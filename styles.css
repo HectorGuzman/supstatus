@@ -1,0 +1,86 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #e0f7fa;
+  margin: 0;
+  padding: 0;
+}
+header {
+  background: linear-gradient(to right, #0077b6, #00b4d8);
+  color: white;
+  text-align: center;
+  padding: 20px;
+  border-bottom: 4px solid #0096c7;
+}
+h1 {
+  margin: 0;
+  font-size: 1.8em;
+}
+#fecha {
+  font-size: 0.95em;
+  font-weight: 400;
+  margin-top: 5px;
+  color: #d0f0ff;
+}
+#selector-dia {
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #d0f0ff;
+}
+button {
+  margin: 0 5px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1em;
+  cursor: pointer;
+  background-color: white;
+  color: #0077b6;
+  transition: background-color 0.3s, color 0.3s, transform 0.2s;
+}
+button:hover {
+  background-color: #caf0f8;
+}
+.activo {
+  background-color: #0077b6;
+  color: white;
+}
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+.card {
+  position: relative;
+  background-size: cover;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 15px 0;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+.card > * {
+  position: relative;
+  z-index: 1;
+}
+.card:hover {
+  transform: translateY(-3px);
+}
+.hora {
+  font-weight: 600;
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+.detalle {
+  margin: 6px 0;
+  font-size: 0.95em;
+}
