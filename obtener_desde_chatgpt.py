@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import os
 
 # Requiere que definas OPENAI_API_KEY como secreto en GitHub
+print("🔍 OPENAI_API_KEY presente:", "OPENAI_API_KEY" in os.environ)
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("❌ OPENAI_API_KEY no está definido en el entorno.")
