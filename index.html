@@ -1,2 +1,217 @@
 <!DOCTYPE html>
-<!-- Recortado por claridad en esta vista, incluir el contenido del index final aquí -->
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sup Status - La Herradura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #e0f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(to right, #0077b6, #00b4d8);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 4px solid #0096c7;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    #fecha, #horarios-sol, #horarios-marea {
+      font-size: 0.9em;
+      color: #d0f0ff;
+      margin-top: 5px;
+    }
+    .nota-aviso {
+      background-color: #ffffff22;
+      font-size: 0.85em;
+      margin-top: 12px;
+      padding: 10px 15px;
+      color: #d0f0ff;
+      font-style: italic;
+      border-radius: 8px;
+    }
+    .container {
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .card {
+      background: linear-gradient(to right, #3a506b, #5bc0be);
+      color: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      animation: fadeIn 0.4s ease-in;
+    }
+    .hora {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    .detalle {
+      font-size: 0.95em;
+      margin-bottom: 4px;
+    }
+    button {
+      background: white;
+      color: #0077b6;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      font-weight: bold;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .activo {
+      background: #0096c7;
+      color: white;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(to right, #0077b6, #00b4d8);
+      color: white;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SUP en La Herradura</h1>
+    <div id="fecha"></div>
+    <div id="horarios-sol"></div>
+    <div id="horarios-marea"></div>
+    <div id="selector-dia">
+      <button onclick="cambiarDia('hoy')">Hoy</button>
+      <button onclick="cambiarDia('mañana')">Mañana</button>
+    </div>
+    <div class="nota-aviso">
+      ⚠️ Esta información es estimada. Usa chaleco salvavidas, conoce tus límites y navega con responsabilidad.
+    </div>
+    <button onclick="compartirInfo()">📤 Compartir condiciones</button>
+  </header>
+  <div class="container" id="pronostico"></div>
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+  <script>
+    const contenedor = document.getElementById("pronostico");
+    const mensajeDia = document.createElement("p");
+    mensajeDia.style.textAlign = "center";
+    mensajeDia.style.fontSize = "0.95em";
+    mensajeDia.style.color = "#555";
+    document.querySelector(".container").prepend(mensajeDia);
+    const fechaEl = document.getElementById("fecha");
+    const solEl = document.getElementById("horarios-sol");
+    const lat = -29.958055;
+    const lng = -71.343611;
+    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+
+    function compartirInfo() {
+      const fecha = fechaEl.textContent;
+      const resumen = document.querySelector(".container p")?.textContent || "Revisa las condiciones en SUP La Herradura.";
+      const texto = `${fecha}\n${resumen}`;
+      if (navigator.share) {
+        navigator.share({ title: 'SUP en La Herradura', text: texto, url: window.location.href })
+          .catch(err => console.error('Error al compartir:', err));
+      } else {
+        alert("Tu navegador no soporta la función de compartir.");
+      }
+    }
+
+    function actualizarHorariosSol(fecha) {
+      const times = SunCalc.getTimes(fecha, lat, lng);
+      const salida = times.sunrise.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+      const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+      solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
+
+      const mareas = [
+        { tipo: 'Marea alta', hora: new Date(fecha.setHours(2, 30)) },
+        { tipo: 'Marea baja', hora: new Date(fecha.setHours(8, 45)) },
+        { tipo: 'Marea alta', hora: new Date(fecha.setHours(14, 30)) },
+        { tipo: 'Marea baja', hora: new Date(fecha.setHours(20, 45)) }
+      ];
+
+      const resumenMareas = mareas.map(m => `🌊 <strong>${m.tipo}</strong>: ${m.hora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}`).join(" | ");
+      const mareaEl = document.getElementById("horarios-marea");
+      mareaEl.innerHTML = resumenMareas;
+    }
+
+    function obtenerMensaje(dia) {
+      return dia === "mañana"
+        ? "🌤️ Previsión para mañana en La Herradura."
+        : "🌊 Condiciones para hoy en La Herradura.";
+    }
+
+    function getHorarioLabel(hora) {
+      if (hora >= 6 && hora < 9) return '🌅 Amanecer';
+      if (hora >= 9 && hora < 12) return '🌤️ Mañana';
+      if (hora >= 12 && hora < 15) return '☀️ Mediodía';
+      if (hora >= 15 && hora < 18) return '☀️ Tarde';
+      if (hora >= 18 && hora < 21) return '🌆 Atardecer';
+      return '🌙 Noche';
+    }
+
+    function renderizarPronostico(dia) {
+      const ejemploData = window.dataPronostico && window.dataPronostico[dia] ? window.dataPronostico[dia] : [];
+      contenedor.innerHTML = "";
+      ejemploData.forEach(item => {
+        const horaNum = parseInt(item.hora.split(":" )[0], 10);
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="hora">${getHorarioLabel(horaNum)} (${item.hora} Hrs)</div>
+          <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
+          <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje} <span style='font-weight:bold;'>→</span> <span title='Dirección del oleaje'>🌐 ${item.direccionOleaje}</span></div>
+          <div class="detalle"><strong>🌙 Marea:</strong> ${item.marea}</div>
+          <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
+          <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
+          <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>`;
+        contenedor.appendChild(card);
+      });
+    }
+
+    function cambiarDia(value) {
+      const nuevaFecha = new Date();
+      if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+      actualizarHorariosSol(nuevaFecha);
+      document.querySelectorAll("#selector-dia button").forEach(btn => {
+        btn.classList.remove("activo");
+        if (btn.textContent.toLowerCase().includes(value)) {
+          btn.focus();
+          btn.classList.add("activo");
+        }
+      });
+      fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
+      mensajeDia.textContent = obtenerMensaje(value);
+      renderizarPronostico(value);
+    }
+
+    const hoyFecha = new Date();
+    fetch("data.json")
+      .then(res => res.json())
+      .then(data => {
+        window.dataPronostico = data;
+        actualizarHorariosSol(hoyFecha);
+        fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
+        mensajeDia.textContent = obtenerMensaje("hoy");
+        renderizarPronostico("hoy");
+      })
+      .catch(err => {
+        console.error("No se pudo cargar data.json", err);
+        mensajeDia.textContent = "No se pudo cargar la información del pronóstico.";
+      });
+  </script>
+  <footer>
+    Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank">@__jokerguzman</a>
+  </footer>
+</body>
+</html>
