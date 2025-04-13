@@ -120,6 +120,7 @@
     <h1>SUP en La Herradura</h1>
     <div id="fecha"></div>
     <div id="horarios-sol" style="margin-top: 10px; font-size: 0.85em; color: #d0f0ff;"></div>
+    <div id="horarios-marea" style="margin-top: 5px; font-size: 0.85em; color: #d0f0ff;"></div>
     <div id="selector-dia">
       <button onclick="cambiarDia('hoy')">Hoy</button>
       <button onclick="cambiarDia('mañana')">Mañana</button>
@@ -127,54 +128,67 @@
     <div class="nota-aviso">
       ⚠️ Esta información es estimada y puede variar. Usa chaleco salvavidas, conoce tus límites y navega con responsabilidad.
     </div>
-    </div>
-  </header>
+    <div style="margin-top: 15px;">
+  <button onclick="compartirInfo()" style="background-color: #ffffffcc; color: #0077b6; border-radius: 12px; padding: 8px 16px; font-size: 0.95em; font-weight: 600; border: 2px solid #00b4d8;">
+    📤 Compartir condiciones
+  </button>
+</div>
+
   <div class="container" id="pronostico"></div>
 
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+<script>
+function compartirInfo() {
+  const fecha = document.getElementById("fecha").textContent;
+  const resumen = document.querySelector(".container p")?.textContent || "Revisa las condiciones en SUP La Herradura.";
+  const texto = `${fecha}
+${resumen}`;
+
+  if (navigator.share) {
+    navigator.share({
+      title: 'SUP en La Herradura',
+      text: texto,
+      url: window.location.href
+    }).catch(err => console.error('Error al compartir:', err));
+  } else {
+    alert("Tu navegador no soporta la función de compartir.");
+  }
+}
+</script>
+<script>
+const contenedor = document.getElementById("pronostico");
+const mensajeDia = document.createElement("p");
+mensajeDia.style.textAlign = "center";
+mensajeDia.style.fontSize = "0.95em";
+mensajeDia.style.color = "#555";
+document.querySelector(".container").prepend(mensajeDia);
+const fechaEl = document.getElementById("fecha");
+const solEl = document.getElementById("horarios-sol");
+const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const lat = -29.958055;
+const lng = -71.343611;
+
+function actualizarHorariosSol(fecha) {
+  const times = SunCalc.getTimes(fecha, lat, lng);
+  const salida = times.sunrise.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
+
+  const horaMareaAlta = new Date(fecha);
+  horaMareaAlta.setHours(14, 30);
+  const horaMareaBaja = new Date(fecha);
+  horaMareaBaja.setHours(6, 45);
+  const subida = horaMareaAlta.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  const bajada = horaMareaBaja.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+  const mareaEl = document.getElementById("horarios-marea");
+  mareaEl.textContent = `🌊 Marea alta: ${subida} | 🏖️ Marea baja: ${bajada}`;
+}
+</script>
 <script>
 function obtenerMensaje(dia) {
   return dia === "mañana"
     ? "🌤️ Previsión para mañana en La Herradura."
     : "🌊 Condiciones para hoy en La Herradura.";
-}
-
-function renderizarPronostico(dia) {
-  const hoyData = [
-    { hora: "06:00", viento: "3 km/h (SE)", oleaje: "0.2 m", marea: "baja", temperatura: "18°C", condiciones: "Muy tranquilo, ideal para comenzar el día." },
-    { hora: "09:00", viento: "5 km/h (S)", oleaje: "0.4 m", marea: "subiendo", temperatura: "20°C", condiciones: "Tranquilo, buen momento para SUP." },
-    { hora: "12:00", viento: "9 km/h (S)", oleaje: "0.6 m", marea: "media", temperatura: "23°C", condiciones: "Algo más movido, atención al viento." },
-    { hora: "15:00", viento: "12 km/h (SO)", oleaje: "0.8 m", marea: "alta", temperatura: "25°C", condiciones: "Condiciones algo intensas, precaución." },
-    { hora: "18:00", viento: "10 km/h (SO)", oleaje: "0.7 m", marea: "media", temperatura: "22°C", condiciones: "Ideal para una última sesión suave." },
-    { hora: "21:00", viento: "6 km/h (S)", oleaje: "0.4 m", marea: "bajando", temperatura: "19°C", condiciones: "Tranquilo al atardecer." }
-  ];
-
-  const mananaData = [
-    { hora: "06:00", viento: "4 km/h (E)", oleaje: "0.3 m", marea: "baja", temperatura: "17°C", condiciones: "Algo fresco, ideal para madrugar con calma." },
-    { hora: "09:00", viento: "6 km/h (SE)", oleaje: "0.5 m", marea: "subiendo", temperatura: "19°C", condiciones: "Ligera brisa y mar estable." },
-    { hora: "12:00", viento: "8 km/h (S)", oleaje: "0.7 m", marea: "media", temperatura: "22°C", condiciones: "Buen momento con algo de oleaje." },
-    { hora: "15:00", viento: "11 km/h (SO)", oleaje: "0.9 m", marea: "alta", temperatura: "24°C", condiciones: "Condiciones desafiantes, para expertos." },
-    { hora: "18:00", viento: "9 km/h (S)", oleaje: "0.6 m", marea: "media", temperatura: "21°C", condiciones: "Tarde agradable con mar manejable." },
-    { hora: "21:00", viento: "5 km/h (SE)", oleaje: "0.4 m", marea: "bajando", temperatura: "18°C", condiciones: "Final tranquilo con luz tenue." }
-  ];
-
-  const ejemploData = dia === "mañana" ? mananaData : hoyData;
-
-  contenedor.innerHTML = "";
-  ejemploData.forEach(item => {
-    const horaNum = parseInt(item.hora.split(":")[0], 10);
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="hora">${getHorarioLabel(horaNum)} (${item.hora} Hrs)</div>
-      <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
-      <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje}</div>
-      <div class="detalle"><strong>🌙 Marea:</strong> ${item.marea}</div>
-      <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
-      <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones }</div>
-    `;
-    contenedor.appendChild(card);
-  });
 }
 
 function getHorarioLabel(hora) {
@@ -185,52 +199,69 @@ function getHorarioLabel(hora) {
   if (hora >= 18 && hora < 21) return '🌆 Atardecer';
   return '🌙 Noche';
 }
+
+function renderizarPronostico(dia) {
+  const hoyData = [
+    { hora: "06:00", viento: "3 km/h (SE)", oleaje: "0.2 m", marea: "baja", temperatura: "18°C", condiciones: "Muy tranquilo, ideal para comenzar el día.", nivel: "Principiante" },
+    { hora: "09:00", viento: "5 km/h (S)", oleaje: "0.4 m", marea: "subiendo", temperatura: "20°C", condiciones: "Tranquilo, buen momento para SUP.", nivel: "Principiante" },
+    { hora: "12:00", viento: "9 km/h (S)", oleaje: "0.6 m", marea: "media", temperatura: "23°C", condiciones: "Algo más movido, atención al viento.", nivel: "Intermedio" },
+    { hora: "15:00", viento: "12 km/h (SO)", oleaje: "0.8 m", marea: "alta", temperatura: "25°C", condiciones: "Condiciones algo intensas, precaución.", nivel: "Avanzado" },
+    { hora: "18:00", viento: "10 km/h (SO)", oleaje: "0.7 m", marea: "media", temperatura: "22°C", condiciones: "Ideal para una última sesión suave.", nivel: "Intermedio" },
+    { hora: "21:00", viento: "6 km/h (S)", oleaje: "0.4 m", marea: "bajando", temperatura: "19°C", condiciones: "Tranquilo al atardecer.", nivel: "Principiante" }
+  ];
+
+  const mananaData = [
+    { hora: "06:00", viento: "4 km/h (E)", oleaje: "0.3 m", marea: "baja", temperatura: "17°C", condiciones: "Algo fresco, ideal para madrugar con calma.", nivel: "Principiante" },
+    { hora: "09:00", viento: "6 km/h (SE)", oleaje: "0.5 m", marea: "subiendo", temperatura: "19°C", condiciones: "Ligera brisa y mar estable.", nivel: "Principiante" },
+    { hora: "12:00", viento: "8 km/h (S)", oleaje: "0.7 m", marea: "media", temperatura: "22°C", condiciones: "Buen momento con algo de oleaje.", nivel: "Intermedio" },
+    { hora: "15:00", viento: "11 km/h (SO)", oleaje: "0.9 m", marea: "alta", temperatura: "24°C", condiciones: "Condiciones desafiantes, para expertos.", nivel: "Avanzado" },
+    { hora: "18:00", viento: "9 km/h (S)", oleaje: "0.6 m", marea: "media", temperatura: "21°C", condiciones: "Tarde agradable con mar manejable.", nivel: "Intermedio" },
+    { hora: "21:00", viento: "5 km/h (SE)", oleaje: "0.4 m", marea: "bajando", temperatura: "18°C", condiciones: "Final tranquilo con luz tenue.", nivel: "Principiante" }
+  ];
+
+  const ejemploData = dia === "mañana" ? mananaData : hoyData;
+
+  contenedor.innerHTML = "";
+  ejemploData.forEach(item => {
+    const horaNum = parseInt(item.hora.split(":" )[0], 10);
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="hora">${getHorarioLabel(horaNum)} (${item.hora} Hrs)</div>
+      <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
+      <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje}</div>
+      <div class="detalle"><strong>🌙 Marea:</strong> ${item.marea}</div>
+      <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
+      <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
+      <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>
+    `;
+    contenedor.appendChild(card);
+  });
+}
+
+function cambiarDia(value) {
+  const nuevaFecha = new Date();
+  if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+  actualizarHorariosSol(nuevaFecha);
+  document.querySelectorAll("#selector-dia button").forEach(btn => {
+    btn.classList.remove("activo");
+    if (btn.textContent.toLowerCase().includes(value)) {
+      btn.focus();
+      btn.classList.add("activo");
+    }
+  });
+  fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
+  mensajeDia.textContent = obtenerMensaje(value);
+  renderizarPronostico(value);
+}
+
+const hoyFecha = new Date();
+actualizarHorariosSol(hoyFecha);
+fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
+mensajeDia.textContent = obtenerMensaje("hoy");
+renderizarPronostico("hoy");
 </script>
-  <script>
-    const contenedor = document.getElementById("pronostico");
-    const mensajeDia = document.createElement("p");
-    mensajeDia.style.textAlign = "center";
-    mensajeDia.style.fontSize = "0.95em";
-    mensajeDia.style.color = "#555";
-    document.querySelector(".container").prepend(mensajeDia);
-    const fechaEl = document.getElementById("fecha");
-    const solEl = document.getElementById("horarios-sol");
-    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const lat = -29.958055;
-    const lng = -71.343611;
-
-    function actualizarHorariosSol(fecha) {
-      const times = SunCalc.getTimes(fecha, lat, lng);
-      const salida = times.sunrise.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-      const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-      solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
-    }
-
-    function cambiarDia(value) {
-      const nuevaFecha = new Date();
-      if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
-      actualizarHorariosSol(nuevaFecha);
-
-      document.querySelectorAll("#selector-dia button").forEach(btn => {
-        btn.classList.remove("activo");
-        if (btn.textContent.toLowerCase().includes(value)) {
-          btn.focus();
-          btn.classList.add("activo");
-        }
-      });
-      fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
-      mensajeDia.textContent = obtenerMensaje(value);
-      renderizarPronostico(value);
-    }
-
-    const hoyFecha = new Date();
-    actualizarHorariosSol(hoyFecha);
-    fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
-    mensajeDia.textContent = obtenerMensaje("hoy");
-    renderizarPronostico("hoy");
-  </script>
-
-  <footer style="text-align: center; padding: 20px; background: linear-gradient(to right, #0077b6, #00b4d8); color: white; font-size: 0.95em;">
+<footer style="text-align: center; padding: 20px; background: linear-gradient(to right, #0077b6, #00b4d8); color: white; font-size: 0.95em;">
     Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank" style="color: white; text-decoration: underline; font-weight: 600;">@__jokerguzman</a>
   </footer>
 </body>
