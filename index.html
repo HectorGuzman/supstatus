@@ -2,11 +2,108 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #e0f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(to right, #0077b6, #00b4d8);
+      color: white;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 4px solid #0096c7;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.8em;
+    }
+    #fecha {
+      font-size: 0.95em;
+      font-weight: 400;
+      margin-top: 5px;
+      color: #d0f0ff;
+    }
+    #selector-dia {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #d0f0ff;
+    }
+    button {
+      margin: 0 5px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 25px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: white;
+      color: #0077b6;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: background-color 0.3s, color 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background-color: #caf0f8;
+    }
+    .activo {
+      background: linear-gradient(to right, #00b4d8, #0077b6);
+      color: white;
+    }
+    .container {
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    .card {
+      position: relative;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 15px 0;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 1;
+    }
+    .icono-clima {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 1.8em;
+      z-index: 2;
+      animation: saltito 2s ease-in-out infinite;
+    }
+
+    .nota-aviso {
+      background-color: #ffffff22;
+      font-size: 0.85em;
+      margin-top: 12px;
+      padding: 10px 15px;
+      color: #d0f0ff;
+      font-style: italic;
+      border-radius: 8px;
+      line-height: 1.4;
+    }
+  @keyframes saltito {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+  </style>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Condiciones SUP - La Herradura</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
+  </head>
 <body>
   <header>
     <h1>SUP en La Herradura</h1>
@@ -20,6 +117,116 @@
     </div>
   </header>
   <div class="container" id="pronostico"></div>
-  <script src="main.js"></script>
+
+  <script>
+const contenedor = document.getElementById("pronostico");
+const mensajeDia = document.createElement("p");
+mensajeDia.style.textAlign = "center";
+mensajeDia.style.fontSize = "0.95em";
+mensajeDia.style.color = "#555";
+document.querySelector(".container").prepend(mensajeDia);
+const fechaEl = document.getElementById("fecha");
+const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const hoyFecha = new Date();
+fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
+
+let dataPorDia = {
+  "hoy": [
+    { "hora": "06:00", "temperatura": "18°C", "viento": "3 km/h (N)", "oleaje": "0.2 m", "marea": "baja", "condiciones": "Muy tranquilo, ideal para iniciar el día." },
+    { "hora": "09:00", "temperatura": "19°C", "viento": "6 km/h (NE)", "oleaje": "0.3 m", "marea": "subiendo", "condiciones": "Perfecto para SUP recreativo." },
+    { "hora": "12:00", "temperatura": "22°C", "viento": "9 km/h (E)", "oleaje": "0.4 m", "marea": "alta", "condiciones": "Movido pero manejable para intermedios." },
+    { "hora": "15:00", "temperatura": "24°C", "viento": "14 km/h (SE)", "oleaje": "0.7 m", "marea": "bajando", "condiciones": "Precaución por viento y oleaje." },
+    { "hora": "18:00", "temperatura": "21°C", "viento": "10 km/h (S)", "oleaje": "0.5 m", "marea": "baja", "condiciones": "Atardecer tranquilo, buena luz." },
+    { "hora": "21:00", "temperatura": "19°C", "viento": "4 km/h (SW)", "oleaje": "0.3 m", "marea": "subiendo", "condiciones": "Muy tranquilo, ideal para cerrar el día." }
+  ],
+  "mañana": [
+    { "hora": "06:00", "temperatura": "17°C", "viento": "2 km/h (N)", "oleaje": "0.2 m", "marea": "baja", "condiciones": "Condiciones calmas para comenzar." },
+    { "hora": "09:00", "temperatura": "19°C", "viento": "5 km/h (NE)", "oleaje": "0.3 m", "marea": "media", "condiciones": "Apto para nivel principiante." },
+    { "hora": "12:00", "temperatura": "22°C", "viento": "8 km/h (E)", "oleaje": "0.5 m", "marea": "alta", "condiciones": "Oleaje moderado, ideal para explorar." },
+    { "hora": "15:00", "temperatura": "24°C", "viento": "13 km/h (SE)", "oleaje": "0.6 m", "marea": "bajando", "condiciones": "Moderado a fuerte, algo desafiante." },
+    { "hora": "18:00", "temperatura": "21°C", "viento": "9 km/h (S)", "oleaje": "0.4 m", "marea": "baja", "condiciones": "Tranquilo, buena luz y visibilidad." },
+    { "hora": "21:00", "temperatura": "19°C", "viento": "3 km/h (W)", "oleaje": "0.3 m", "marea": "media", "condiciones": "Relajado, final ideal para el día." }
+  ]
+};
+
+function obtenerMensaje(dia) {
+  const ahora = new Date();
+  const hora = ahora.getHours();
+  if (dia === "hoy") {
+    if (hora < 9) return "Buen día para madrugar y disfrutar del agua tranquila.";
+    if (hora < 15) return "Buen momento para una sesión de SUP recreativa.";
+    return "Condiciones suaves ideales para terminar el día.";
+  } else if (dia === "mañana") {
+    if (hora < 12) return "Mañana se espera mejor viento en la tarde.";
+    return "Ideal para remar después de almuerzo.";
+  }
+  return "";
+}
+
+function renderizarPronostico(dia) {
+  contenedor.innerHTML = "";
+  dataPorDia[dia].forEach(item => {
+    const card = document.createElement("div");
+    const horaNum = parseInt(item.hora.split(":"))[0];
+
+    let icono = "☀️";
+    let borde = "none";
+
+    if (item.condiciones.toLowerCase().includes("tranquilo") || item.condiciones.toLowerCase().includes("calma")) {
+      icono = "🏄‍♂️";
+      borde = "2px solid #00b4d8";
+    } else if (item.condiciones.toLowerCase().includes("movido") || item.condiciones.toLowerCase().includes("viento")) {
+      icono = "🌬️";
+      borde = "2px solid #f77f00";
+    } else if (horaNum >= 18 && horaNum < 21) {
+      icono = "🌇";
+      borde = "2px solid #ffb703";
+    } else {
+      icono = "☀️";
+      borde = "2px solid #06d6a0";
+    }
+
+    card.className = "card";
+    if (horaNum >= 6 && horaNum < 9) {
+      card.style.backgroundColor = '#a2d2ff';
+    } else if (horaNum >= 9 && horaNum < 18) {
+      card.style.backgroundColor = '#00b4d8';
+    } else if (horaNum >= 18 && horaNum < 21) {
+      card.style.backgroundColor = '#ffb703';
+    } else {
+      card.style.backgroundColor = '#023047';
+    }
+    card.style.border = borde;
+    card.innerHTML = `
+      <div class="icono-clima">${icono}</div>
+      <div class="hora">${item.hora} hrs</div>
+      <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
+      <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje}</div>
+      <div class="detalle"><strong>🌙 Marea:</strong> ${item.marea}</div>
+      <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
+      <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
+    `;
+    contenedor.appendChild(card);
+  });
+}
+
+function cambiarDia(value) {
+  document.querySelectorAll("#selector-dia button").forEach(btn => {
+    btn.classList.remove("activo");
+    if (btn.textContent.toLowerCase().includes(value)) {
+      btn.focus();
+      btn.classList.add("activo");
+    }
+  });
+  const nuevaFecha = new Date();
+  if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+  fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
+  mensajeDia.textContent = obtenerMensaje(value);
+  renderizarPronostico(value);
+}
+
+mensajeDia.textContent = obtenerMensaje("hoy");
+renderizarPronostico("hoy");
+  </script>
 </body>
 </html>
