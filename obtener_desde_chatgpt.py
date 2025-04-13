@@ -1,50 +1,40 @@
-
+import openai
 import json
-import random
 from datetime import datetime, timedelta
+import os
 
-def direccion_aleatoria():
-    return random.choice([
-        "Norte", "Noreste", "Este", "Sureste",
-        "Sur", "Suroeste", "Oeste", "Noroeste"
-    ])
+# Requiere que definas OPENAI_API_KEY como secreto en GitHub
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def generar_datos_dia():
-    horas = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
-    condiciones = [
-        ("Muy tranquilo, ideal para comenzar el día.", "Principiante"),
-        ("Tranquilo, buen momento para SUP.", "Principiante"),
-        ("Algo más movido, atención al viento.", "Intermedio"),
-        ("Condiciones algo intensas, precaución.", "Avanzado"),
-        ("Ideal para una última sesión suave.", "Intermedio"),
-        ("Tranquilo al atardecer.", "Principiante")
-    ]
-    datos = []
-    for i, hora in enumerate(horas):
-        datos.append({
-            "hora": hora,
-            "viento": f"{random.randint(3, 12)} km/h ({direccion_aleatoria()[:2]})",
-            "oleaje": f"{round(random.uniform(0.3, 0.9), 1)} m",
-            "direccionOleaje": direccion_aleatoria(),
-            "marea": random.choice(["baja", "subiendo", "media", "alta", "bajando"]),
-            "temperatura": f"{random.randint(17, 25)}°C",
-            "condiciones": condiciones[i][0],
-            "nivel": condiciones[i][1]
-        })
-    return datos
+prompt = """
+Actúa como un asistente experto en condiciones marítimas para SUP en La Herradura, Coquimbo. Genera datos para hoy y mañana con la siguiente estructura JSON:
+{
+  "hoy": [
+    {
+      "hora": "06:00",
+      "viento": "X km/h (dirección)",
+      "oleaje": "X.X m",
+      "direccionOleaje": "Norte/Sureste/etc",
+      "marea": "baja/media/alta",
+      "temperatura": "X°C",
+      "condiciones": "Breve descripción",
+      "nivel": "Principiante/Intermedio/Avanzado"
+    },
+    ...
+  ],
+  "mañana": [ ... ]
+}
+Debe incluir 6 bloques por día (06:00 a 21:00 cada 3h), de forma natural, realista y útil. Consulta esta data donde estimes conveniente pero en paginas de surf y meterologia
+"""
 
-def main():
-    hoy = datetime.now()
-    manana = hoy + timedelta(days=1)
+print("Generando datos desde ChatGPT...")
 
-    data = {
-        "fecha_generacion": hoy.strftime("%Y-%m-%d"),
-        "hoy": generar_datos_dia(),
-        "mañana": generar_datos_dia()
-    }
-
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
-if __name__ == "__main__":
-    main()
+response = openai.ChatCompletion.create(
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": "Eres un asistente que responde solo con JSON válido."},
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.4,
+    max_tokens=2000
+)
