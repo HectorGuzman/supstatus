@@ -18,6 +18,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+          
+      - name: Instalar dependencias
+        run: pip install openai
 
       - name: Ejecutar script de generación
         run: python obtener_desde_chatgpt.py
