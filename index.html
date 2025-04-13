@@ -1,7 +1,8 @@
-<!DOCTYPE html>
-<html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Condiciones SUP - La Herradura</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -58,33 +59,23 @@
     }
     .card {
       position: relative;
+      width: 100%;
+      box-sizing: border-box;
       border-radius: 12px;
-      padding: 20px;
-      margin: 15px 0;
+      padding: 16px 20px;
+      margin: 12px 0;
       color: white;
+      background: linear-gradient(to right, #3a506b, #5bc0be);
       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: block;
+      animation: fadeIn 0.4s ease-in;
     }
-
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+    .detalle {
+      margin: 6px 0;
+      font-size: 0.95em;
     }
-
-    .card > * {
-      position: relative;
-      z-index: 1;
-    }
-    .icono-clima {
-      position: absolute;
-      top: 8px;
-      right: 12px;
-      font-size: 1.8em;
-      z-index: 2;
-      animation: saltito 2s ease-in-out infinite;
-    }
-
     .nota-aviso {
       background-color: #ffffff22;
       font-size: 0.85em;
@@ -95,138 +86,152 @@
       border-radius: 8px;
       line-height: 1.4;
     }
-  @keyframes saltito {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-4px); }
+    .hora {
+      font-size: 1.1em;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #ffffffee;
+      background-color: rgba(255, 255, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: inline-block;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 480px) {
+      body {
+        padding: 0 10px;
+      }
+      .card {
+        padding: 14px;
+        font-size: 0.95em;
+      }
+      .detalle {
+        font-size: 0.9em;
+      }
     }
   </style>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Condiciones SUP - La Herradura</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  </head>
+</head>
 <body>
   <header>
     <h1>SUP en La Herradura</h1>
     <div id="fecha"></div>
+    <div id="horarios-sol" style="margin-top: 10px; font-size: 0.85em; color: #d0f0ff;"></div>
     <div id="selector-dia">
       <button onclick="cambiarDia('hoy')">Hoy</button>
       <button onclick="cambiarDia('mañana')">Mañana</button>
     </div>
     <div class="nota-aviso">
-      ⚠️ La información mostrada es estimativa y puede cambiar. Por favor, toma siempre precauciones al llegar a la playa. El uso de chaleco salvavidas es obligatorio.
+      ⚠️ Esta información es estimada y puede variar. Usa chaleco salvavidas, conoce tus límites y navega con responsabilidad.
+    </div>
     </div>
   </header>
   <div class="container" id="pronostico"></div>
 
-  <script>
-const contenedor = document.getElementById("pronostico");
-const mensajeDia = document.createElement("p");
-mensajeDia.style.textAlign = "center";
-mensajeDia.style.fontSize = "0.95em";
-mensajeDia.style.color = "#555";
-document.querySelector(".container").prepend(mensajeDia);
-const fechaEl = document.getElementById("fecha");
-const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-const hoyFecha = new Date();
-fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
-
-let dataPorDia = {
-  "hoy": [
-    { "hora": "06:00", "temperatura": "18°C", "viento": "3 km/h (N)", "oleaje": "0.2 m", "marea": "baja", "condiciones": "Muy tranquilo, ideal para iniciar el día." },
-    { "hora": "09:00", "temperatura": "19°C", "viento": "6 km/h (NE)", "oleaje": "0.3 m", "marea": "subiendo", "condiciones": "Perfecto para SUP recreativo." },
-    { "hora": "12:00", "temperatura": "22°C", "viento": "9 km/h (E)", "oleaje": "0.4 m", "marea": "alta", "condiciones": "Movido pero manejable para intermedios." },
-    { "hora": "15:00", "temperatura": "24°C", "viento": "14 km/h (SE)", "oleaje": "0.7 m", "marea": "bajando", "condiciones": "Precaución por viento y oleaje." },
-    { "hora": "18:00", "temperatura": "21°C", "viento": "10 km/h (S)", "oleaje": "0.5 m", "marea": "baja", "condiciones": "Atardecer tranquilo, buena luz." },
-    { "hora": "21:00", "temperatura": "19°C", "viento": "4 km/h (SW)", "oleaje": "0.3 m", "marea": "subiendo", "condiciones": "Muy tranquilo, ideal para cerrar el día." }
-  ],
-  "mañana": [
-    { "hora": "06:00", "temperatura": "17°C", "viento": "2 km/h (N)", "oleaje": "0.2 m", "marea": "baja", "condiciones": "Condiciones calmas para comenzar." },
-    { "hora": "09:00", "temperatura": "19°C", "viento": "5 km/h (NE)", "oleaje": "0.3 m", "marea": "media", "condiciones": "Apto para nivel principiante." },
-    { "hora": "12:00", "temperatura": "22°C", "viento": "8 km/h (E)", "oleaje": "0.5 m", "marea": "alta", "condiciones": "Oleaje moderado, ideal para explorar." },
-    { "hora": "15:00", "temperatura": "24°C", "viento": "13 km/h (SE)", "oleaje": "0.6 m", "marea": "bajando", "condiciones": "Moderado a fuerte, algo desafiante." },
-    { "hora": "18:00", "temperatura": "21°C", "viento": "9 km/h (S)", "oleaje": "0.4 m", "marea": "baja", "condiciones": "Tranquilo, buena luz y visibilidad." },
-    { "hora": "21:00", "temperatura": "19°C", "viento": "3 km/h (W)", "oleaje": "0.3 m", "marea": "media", "condiciones": "Relajado, final ideal para el día." }
-  ]
-};
-
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+<script>
 function obtenerMensaje(dia) {
-  const ahora = new Date();
-  const hora = ahora.getHours();
-  if (dia === "hoy") {
-    if (hora < 9) return "Buen día para madrugar y disfrutar del agua tranquila.";
-    if (hora < 15) return "Buen momento para una sesión de SUP recreativa.";
-    return "Condiciones suaves ideales para terminar el día.";
-  } else if (dia === "mañana") {
-    if (hora < 12) return "Mañana se espera mejor viento en la tarde.";
-    return "Ideal para remar después de almuerzo.";
-  }
-  return "";
+  return dia === "mañana"
+    ? "🌤️ Previsión para mañana en La Herradura."
+    : "🌊 Condiciones para hoy en La Herradura.";
 }
 
 function renderizarPronostico(dia) {
+  const hoyData = [
+    { hora: "06:00", viento: "3 km/h (SE)", oleaje: "0.2 m", marea: "baja", temperatura: "18°C", condiciones: "Muy tranquilo, ideal para comenzar el día." },
+    { hora: "09:00", viento: "5 km/h (S)", oleaje: "0.4 m", marea: "subiendo", temperatura: "20°C", condiciones: "Tranquilo, buen momento para SUP." },
+    { hora: "12:00", viento: "9 km/h (S)", oleaje: "0.6 m", marea: "media", temperatura: "23°C", condiciones: "Algo más movido, atención al viento." },
+    { hora: "15:00", viento: "12 km/h (SO)", oleaje: "0.8 m", marea: "alta", temperatura: "25°C", condiciones: "Condiciones algo intensas, precaución." },
+    { hora: "18:00", viento: "10 km/h (SO)", oleaje: "0.7 m", marea: "media", temperatura: "22°C", condiciones: "Ideal para una última sesión suave." },
+    { hora: "21:00", viento: "6 km/h (S)", oleaje: "0.4 m", marea: "bajando", temperatura: "19°C", condiciones: "Tranquilo al atardecer." }
+  ];
+
+  const mananaData = [
+    { hora: "06:00", viento: "4 km/h (E)", oleaje: "0.3 m", marea: "baja", temperatura: "17°C", condiciones: "Algo fresco, ideal para madrugar con calma." },
+    { hora: "09:00", viento: "6 km/h (SE)", oleaje: "0.5 m", marea: "subiendo", temperatura: "19°C", condiciones: "Ligera brisa y mar estable." },
+    { hora: "12:00", viento: "8 km/h (S)", oleaje: "0.7 m", marea: "media", temperatura: "22°C", condiciones: "Buen momento con algo de oleaje." },
+    { hora: "15:00", viento: "11 km/h (SO)", oleaje: "0.9 m", marea: "alta", temperatura: "24°C", condiciones: "Condiciones desafiantes, para expertos." },
+    { hora: "18:00", viento: "9 km/h (S)", oleaje: "0.6 m", marea: "media", temperatura: "21°C", condiciones: "Tarde agradable con mar manejable." },
+    { hora: "21:00", viento: "5 km/h (SE)", oleaje: "0.4 m", marea: "bajando", temperatura: "18°C", condiciones: "Final tranquilo con luz tenue." }
+  ];
+
+  const ejemploData = dia === "mañana" ? mananaData : hoyData;
+
   contenedor.innerHTML = "";
-  dataPorDia[dia].forEach(item => {
+  ejemploData.forEach(item => {
+    const horaNum = parseInt(item.hora.split(":")[0], 10);
     const card = document.createElement("div");
-    const horaNum = parseInt(item.hora.split(":"))[0];
-
-    let icono = "☀️";
-    let borde = "none";
-
-    if (item.condiciones.toLowerCase().includes("tranquilo") || item.condiciones.toLowerCase().includes("calma")) {
-      icono = "🏄‍♂️";
-      borde = "2px solid #00b4d8";
-    } else if (item.condiciones.toLowerCase().includes("movido") || item.condiciones.toLowerCase().includes("viento")) {
-      icono = "🌬️";
-      borde = "2px solid #f77f00";
-    } else if (horaNum >= 18 && horaNum < 21) {
-      icono = "🌇";
-      borde = "2px solid #ffb703";
-    } else {
-      icono = "☀️";
-      borde = "2px solid #06d6a0";
-    }
-
     card.className = "card";
-    if (horaNum >= 6 && horaNum < 9) {
-      card.style.backgroundColor = '#a2d2ff';
-    } else if (horaNum >= 9 && horaNum < 18) {
-      card.style.backgroundColor = '#00b4d8';
-    } else if (horaNum >= 18 && horaNum < 21) {
-      card.style.backgroundColor = '#ffb703';
-    } else {
-      card.style.backgroundColor = '#023047';
-    }
-    card.style.border = borde;
     card.innerHTML = `
-      <div class="icono-clima">${icono}</div>
-      <div class="hora">${item.hora} hrs</div>
+      <div class="hora">${getHorarioLabel(horaNum)} (${item.hora} Hrs)</div>
       <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
       <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje}</div>
       <div class="detalle"><strong>🌙 Marea:</strong> ${item.marea}</div>
       <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
-      <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
+      <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones }</div>
     `;
     contenedor.appendChild(card);
   });
 }
 
-function cambiarDia(value) {
-  document.querySelectorAll("#selector-dia button").forEach(btn => {
-    btn.classList.remove("activo");
-    if (btn.textContent.toLowerCase().includes(value)) {
-      btn.focus();
-      btn.classList.add("activo");
-    }
-  });
-  const nuevaFecha = new Date();
-  if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
-  fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
-  mensajeDia.textContent = obtenerMensaje(value);
-  renderizarPronostico(value);
+function getHorarioLabel(hora) {
+  if (hora >= 6 && hora < 9) return '🌅 Amanecer';
+  if (hora >= 9 && hora < 12) return '🌤️ Mañana';
+  if (hora >= 12 && hora < 15) return '☀️ Mediodía';
+  if (hora >= 15 && hora < 18) return '☀️ Tarde';
+  if (hora >= 18 && hora < 21) return '🌆 Atardecer';
+  return '🌙 Noche';
 }
+</script>
+  <script>
+    const contenedor = document.getElementById("pronostico");
+    const mensajeDia = document.createElement("p");
+    mensajeDia.style.textAlign = "center";
+    mensajeDia.style.fontSize = "0.95em";
+    mensajeDia.style.color = "#555";
+    document.querySelector(".container").prepend(mensajeDia);
+    const fechaEl = document.getElementById("fecha");
+    const solEl = document.getElementById("horarios-sol");
+    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const lat = -29.958055;
+    const lng = -71.343611;
 
-mensajeDia.textContent = obtenerMensaje("hoy");
-renderizarPronostico("hoy");
+    function actualizarHorariosSol(fecha) {
+      const times = SunCalc.getTimes(fecha, lat, lng);
+      const salida = times.sunrise.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+      const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+      solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
+    }
+
+    function cambiarDia(value) {
+      const nuevaFecha = new Date();
+      if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
+      actualizarHorariosSol(nuevaFecha);
+
+      document.querySelectorAll("#selector-dia button").forEach(btn => {
+        btn.classList.remove("activo");
+        if (btn.textContent.toLowerCase().includes(value)) {
+          btn.focus();
+          btn.classList.add("activo");
+        }
+      });
+      fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
+      mensajeDia.textContent = obtenerMensaje(value);
+      renderizarPronostico(value);
+    }
+
+    const hoyFecha = new Date();
+    actualizarHorariosSol(hoyFecha);
+    fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
+    mensajeDia.textContent = obtenerMensaje("hoy");
+    renderizarPronostico("hoy");
   </script>
+
+  <footer style="text-align: center; padding: 20px; background: linear-gradient(to right, #0077b6, #00b4d8); color: white; font-size: 0.95em;">
+    Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank" style="color: white; text-decoration: underline; font-weight: 600;">@__jokerguzman</a>
+  </footer>
 </body>
 </html>
