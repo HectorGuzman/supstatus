@@ -1,0 +1,31 @@
+
+name: Generar data.json diaria
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # todos los días a medianoche UTC
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Ejecutar script de generación
+        run: python generar_data.py
+
+      - name: Confirmar y subir cambios
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data.json
+          git commit -m "🔄 Actualización diaria de data.json"
+          git push
