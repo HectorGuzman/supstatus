@@ -2,133 +2,21 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "4 km/h (NE)",
-      "oleaje": "0.3 m",
+      "viento": "3 km/h (N)",
+      "oleaje": "0.2 m",
       "marea": "baja",
+      "temperatura": "18°C",
       "condiciones": "Muy tranquilo, ideal para iniciar el día."
-    },
-    {
-      "hora": "09:00",
-      "viento": "7 km/h (N)",
-      "oleaje": "0.4 m",
-      "marea": "subiendo",
-      "condiciones": "Perfecto para SUP recreativo."
-    },
-    {
-      "hora": "12:00",
-      "viento": "10 km/h (E)",
-      "oleaje": "0.5 m",
-      "marea": "alta",
-      "condiciones": "Ligeramente movido, apto para intermedios."
-    },
-    {
-      "hora": "15:00",
-      "viento": "12 km/h (SE)",
-      "oleaje": "0.6 m",
-      "marea": "bajando",
-      "condiciones": "Condiciones variables, precaución."
-    },
-    {
-      "hora": "18:00",
-      "viento": "8 km/h (S)",
-      "oleaje": "0.4 m",
-      "marea": "baja",
-      "condiciones": "Tranquilo con buena luz de tarde."
-    },
-    {
-      "hora": "21:00",
-      "viento": "5 km/h (SW)",
-      "oleaje": "0.3 m",
-      "marea": "subiendo",
-      "condiciones": "Muy tranquilo, ideal para cerrar el día."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "4 km/h (NE)",
-      "oleaje": "0.3 m",
+      "viento": "2 km/h (N)",
+      "oleaje": "0.2 m",
       "marea": "baja",
-      "condiciones": "Muy tranquilo, ideal para iniciar el día."
-    },
-    {
-      "hora": "09:00",
-      "viento": "7 km/h (N)",
-      "oleaje": "0.4 m",
-      "marea": "subiendo",
-      "condiciones": "Perfecto para SUP recreativo."
-    },
-    {
-      "hora": "12:00",
-      "viento": "10 km/h (E)",
-      "oleaje": "0.5 m",
-      "marea": "alta",
-      "condiciones": "Ligeramente movido, apto para intermedios."
-    },
-    {
-      "hora": "15:00",
-      "viento": "12 km/h (SE)",
-      "oleaje": "0.6 m",
-      "marea": "bajando",
-      "condiciones": "Condiciones variables, precaución."
-    },
-    {
-      "hora": "18:00",
-      "viento": "8 km/h (S)",
-      "oleaje": "0.4 m",
-      "marea": "baja",
-      "condiciones": "Tranquilo con buena luz de tarde."
-    },
-    {
-      "hora": "21:00",
-      "viento": "5 km/h (SW)",
-      "oleaje": "0.3 m",
-      "marea": "subiendo",
-      "condiciones": "Muy tranquilo, ideal para cerrar el día."
-    }
-  ],
-  "pasado": [
-    {
-      "hora": "06:00",
-      "viento": "4 km/h (NE)",
-      "oleaje": "0.3 m",
-      "marea": "baja",
-      "condiciones": "Muy tranquilo, ideal para iniciar el día."
-    },
-    {
-      "hora": "09:00",
-      "viento": "7 km/h (N)",
-      "oleaje": "0.4 m",
-      "marea": "subiendo",
-      "condiciones": "Perfecto para SUP recreativo."
-    },
-    {
-      "hora": "12:00",
-      "viento": "10 km/h (E)",
-      "oleaje": "0.5 m",
-      "marea": "alta",
-      "condiciones": "Ligeramente movido, apto para intermedios."
-    },
-    {
-      "hora": "15:00",
-      "viento": "12 km/h (SE)",
-      "oleaje": "0.6 m",
-      "marea": "bajando",
-      "condiciones": "Condiciones variables, precaución."
-    },
-    {
-      "hora": "18:00",
-      "viento": "8 km/h (S)",
-      "oleaje": "0.4 m",
-      "marea": "baja",
-      "condiciones": "Tranquilo con buena luz de tarde."
-    },
-    {
-      "hora": "21:00",
-      "viento": "5 km/h (SW)",
-      "oleaje": "0.3 m",
-      "marea": "subiendo",
-      "condiciones": "Muy tranquilo, ideal para cerrar el día."
+      "temperatura": "17°C",
+      "condiciones": "Condiciones calmas para comenzar."
     }
   ]
 }

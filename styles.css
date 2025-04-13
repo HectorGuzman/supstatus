@@ -28,20 +28,22 @@ h1 {
 }
 button {
   margin: 0 5px;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   font-size: 1em;
   cursor: pointer;
   background-color: white;
   color: #0077b6;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s, color 0.3s, transform 0.2s;
 }
 button:hover {
   background-color: #caf0f8;
 }
 .activo {
-  background-color: #0077b6;
+  background: linear-gradient(to right, #00b4d8, #0077b6);
   color: white;
 }
 .container {
@@ -51,22 +53,12 @@ button:hover {
 }
 .card {
   position: relative;
-  background-size: cover;
   border-radius: 12px;
   padding: 20px;
   margin: 15px 0;
   color: white;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   overflow: hidden;
-  transition: transform 0.2s;
-}
-.card::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 0;
 }
 .card > * {
   position: relative;
@@ -83,4 +75,24 @@ button:hover {
 .detalle {
   margin: 6px 0;
   font-size: 0.95em;
+}
+.icono {
+  margin-right: 5px;
+}
+.icono-clima {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.8em;
+  z-index: 2;
+}
+.nota-aviso {
+  background-color: #ffffff22;
+  font-size: 0.85em;
+  margin-top: 12px;
+  padding: 10px 15px;
+  color: #d0f0ff;
+  font-style: italic;
+  border-radius: 8px;
+  line-height: 1.4;
 }
