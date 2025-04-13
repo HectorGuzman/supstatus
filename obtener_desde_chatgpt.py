@@ -4,7 +4,10 @@ from datetime import datetime, timedelta
 import os
 
 # Requiere que definas OPENAI_API_KEY como secreto en GitHub
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.environ.get("OPENAI_API_KEY")
+if not api_key:
+    raise ValueError("❌ OPENAI_API_KEY no está definido en el entorno.")
+client = openai.OpenAI(api_key=api_key)
 
 prompt = """
 Actúa como un asistente experto en condiciones marítimas para SUP en La Herradura, Coquimbo. Genera datos para hoy y mañana con la siguiente estructura JSON:
