@@ -133,14 +133,9 @@
       const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
       solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
 
-      const mareas = [
-        { tipo: 'Marea alta', hora: new Date(fecha.setHours(2, 30)) },
-        { tipo: 'Marea baja', hora: new Date(fecha.setHours(8, 45)) },
-        { tipo: 'Marea alta', hora: new Date(fecha.setHours(14, 30)) },
-        { tipo: 'Marea baja', hora: new Date(fecha.setHours(20, 45)) }
-      ];
+      const mareas = window.dataPronostico && window.dataPronostico.mareas ? window.dataPronostico.mareas : [];
 
-      const resumenMareas = mareas.map(m => `🌊 <strong>${m.tipo}</strong>: ${m.hora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}`).join(" | ");
+      const resumenMareas = mareas.map(m => `🌊 <strong>Marea ${m.tipo}</strong>: ${m.hora}`).join(" | ");
       const mareaEl = document.getElementById("horarios-marea");
       mareaEl.innerHTML = resumenMareas;
     }
