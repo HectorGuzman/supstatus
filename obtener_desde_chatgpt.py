@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 
 # Requiere que definas OPENAI_API_KEY como secreto en GitHub
-openai.api_key = os.getenv("OPENAI_API_KEY")
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 prompt = """
 Actúa como un asistente experto en condiciones marítimas para SUP en La Herradura, Coquimbo. Genera datos para hoy y mañana con la siguiente estructura JSON:
@@ -35,7 +35,7 @@ Debe incluir 6 bloques por día (06:00 a 21:00 cada 3h), de forma natural, reali
 
 print("Generando datos desde ChatGPT...")
 
-response = openai.chat.completions.create(
+response = client.chat.completions.create(
     model="gpt-4",
     messages=[
         {"role": "system", "content": "Eres un asistente que responde solo con JSON válido."},
