@@ -22,14 +22,20 @@ Actúa como un asistente experto en condiciones marítimas para SUP en La Herrad
     },
     ...
   ],
-  "mañana": [ ... ]
+  "mañana": [ ... ],
+  "mareas": [
+    { "tipo": "alta", "hora": "02:30" },
+    { "tipo": "baja", "hora": "08:45" },
+    { "tipo": "alta", "hora": "14:30" },
+    { "tipo": "baja", "hora": "20:45" }
+  ]
 }
-Debe incluir 6 bloques por día (06:00 a 21:00 cada 3h), de forma natural, realista y útil. Consulta esta data donde estimes conveniente pero en paginas de surf y meterologia
+Debe incluir 6 bloques por día (06:00 a 21:00 cada 3h), de forma natural, realista y útil. Las mareas deben representar horarios estimados típicos del lugar.
 """
 
 print("Generando datos desde ChatGPT...")
 
-response = openai.ChatCompletion.create(
+response = openai.chat.completions.create(
     model="gpt-4",
     messages=[
         {"role": "system", "content": "Eres un asistente que responde solo con JSON válido."},
@@ -38,3 +44,14 @@ response = openai.ChatCompletion.create(
     temperature=0.4,
     max_tokens=2000
 )
+
+# Parsear respuesta (asegura formato válido)
+try:
+    content = response.choices[0].message.content.strip()
+    parsed = json.loads(content)
+    with open("data.json", "w", encoding="utf-8") as f:
+        json.dump(parsed, f, indent=2, ensure_ascii=False)
+    print("✅ Archivo data.json generado exitosamente.")
+except Exception as e:
+    print("❌ Error al generar o guardar el JSON:", e)
+    print("Respuesta:", response.choices[0].message.content)
