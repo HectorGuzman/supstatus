@@ -135,7 +135,7 @@ Reglas:
   - Avanzado: > 15 km/h
 - No repitas descripciones entre bloques horarios.
 - La clave "mareas" debe ser una lista con las próximas 4 a 6 mareas (alta y baja).
-- Agrega la clave "generado" con la fecha y hora actual (formato yyyy-mm-dd HH:MM:SS).
+- Agrega la clave "generado" con exactamente este valor: "{fecha_generacion}"
 """
 
 print("🤖 Generando JSON con datos reales desde ChatGPT...")
