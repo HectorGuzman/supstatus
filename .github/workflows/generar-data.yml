@@ -3,7 +3,8 @@ name: Generar data.json diaria
 
 on:
   schedule:
-    - cron: '0 7 * * *'  # todos los días a 3 o 4 de la mañana horario Chileno  workflow_dispatch:
+    - cron: '0 7 * * *'  # todos los días a 3 o 4 de la mañana horario Chileno  
+  workflow_dispatch:
 
 jobs:
   build:
