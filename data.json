@@ -2,143 +2,107 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "10 km/h (Suroeste)",
-      "oleaje": "0.8 m",
-      "direccionOleaje": "Norte",
-      "marea": "baja",
-      "temperatura": "15°C",
-      "condiciones": "Cielo despejado, viento suave",
+      "viento": "2.4 km/h",
+      "oleaje": "1.14 m",
+      "temperatura": "12.9°C",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "15 km/h (Oeste)",
-      "oleaje": "1.2 m",
-      "direccionOleaje": "Norte",
-      "marea": "media",
-      "temperatura": "18°C",
-      "condiciones": "Buenas condiciones para remar",
-      "nivel": "Intermedio"
+      "viento": "2.5 km/h",
+      "oleaje": "1.1 m",
+      "temperatura": "13.4°C",
+      "nivel": "Principiante"
     },
     {
       "hora": "12:00",
-      "viento": "20 km/h (Oeste)",
-      "oleaje": "1.5 m",
-      "direccionOleaje": "Norte",
-      "marea": "media",
-      "temperatura": "21°C",
-      "condiciones": "Viento moderado, oleaje constante",
-      "nivel": "Intermedio"
+      "viento": "10.1 km/h",
+      "oleaje": "1.06 m",
+      "temperatura": "16.7°C",
+      "nivel": "Avanzado"
     },
     {
       "hora": "15:00",
-      "viento": "18 km/h (Oeste)",
-      "oleaje": "1.3 m",
-      "direccionOleaje": "Norte",
-      "marea": "alta",
-      "temperatura": "20°C",
-      "condiciones": "Buenas condiciones, oleaje creciente",
-      "nivel": "Intermedio"
+      "viento": "12.6 km/h",
+      "oleaje": "1.04 m",
+      "temperatura": "17.0°C",
+      "nivel": "Avanzado"
     },
     {
       "hora": "18:00",
-      "viento": "12 km/h (Suroeste)",
-      "oleaje": "1.0 m",
-      "direccionOleaje": "Norte",
-      "marea": "alta",
-      "temperatura": "17°C",
-      "condiciones": "Atardecer tranquilo, oleaje moderado",
-      "nivel": "Intermedio"
+      "viento": "6.9 km/h",
+      "oleaje": "1.04 m",
+      "temperatura": "15.2°C",
+      "nivel": "Avanzado"
     },
     {
       "hora": "21:00",
-      "viento": "8 km/h (Sur)",
-      "oleaje": "0.7 m",
-      "direccionOleaje": "Norte",
-      "marea": "alta",
-      "temperatura": "15°C",
-      "condiciones": "Noche fresca, oleaje suave",
+      "viento": "2.2 km/h",
+      "oleaje": "1.06 m",
+      "temperatura": "13.6°C",
       "nivel": "Principiante"
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "10 km/h (Suroeste)",
-      "oleaje": "0.8 m",
-      "direccionOleaje": "Norte",
-      "marea": "baja",
-      "temperatura": "14°C",
-      "condiciones": "Mañana fresca, viento suave",
+      "viento": "5.1 km/h",
+      "oleaje": "1.16 m",
+      "temperatura": "11.7°C",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "14 km/h (Oeste)",
-      "oleaje": "1.1 m",
-      "direccionOleaje": "Norte",
-      "marea": "baja",
-      "temperatura": "17°C",
-      "condiciones": "Buenas condiciones para remar",
-      "nivel": "Intermedio"
+      "viento": "5.0 km/h",
+      "oleaje": "1.2 m",
+      "temperatura": "15.0°C",
+      "nivel": "Principiante"
     },
     {
       "hora": "12:00",
-      "viento": "18 km/h (Oeste)",
-      "oleaje": "1.4 m",
-      "direccionOleaje": "Norte",
-      "marea": "media",
-      "temperatura": "20°C",
-      "condiciones": "Viento moderado, oleaje constante",
-      "nivel": "Intermedio"
+      "viento": "11.2 km/h",
+      "oleaje": "1.28 m",
+      "temperatura": "18.7°C",
+      "nivel": "Avanzado"
     },
     {
       "hora": "15:00",
-      "viento": "20 km/h (Oeste)",
-      "oleaje": "1.6 m",
-      "direccionOleaje": "Norte",
-      "marea": "media",
-      "temperatura": "21°C",
-      "condiciones": "Condiciones desafiantes, oleaje creciente",
+      "viento": "9.4 km/h",
+      "oleaje": "1.38 m",
+      "temperatura": "19.1°C",
       "nivel": "Avanzado"
     },
     {
       "hora": "18:00",
-      "viento": "16 km/h (Oeste)",
-      "oleaje": "1.3 m",
-      "direccionOleaje": "Norte",
-      "marea": "alta",
-      "temperatura": "19°C",
-      "condiciones": "Atardecer ventoso, oleaje moderado",
-      "nivel": "Intermedio"
+      "viento": "4.7 km/h",
+      "oleaje": "1.5 m",
+      "temperatura": "16.3°C",
+      "nivel": "Avanzado"
     },
     {
       "hora": "21:00",
-      "viento": "12 km/h (Oeste)",
-      "oleaje": "1.0 m",
-      "direccionOleaje": "Norte",
-      "marea": "alta",
-      "temperatura": "16°C",
-      "condiciones": "Noche fresca, oleaje suave",
+      "viento": "1.8 km/h",
+      "oleaje": "1.56 m",
+      "temperatura": "14.2°C",
       "nivel": "Principiante"
     }
   ],
   "mareas": [
     {
-      "tipo": "alta",
-      "hora": "02:30"
-    },
-    {
       "tipo": "baja",
-      "hora": "08:45"
+      "hora": "20:41"
     },
     {
       "tipo": "alta",
-      "hora": "14:30"
+      "hora": "02:35"
     },
     {
       "tipo": "baja",
-      "hora": "20:45"
+      "hora": "08:29"
+    },
+    {
+      "tipo": "alta",
+      "hora": "14:54"
     }
   ]
 }
