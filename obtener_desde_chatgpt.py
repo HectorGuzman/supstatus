@@ -78,18 +78,17 @@ worldtides_url = f"https://www.worldtides.info/api/v2?extremes&lat={LAT}&lon={LO
 response_mareas = requests.get(worldtides_url)
 mareas_data = response_mareas.json()
 
-mareas_formateadas = {"hoy": [], "mañana": []}
-
-for m in mareas_data.get("extremes", []):
+# Agrupar próximas mareas (máximo 6 eventos)
+mareas_proximas = []
+for m in mareas_data.get("extremes", [])[:6]:
     tipo = "alta" if m["type"].lower() == "high" else "baja"
     fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", ""))
-    dia_clave = "hoy" if fecha_evento.date().isoformat() == hoy else "mañana"
     hora = fecha_evento.strftime("%H:%M")
-    mareas_formateadas[dia_clave].append({"tipo": tipo, "hora": hora})
+    mareas_proximas.append({"tipo": tipo, "hora": hora})
 
 # Preparar prompt usando los datos reales
 clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
-marea_contexto = json.dumps(mareas_formateadas, indent=2, ensure_ascii=False)
+marea_contexto = json.dumps(mareas_proximas, indent=2, ensure_ascii=False)
 
 prompt = f"""
 Actúa como un asistente experto en SUP (stand up paddle) para La Herradura, Coquimbo.
@@ -98,7 +97,7 @@ A continuación tienes datos REALES de clima y condiciones horarias extraídas d
 CLIMA:
 {clima_contexto}
 
-MAREAS:
+PRÓXIMAS MAREAS:
 {marea_contexto}
 
 Usando exclusivamente esta información como base, genera un JSON estructurado como este ejemplo:
@@ -116,16 +115,10 @@ Usando exclusivamente esta información como base, genera un JSON estructurado c
     }}
   ],
   "mañana": [...],
-  "mareas": {{
-    "hoy": [
-      {{"tipo": "alta", "hora": "03:00"}},
-      {{"tipo": "baja", "hora": "09:00"}}
-    ],
-    "mañana": [
-      {{"tipo": "alta", "hora": "03:30"}},
-      {{"tipo": "baja", "hora": "09:45"}}
-    ]
-  }}
+  "mareas": [
+    {{"tipo": "alta", "hora": "03:00"}},
+    {{"tipo": "baja", "hora": "09:00"}}
+  ]
 }}
 
 Reglas:
@@ -138,7 +131,7 @@ Reglas:
   - Intermedio: entre 9 y 15 km/h
   - Avanzado: > 15 km/h
 - No repitas descripciones entre bloques horarios.
-- La clave "mareas" debe contener subclaves "hoy" y "mañana".
+- La clave "mareas" debe ser una lista con las próximas 4 a 6 mareas (alta y baja).
 """
 
 print("\U0001F916 Generando JSON con datos reales desde ChatGPT...")
