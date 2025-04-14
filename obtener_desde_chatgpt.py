@@ -18,6 +18,11 @@ meteo_url = (
 response_meteo = requests.get(meteo_url)
 data_meteo = response_meteo.json()
 
+# Validar respuesta de Open-Meteo
+print("🔎 Respuesta Open-Meteo:", json.dumps(data_meteo, indent=2))
+if "hourly" not in data_meteo:
+    raise ValueError("❌ Open-Meteo no devolvió datos 'hourly'. Revisa la URL o parámetros.")
+
 # Filtrar solo las horas relevantes (06:00 a 21:00 cada 3h)
 horas_objetivo = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
 hoy = datetime.now().date().isoformat()
