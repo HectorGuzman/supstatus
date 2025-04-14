@@ -22,17 +22,17 @@ jobs:
       - name: Instalar dependencias
         run: pip install openai requests pytz
 
+      - name: Configurar Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git pull origin main --rebase
+
       - name: Ejecutar script de generación
         run: python obtener_desde_chatgpt.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WORLDTIDES_API_KEY: ${{ secrets.WORLDTIDES_API_KEY }}
-          
-      - name: Pull con rebase para evitar conflictos
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git pull origin main --rebase
           
       - name: Verificar si hubo cambios en data.json
         id: git-check
