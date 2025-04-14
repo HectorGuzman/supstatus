@@ -27,7 +27,7 @@ print("🌬️ Consultando Open-Meteo (forecast)...")
 # Primero definimos la URL y luego hacemos la solicitud
 forecast_url = (
     f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
-    f"&hourly=wind_speed,wind_direction,temperature_2m"
+    f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m"
     f"&timezone=auto"
 )
 response_forecast = requests.get(forecast_url)
@@ -57,7 +57,7 @@ for i, fecha in enumerate([hoy, manana]):
             idx_m = data_marine["hourly"]["time"].index(timestamp)
             bloques.append({
                 "hora": hora,
-                "viento": f"{data_forecast['hourly']['wind_speed'][idx_f]} km/h",
+                "viento": f\"{data_forecast['hourly']['wind_speed_10m'][idx_f]} km/h\",
                 "oleaje": f"{data_marine['hourly']['wave_height'][idx_m]} m",
                 "direccionOleaje": f"{int(data_marine['hourly']['wave_direction'][idx_m])}°",
                 "temperatura": f"{data_forecast['hourly']['temperature_2m'][idx_f]}°C"
