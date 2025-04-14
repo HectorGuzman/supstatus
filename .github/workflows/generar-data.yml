@@ -27,7 +27,13 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           WORLDTIDES_API_KEY: ${{ secrets.WORLDTIDES_API_KEY }}
-
+          
+      - name: Pull con rebase para evitar conflictos
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git pull origin main --rebase
+          
       - name: Verificar si hubo cambios en data.json
         id: git-check
         run: |
@@ -41,10 +47,6 @@ jobs:
             echo "Cambios detectados"
             echo "skip_commit=false" >> $GITHUB_ENV
           fi
-          
-      - name: Hacer pull para evitar conflictos
-        if: env.skip_commit == 'false'
-        run: git pull origin main --rebase
 
       - name: Commit y push si hay cambios
         if: env.skip_commit == 'false'
