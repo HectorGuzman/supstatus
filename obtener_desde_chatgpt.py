@@ -77,7 +77,7 @@ mareas_data = response_mareas.json()
 mareas_formateadas = []
 for m in mareas_data.get("extremes", [])[:4]:
     tipo = "alta" if m["type"].lower() == "high" else "baja"
-    hora = datetime.fromisoformat(m["date"]).strftime("%H:%M")
+    hora = datetime.strptime(m["date"], "%Y-%m-%dT%H:%M%z").astimezone().strftime("%H:%M")
     mareas_formateadas.append({"tipo": tipo, "hora": hora})
 
 # Preparar prompt usando los datos reales
