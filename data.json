@@ -4,42 +4,54 @@
       "hora": "06:00",
       "viento": "2.4 km/h",
       "oleaje": "1.14 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "12.9°C",
+      "condiciones": "Con viento suave y oleaje moderado, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
       "viento": "2.5 km/h",
       "oleaje": "1.1 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "13.4°C",
+      "condiciones": "Con condiciones similares a las de la mañana, es adecuado para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "12:00",
       "viento": "10.1 km/h",
       "oleaje": "1.06 m",
+      "direccionOleaje": "Oeste",
       "temperatura": "16.7°C",
-      "nivel": "Avanzado"
+      "condiciones": "Con viento moderado y oleaje ligero, es un momento óptimo para remar.",
+      "nivel": "Principiante"
     },
     {
       "hora": "15:00",
       "viento": "12.6 km/h",
       "oleaje": "1.04 m",
+      "direccionOleaje": "Oeste",
       "temperatura": "17.0°C",
-      "nivel": "Avanzado"
+      "condiciones": "Con viento moderado y oleaje ligero, es favorable para la práctica de SUP.",
+      "nivel": "Principiante"
     },
     {
       "hora": "18:00",
       "viento": "6.9 km/h",
       "oleaje": "1.04 m",
+      "direccionOleaje": "Oeste",
       "temperatura": "15.2°C",
-      "nivel": "Avanzado"
+      "condiciones": "Con viento suave y oleaje ligero, es un buen momento para remar.",
+      "nivel": "Principiante"
     },
     {
       "hora": "21:00",
       "viento": "2.2 km/h",
       "oleaje": "1.06 m",
+      "direccionOleaje": "Oeste",
       "temperatura": "13.6°C",
+      "condiciones": "Con viento suave y oleaje moderado, es apto para principiantes.",
       "nivel": "Principiante"
     }
   ],
@@ -48,50 +60,58 @@
       "hora": "06:00",
       "viento": "5.1 km/h",
       "oleaje": "1.16 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "11.7°C",
+      "condiciones": "Con viento suave y oleaje moderado, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
       "viento": "5.0 km/h",
       "oleaje": "1.2 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "15.0°C",
+      "condiciones": "Con condiciones similares a las de la mañana, es adecuado para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "12:00",
       "viento": "11.2 km/h",
       "oleaje": "1.28 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "18.7°C",
-      "nivel": "Avanzado"
+      "condiciones": "Con viento moderado y oleaje moderado, es un buen momento para remar.",
+      "nivel": "Principiante"
     },
     {
       "hora": "15:00",
       "viento": "9.4 km/h",
       "oleaje": "1.38 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "19.1°C",
-      "nivel": "Avanzado"
+      "condiciones": "Con viento moderado y oleaje moderado, es favorable para la práctica de SUP.",
+      "nivel": "Principiante"
     },
     {
       "hora": "18:00",
       "viento": "4.7 km/h",
       "oleaje": "1.5 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "16.3°C",
-      "nivel": "Avanzado"
+      "condiciones": "Con viento suave y oleaje moderado, es un buen momento para remar.",
+      "nivel": "Principiante"
     },
     {
       "hora": "21:00",
       "viento": "1.8 km/h",
       "oleaje": "1.56 m",
+      "direccionOleaje": "Suroeste",
       "temperatura": "14.2°C",
+      "condiciones": "Con viento suave y oleaje moderado, es apto para principiantes.",
       "nivel": "Principiante"
     }
   ],
   "mareas": [
-    {
-      "tipo": "baja",
-      "hora": "20:41"
-    },
     {
       "tipo": "alta",
       "hora": "02:35"
@@ -103,6 +123,26 @@
     {
       "tipo": "alta",
       "hora": "14:54"
+    },
+    {
+      "tipo": "baja",
+      "hora": "21:17"
+    },
+    {
+      "tipo": "alta",
+      "hora": "03:07"
+    },
+    {
+      "tipo": "baja",
+      "hora": "08:54"
+    },
+    {
+      "tipo": "alta",
+      "hora": "15:25"
+    },
+    {
+      "tipo": "baja",
+      "hora": "21:30"
     }
   ]
 }
