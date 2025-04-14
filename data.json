@@ -1,127 +1,144 @@
 {
-  "fecha_generacion": "2025-04-13",
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "10 km/h (Su)",
-      "oleaje": "0.6 m",
-      "direccionOleaje": "Este",
-      "marea": "media",
-      "temperatura": "25°C",
-      "condiciones": "Muy tranquilo, ideal para comenzar el día.",
+      "viento": "10 km/h (Suroeste)",
+      "oleaje": "0.8 m",
+      "direccionOleaje": "Norte",
+      "marea": "baja",
+      "temperatura": "15°C",
+      "condiciones": "Cielo despejado, viento suave",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "4 km/h (Su)",
-      "oleaje": "0.3 m",
-      "direccionOleaje": "Suroeste",
-      "marea": "alta",
+      "viento": "15 km/h (Oeste)",
+      "oleaje": "1.2 m",
+      "direccionOleaje": "Norte",
+      "marea": "media",
       "temperatura": "18°C",
-      "condiciones": "Tranquilo, buen momento para SUP.",
-      "nivel": "Principiante"
+      "condiciones": "Buenas condiciones para remar",
+      "nivel": "Intermedio"
     },
     {
       "hora": "12:00",
-      "viento": "11 km/h (Su)",
-      "oleaje": "0.7 m",
+      "viento": "20 km/h (Oeste)",
+      "oleaje": "1.5 m",
       "direccionOleaje": "Norte",
-      "marea": "bajando",
-      "temperatura": "23°C",
-      "condiciones": "Algo más movido, atención al viento.",
+      "marea": "media",
+      "temperatura": "21°C",
+      "condiciones": "Viento moderado, oleaje constante",
       "nivel": "Intermedio"
     },
     {
       "hora": "15:00",
-      "viento": "8 km/h (No)",
-      "oleaje": "0.6 m",
-      "direccionOleaje": "Noreste",
-      "marea": "bajando",
+      "viento": "18 km/h (Oeste)",
+      "oleaje": "1.3 m",
+      "direccionOleaje": "Norte",
+      "marea": "alta",
       "temperatura": "20°C",
-      "condiciones": "Condiciones algo intensas, precaución.",
-      "nivel": "Avanzado"
+      "condiciones": "Buenas condiciones, oleaje creciente",
+      "nivel": "Intermedio"
     },
     {
       "hora": "18:00",
-      "viento": "5 km/h (Oe)",
-      "oleaje": "0.7 m",
-      "direccionOleaje": "Sur",
-      "marea": "baja",
-      "temperatura": "25°C",
-      "condiciones": "Ideal para una última sesión suave.",
+      "viento": "12 km/h (Suroeste)",
+      "oleaje": "1.0 m",
+      "direccionOleaje": "Norte",
+      "marea": "alta",
+      "temperatura": "17°C",
+      "condiciones": "Atardecer tranquilo, oleaje moderado",
       "nivel": "Intermedio"
     },
     {
       "hora": "21:00",
-      "viento": "5 km/h (Su)",
-      "oleaje": "0.4 m",
-      "direccionOleaje": "Este",
-      "marea": "subiendo",
-      "temperatura": "21°C",
-      "condiciones": "Tranquilo al atardecer.",
+      "viento": "8 km/h (Sur)",
+      "oleaje": "0.7 m",
+      "direccionOleaje": "Norte",
+      "marea": "alta",
+      "temperatura": "15°C",
+      "condiciones": "Noche fresca, oleaje suave",
       "nivel": "Principiante"
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "8 km/h (No)",
-      "oleaje": "0.5 m",
-      "direccionOleaje": "Este",
+      "viento": "10 km/h (Suroeste)",
+      "oleaje": "0.8 m",
+      "direccionOleaje": "Norte",
       "marea": "baja",
-      "temperatura": "25°C",
-      "condiciones": "Muy tranquilo, ideal para comenzar el día.",
+      "temperatura": "14°C",
+      "condiciones": "Mañana fresca, viento suave",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "8 km/h (Su)",
-      "oleaje": "0.6 m",
-      "direccionOleaje": "Noreste",
-      "marea": "alta",
-      "temperatura": "23°C",
-      "condiciones": "Tranquilo, buen momento para SUP.",
-      "nivel": "Principiante"
+      "viento": "14 km/h (Oeste)",
+      "oleaje": "1.1 m",
+      "direccionOleaje": "Norte",
+      "marea": "baja",
+      "temperatura": "17°C",
+      "condiciones": "Buenas condiciones para remar",
+      "nivel": "Intermedio"
     },
     {
       "hora": "12:00",
-      "viento": "6 km/h (Su)",
-      "oleaje": "0.9 m",
-      "direccionOleaje": "Noroeste",
-      "marea": "subiendo",
-      "temperatura": "24°C",
-      "condiciones": "Algo más movido, atención al viento.",
+      "viento": "18 km/h (Oeste)",
+      "oleaje": "1.4 m",
+      "direccionOleaje": "Norte",
+      "marea": "media",
+      "temperatura": "20°C",
+      "condiciones": "Viento moderado, oleaje constante",
       "nivel": "Intermedio"
     },
     {
       "hora": "15:00",
-      "viento": "9 km/h (Oe)",
-      "oleaje": "0.7 m",
-      "direccionOleaje": "Noroeste",
-      "marea": "alta",
-      "temperatura": "20°C",
-      "condiciones": "Condiciones algo intensas, precaución.",
+      "viento": "20 km/h (Oeste)",
+      "oleaje": "1.6 m",
+      "direccionOleaje": "Norte",
+      "marea": "media",
+      "temperatura": "21°C",
+      "condiciones": "Condiciones desafiantes, oleaje creciente",
       "nivel": "Avanzado"
     },
     {
       "hora": "18:00",
-      "viento": "10 km/h (Su)",
-      "oleaje": "0.5 m",
-      "direccionOleaje": "Este",
-      "marea": "media",
-      "temperatura": "22°C",
-      "condiciones": "Ideal para una última sesión suave.",
+      "viento": "16 km/h (Oeste)",
+      "oleaje": "1.3 m",
+      "direccionOleaje": "Norte",
+      "marea": "alta",
+      "temperatura": "19°C",
+      "condiciones": "Atardecer ventoso, oleaje moderado",
       "nivel": "Intermedio"
     },
     {
       "hora": "21:00",
-      "viento": "9 km/h (Su)",
-      "oleaje": "0.6 m",
-      "direccionOleaje": "Sur",
-      "marea": "media",
-      "temperatura": "19°C",
-      "condiciones": "Tranquilo al atardecer.",
+      "viento": "12 km/h (Oeste)",
+      "oleaje": "1.0 m",
+      "direccionOleaje": "Norte",
+      "marea": "alta",
+      "temperatura": "16°C",
+      "condiciones": "Noche fresca, oleaje suave",
       "nivel": "Principiante"
+    }
+  ],
+  "mareas": [
+    {
+      "tipo": "alta",
+      "hora": "02:30"
+    },
+    {
+      "tipo": "baja",
+      "hora": "08:45"
+    },
+    {
+      "tipo": "alta",
+      "hora": "14:30"
+    },
+    {
+      "tipo": "baja",
+      "hora": "20:45"
     }
   ]
 }
