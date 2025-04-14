@@ -20,6 +20,10 @@ data_marine = response_marine.json()
 
 # Obtener datos atmosféricos desde Open-Meteo (viento, temperatura ambiente)
 print("🌬️ Consultando Open-Meteo (forecast)...")
+
+# DEBUG TEMPORAL: mostrar respuesta cruda forecast
+# (se puede eliminar después de testeo)
+print("🔎 Respuesta Open-Meteo (forecast):", response_forecast.text)
 forecast_url = (
     f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
     f"&hourly=wind_speed,wind_direction,temperature_2m"
