@@ -8,6 +8,12 @@ import requests
 LAT = -29.983059
 LON = -71.365225
 
+# Función para convertir grados a dirección cardinal
+def direccion_cardinal(grados):
+    direcciones = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste']
+    idx = int((grados + 22.5) % 360 / 45)
+    return direcciones[idx]
+
 # Obtener datos marinos desde Open-Meteo (oleaje y temperatura del agua)
 print("📡 Consultando Open-Meteo (marine)...")
 marine_url = (
@@ -21,10 +27,6 @@ data_marine = response_marine.json()
 # Obtener datos atmosféricos desde Open-Meteo (viento, temperatura ambiente)
 print("🌬️ Consultando Open-Meteo (forecast)...")
 
-# DEBUG TEMPORAL: mostrar respuesta cruda forecast
-# (se puede eliminar después de testeo)
-
-# Primero definimos la URL y luego hacemos la solicitud
 forecast_url = (
     f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
     f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m"
@@ -55,11 +57,13 @@ for i, fecha in enumerate([hoy, manana]):
         if timestamp in data_forecast["hourly"]["time"] and timestamp in data_marine["hourly"]["time"]:
             idx_f = data_forecast["hourly"]["time"].index(timestamp)
             idx_m = data_marine["hourly"]["time"].index(timestamp)
+            direccion_grados = int(data_marine['hourly']['wave_direction'][idx_m])
+            direccion_texto = direccion_cardinal(direccion_grados)
             bloques.append({
                 "hora": hora,
                 "viento": f"{data_forecast['hourly']['wind_speed_10m'][idx_f]} km/h",
                 "oleaje": f"{data_marine['hourly']['wave_height'][idx_m]} m",
-                "direccionOleaje": f"{int(data_marine['hourly']['wave_direction'][idx_m])}°",
+                "direccionOleaje": direccion_texto,
                 "temperatura": f"{data_forecast['hourly']['temperature_2m'][idx_f]}°C"
             })
     horarios["hoy" if i == 0 else "mañana"] = bloques
@@ -70,14 +74,14 @@ WT_API_KEY = os.environ.get("WORLDTIDES_API_KEY")
 if not WT_API_KEY:
     raise ValueError("❌ WORLDTIDES_API_KEY no está definido en el entorno.")
 
-worldtides_url = f"https://www.worldtides.info/api/v2?extremes&lat={LAT}&lon={LON}&days=1&key={WT_API_KEY}"
+worldtides_url = f"https://www.worldtides.info/api/v2?extremes&lat={LAT}&lon={LON}&days=2&key={WT_API_KEY}"
 response_mareas = requests.get(worldtides_url)
 mareas_data = response_mareas.json()
 
 mareas_formateadas = []
-for m in mareas_data.get("extremes", [])[:4]:
+for m in mareas_data.get("extremes", []):
     tipo = "alta" if m["type"].lower() == "high" else "baja"
-    hora = datetime.strptime(m["date"], "%Y-%m-%dT%H:%M%z").astimezone().strftime("%H:%M")
+    hora = datetime.fromisoformat(m["date"].replace("+0000", "")).strftime("%H:%M")
     mareas_formateadas.append({"tipo": tipo, "hora": hora})
 
 # Preparar prompt usando los datos reales
@@ -97,16 +101,33 @@ MAREAS:
 Usando exclusivamente esta información como base, genera un JSON estructurado como este ejemplo:
 
 {{
-  "hoy": [...],
+  "hoy": [
+    {{
+      "hora": "06:00",
+      "viento": "5 km/h",
+      "oleaje": "0.3 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "17°C",
+      "condiciones": "Tranquilo y seguro para principiantes.",
+      "nivel": "Principiante"
+    }}
+  ],
   "mañana": [...],
-  "mareas": [...]
+  "mareas": [
+    {{"tipo": "alta", "hora": "03:00"}},
+    {{"tipo": "baja", "hora": "09:00"}},
+    {{"tipo": "alta", "hora": "15:30"}},
+    {{"tipo": "baja", "hora": "21:30"}}
+  ]
 }}
 
 Reglas:
 - Responde únicamente con JSON válido.
 - Las condiciones deben ser coherentes con los datos reales (viento, oleaje, temperatura).
+- Cada bloque horario debe incluir SIEMPRE: viento, oleaje, dirección del oleaje (en palabras), temperatura, condiciones y nivel.
+- Las "condiciones" deben ser una frase útil para el usuario sobre si es un buen momento para hacer SUP y por qué.
 - Asigna "nivel" según criterios como viento (>10 km/h = Avanzado, <5 = Principiante), oleaje (>0.7 m = Avanzado, <0.4 m = Principiante).
-- No repitas descripciones.
+- No repitas descripciones entre bloques horarios.
 """
 
 print("🤖 Generando JSON con datos reales desde ChatGPT...")
