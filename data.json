@@ -15,7 +15,7 @@
       "oleaje": "1.08 m",
       "direccionOleaje": "Oeste",
       "temperatura": "13.7°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
+      "condiciones": "Condiciones tranquilas, adecuadas para todos los niveles.",
       "nivel": "Principiante"
     },
     {
@@ -24,7 +24,7 @@
       "oleaje": "1.02 m",
       "direccionOleaje": "Oeste",
       "temperatura": "16.6°C",
-      "condiciones": "Con viento moderado, recomendado para intermedios.",
+      "condiciones": "Viento moderado, recomendado para niveles intermedios.",
       "nivel": "Intermedio"
     },
     {
@@ -33,7 +33,7 @@
       "oleaje": "1.0 m",
       "direccionOleaje": "Oeste",
       "temperatura": "16.8°C",
-      "condiciones": "Con viento moderado, recomendado para intermedios.",
+      "condiciones": "Viento moderado, apto para niveles intermedios.",
       "nivel": "Intermedio"
     },
     {
@@ -42,7 +42,7 @@
       "oleaje": "1.02 m",
       "direccionOleaje": "Oeste",
       "temperatura": "15.3°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
+      "condiciones": "Condiciones favorables, ideal para todos los niveles.",
       "nivel": "Principiante"
     },
     {
@@ -51,7 +51,7 @@
       "oleaje": "1.04 m",
       "direccionOleaje": "Oeste",
       "temperatura": "13.6°C",
-      "condiciones": "Muy tranquilo, ideal para principiantes.",
+      "condiciones": "Muy tranquilo, perfecto para principiantes.",
       "nivel": "Principiante"
     }
   ],
@@ -62,7 +62,7 @@
       "oleaje": "1.14 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "11.8°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
+      "condiciones": "Condiciones tranquilas, aptas para todos los niveles.",
       "nivel": "Principiante"
     },
     {
@@ -71,7 +71,7 @@
       "oleaje": "1.18 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "15.5°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
+      "condiciones": "Muy tranquilo y seguro, ideal para principiantes.",
       "nivel": "Principiante"
     },
     {
@@ -80,7 +80,7 @@
       "oleaje": "1.28 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "19.2°C",
-      "condiciones": "Con viento moderado, recomendado para intermedios.",
+      "condiciones": "Viento moderado, recomendado para niveles intermedios.",
       "nivel": "Intermedio"
     },
     {
@@ -89,7 +89,7 @@
       "oleaje": "1.4 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "19.4°C",
-      "condiciones": "Con viento moderado, recomendado para intermedios.",
+      "condiciones": "Viento moderado, apto para niveles intermedios.",
       "nivel": "Intermedio"
     },
     {
@@ -98,7 +98,7 @@
       "oleaje": "1.52 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "16.6°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
+      "condiciones": "Condiciones favorables, ideal para todos los niveles.",
       "nivel": "Principiante"
     },
     {
@@ -107,46 +107,27 @@
       "oleaje": "1.58 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "14.2°C",
-      "condiciones": "Muy tranquilo, ideal para principiantes.",
+      "condiciones": "Muy tranquilo, perfecto para principiantes.",
       "nivel": "Principiante"
     }
   ],
-  "mareas": {
-    "hoy": [
-      {
-        "tipo": "alta",
-        "hora": "14:54"
-      },
-      {
-        "tipo": "baja",
-        "hora": "21:17"
-      }
-    ],
-    "mañana": [
-      {
-        "tipo": "alta",
-        "hora": "03:07"
-      },
-      {
-        "tipo": "baja",
-        "hora": "08:54"
-      },
-      {
-        "tipo": "alta",
-        "hora": "15:25"
-      },
-      {
-        "tipo": "baja",
-        "hora": "21:54"
-      },
-      {
-        "tipo": "alta",
-        "hora": "03:39"
-      },
-      {
-        "tipo": "baja",
-        "hora": "09:18"
-      }
-    ]
-  }
+  "mareas": [
+    {
+      "tipo": "alta",
+      "hora": "14:54"
+    },
+    {
+      "tipo": "baja",
+      "hora": "21:17"
+    },
+    {
+      "tipo": "alta",
+      "hora": "03:07"
+    },
+    {
+      "tipo": "baja",
+      "hora": "08:54"
+    }
+  ],
+  "generado": "2022-12-22 18:30:45"
 }
