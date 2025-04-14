@@ -8,20 +8,32 @@ import requests
 LAT = -29.9696
 LON = -71.3553
 
-# Obtener datos reales desde Open-Meteo
-print("📡 Consultando Open-Meteo...")
-meteo_url = (
+# Obtener datos marinos desde Open-Meteo (oleaje y temperatura del agua)
+print("📡 Consultando Open-Meteo (marine)...")
+marine_url = (
     f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT}&longitude={LON}"
-    f"&hourly=wave_height,wind_speed,wind_direction,water_temperature,wave_direction"
+    f"&hourly=wave_height,wave_direction,water_temperature"
     f"&timezone=auto"
 )
-response_meteo = requests.get(meteo_url)
-data_meteo = response_meteo.json()
+response_marine = requests.get(marine_url)
+data_marine = response_marine.json()
 
-# Validar respuesta de Open-Meteo
-print("🔎 Respuesta Open-Meteo:", json.dumps(data_meteo, indent=2))
-if "hourly" not in data_meteo:
-    raise ValueError("❌ Open-Meteo no devolvió datos 'hourly'. Revisa la URL o parámetros.")
+# Obtener datos atmosféricos desde Open-Meteo (viento, temperatura ambiente)
+print("🌬️ Consultando Open-Meteo (forecast)...")
+forecast_url = (
+    f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
+    f"&hourly=wind_speed,wind_direction,temperature_2m"
+    f"&timezone=auto"
+)
+response_forecast = requests.get(forecast_url)
+data_forecast = response_forecast.json()
+
+# Validar respuestas
+print("🔎 Respuesta Open-Meteo (marine):", json.dumps(data_marine, indent=2))
+if "hourly" not in data_marine:
+    raise ValueError("❌ Open-Meteo (marine) no devolvió datos 'hourly'.")
+if "hourly" not in data_forecast:
+    raise ValueError("❌ Open-Meteo (forecast) no devolvió datos 'hourly'.")
 
 # Filtrar solo las horas relevantes (06:00 a 21:00 cada 3h)
 horas_objetivo = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
@@ -34,14 +46,15 @@ for i, fecha in enumerate([hoy, manana]):
     bloques = []
     for hora in horas_objetivo:
         timestamp = f"{fecha}T{hora}"
-        if timestamp in data_meteo["hourly"]["time"]:
-            idx = data_meteo["hourly"]["time"].index(timestamp)
+        if timestamp in data_forecast["hourly"]["time"] and timestamp in data_marine["hourly"]["time"]:
+            idx_f = data_forecast["hourly"]["time"].index(timestamp)
+            idx_m = data_marine["hourly"]["time"].index(timestamp)
             bloques.append({
                 "hora": hora,
-                "viento": f"{data_meteo['hourly']['wind_speed'][idx]} km/h",
-                "oleaje": f"{data_meteo['hourly']['wave_height'][idx]} m",
-                "direccionOleaje": f"{int(data_meteo['hourly']['wave_direction'][idx])}°",
-                "temperatura": f"{data_meteo['hourly']['water_temperature'][idx]}°C"
+                "viento": f"{data_forecast['hourly']['wind_speed'][idx_f]} km/h",
+                "oleaje": f"{data_marine['hourly']['wave_height'][idx_m]} m",
+                "direccionOleaje": f"{int(data_marine['hourly']['wave_direction'][idx_m])}°",
+                "temperatura": f"{data_forecast['hourly']['temperature_2m'][idx_f]}°C"
             })
     horarios["hoy" if i == 0 else "mañana"] = bloques
 
