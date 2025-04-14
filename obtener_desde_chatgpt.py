@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import os
 import requests
 
-# Coordenadas de La Herradura
-LAT = -29.9696
-LON = -71.3553
+# Coordenadas de La Herradura (Club de Yates)
+LAT = -29.983059
+LON = -71.365225
 
 # Obtener datos marinos desde Open-Meteo (oleaje y temperatura del agua)
 print("📡 Consultando Open-Meteo (marine)...")
