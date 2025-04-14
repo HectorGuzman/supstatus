@@ -1,6 +1,6 @@
 import openai
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import os
 import requests
 
@@ -81,12 +81,12 @@ mareas_data = response_mareas.json()
 mareas_proximas = []
 for m in mareas_data.get("extremes", [])[:6]:
     tipo = "alta" if m["type"].lower() == "high" else "baja"
-    fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", ""))
+    fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", "")).astimezone(timezone.utc)
     hora = fecha_evento.strftime("%H:%M")
     mareas_proximas.append({"tipo": tipo, "hora": hora})
 
-# Fecha de generación
-fecha_generacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# Fecha de generación actual (UTC offset-aware)
+fecha_generacion = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S")
 
 # Preparar prompt usando los datos reales
 clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
