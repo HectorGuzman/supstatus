@@ -20,10 +20,7 @@ jobs:
           python-version: '3.10'
           
       - name: Instalar dependencias
-        run: pip install openai
-
-      - name: Instalar dependencias request 
-        run: pip install requests
+        run: pip install openai requests pytz
 
       - name: Ejecutar script de generación
         run: python obtener_desde_chatgpt.py
