@@ -15,7 +15,7 @@ def direccion_cardinal(grados):
     return direcciones[idx]
 
 # Obtener datos marinos desde Open-Meteo (oleaje y temperatura del agua)
-print("\U0001F4E1 Consultando Open-Meteo (marine)...")
+print("📡 Consultando Open-Meteo (marine)...")
 marine_url = (
     f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT}&longitude={LON}"
     f"&hourly=wave_height,wave_direction"
@@ -25,19 +25,18 @@ response_marine = requests.get(marine_url)
 data_marine = response_marine.json()
 
 # Obtener datos atmosféricos desde Open-Meteo (viento, temperatura ambiente)
-print("\U0001F32C️ Consultando Open-Meteo (forecast)...")
-
+print("🌬️ Consultando Open-Meteo (forecast)...")
 forecast_url = (
     f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
     f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m"
     f"&timezone=auto"
 )
 response_forecast = requests.get(forecast_url)
-print("\U0001F50E Respuesta Open-Meteo (forecast):", response_forecast.text)
+print("🔎 Respuesta Open-Meteo (forecast):", response_forecast.text)
 data_forecast = response_forecast.json()
 
 # Validar respuestas
-print("\U0001F50E Respuesta Open-Meteo (marine):", json.dumps(data_marine, indent=2))
+print("🔎 Respuesta Open-Meteo (marine):", json.dumps(data_marine, indent=2))
 if "hourly" not in data_marine:
     raise ValueError("❌ Open-Meteo (marine) no devolvió datos 'hourly'.")
 if "hourly" not in data_forecast:
@@ -69,7 +68,7 @@ for i, fecha in enumerate([hoy, manana]):
     horarios["hoy" if i == 0 else "mañana"] = bloques
 
 # Obtener mareas desde WorldTides (requiere API key)
-print("\U0001F30A Consultando WorldTides...")
+print("🌊 Consultando WorldTides...")
 WT_API_KEY = os.environ.get("WORLDTIDES_API_KEY")
 if not WT_API_KEY:
     raise ValueError("❌ WORLDTIDES_API_KEY no está definido en el entorno.")
@@ -139,7 +138,7 @@ Reglas:
 - Agrega la clave "generado" con la fecha y hora actual (formato yyyy-mm-dd HH:MM:SS).
 """
 
-print("\U0001F916 Generando JSON con datos reales desde ChatGPT...")
+print("🤖 Generando JSON con datos reales desde ChatGPT...")
 
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
