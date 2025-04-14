@@ -22,6 +22,9 @@ jobs:
       - name: Instalar dependencias
         run: pip install openai
 
+      - name: Instalar dependencias request 
+        run: pip install requests
+
       - name: Ejecutar script de generación
         run: python obtener_desde_chatgpt.py
         env:
