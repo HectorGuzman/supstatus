@@ -29,6 +29,7 @@ jobs:
         run: python obtener_desde_chatgpt.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          WORLDTIDES_API_KEY: ${{ secrets.WORLDTIDES_API_KEY }}
 
       - name: Verificar si hubo cambios en data.json
         id: git-check
