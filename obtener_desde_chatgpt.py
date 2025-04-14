@@ -1,4 +1,4 @@
-import openai
+""import openai
 import json
 from datetime import datetime, timedelta
 import os
@@ -86,6 +86,9 @@ for m in mareas_data.get("extremes", [])[:6]:
     hora = fecha_evento.strftime("%H:%M")
     mareas_proximas.append({"tipo": tipo, "hora": hora})
 
+# Fecha de generación
+fecha_generacion = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
 # Preparar prompt usando los datos reales
 clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
 marea_contexto = json.dumps(mareas_proximas, indent=2, ensure_ascii=False)
@@ -118,7 +121,8 @@ Usando exclusivamente esta información como base, genera un JSON estructurado c
   "mareas": [
     {{"tipo": "alta", "hora": "03:00"}},
     {{"tipo": "baja", "hora": "09:00"}}
-  ]
+  ],
+  "generado": "{fecha_generacion}"
 }}
 
 Reglas:
@@ -132,6 +136,7 @@ Reglas:
   - Avanzado: > 15 km/h
 - No repitas descripciones entre bloques horarios.
 - La clave "mareas" debe ser una lista con las próximas 4 a 6 mareas (alta y baja).
+- Agrega la clave "generado" con la fecha y hora actual (formato yyyy-mm-dd HH:MM:SS).
 """
 
 print("\U0001F916 Generando JSON con datos reales desde ChatGPT...")
