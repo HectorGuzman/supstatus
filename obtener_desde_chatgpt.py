@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta, timezone
 import os
 import requests
+import pytz
 
 # Coordenadas de La Herradura (Club de Yates)
 LAT = -29.983059
@@ -85,8 +86,9 @@ for m in mareas_data.get("extremes", [])[:6]:
     hora = fecha_evento.strftime("%H:%M")
     mareas_proximas.append({"tipo": tipo, "hora": hora})
 
-# Fecha de generación actual (UTC offset-aware)
-fecha_generacion = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+# Fecha de generación con hora local de Chile
+zona_chile = pytz.timezone("America/Santiago")
+fecha_generacion = datetime.now(zona_chile).strftime("%Y-%m-%d %H:%M:%S")
 
 # Preparar prompt usando los datos reales
 clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
