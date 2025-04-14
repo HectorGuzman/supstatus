@@ -83,6 +83,27 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    body.oscuro {
+      background: #121212;
+      color: #e0e0e0;
+    }
+    body.oscuro header,
+    body.oscuro footer {
+      background: linear-gradient(to right, #1f1f1f, #333);
+      color: #f0f0f0;
+    }
+    body.oscuro .card {
+      background: linear-gradient(to right, #2c3e50, #34495e);
+      color: white;
+    }
+    body.oscuro button {
+      background: #444;
+      color: #e0f7fa;
+    }
+    body.oscuro .activo {
+      background: #0096c7;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -99,6 +120,7 @@
       ⚠️ Esta información es estimada. Usa chaleco salvavidas, conoce tus límites y navega con responsabilidad.
     </div>
     <button onclick="compartirInfo()">📤 Compartir condiciones</button>
+    <button onclick="alternarModo()">🌓 Modo oscuro</button>
   </header>
   <div class="container" id="pronostico"></div>
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
@@ -166,7 +188,6 @@
           <div class="hora">${getHorarioLabel(horaNum)} (${item.hora} Hrs)</div>
           <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
           <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje} <span style='font-weight:bold;'>→</span> <span title='Dirección del oleaje'>🌐 ${item.direccionOleaje}</span></div>
-          <div class="detalle"><strong>🌙 Marea:</strong> ${item.marea}</div>
           <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
           <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
           <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>`;
@@ -204,6 +225,15 @@
         console.error("No se pudo cargar data.json", err);
         mensajeDia.textContent = "No se pudo cargar la información del pronóstico.";
       });
+
+      function alternarModo() {
+        document.body.classList.toggle("oscuro");
+        localStorage.setItem("modoOscuro", document.body.classList.contains("oscuro"));
+      }
+      if (localStorage.getItem("modoOscuro") === "true") {
+        document.body.classList.add("oscuro");
+      }
+
   </script>
   <footer>
     Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank">@__jokerguzman</a>
