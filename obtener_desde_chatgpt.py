@@ -15,7 +15,7 @@ def direccion_cardinal(grados):
     return direcciones[idx]
 
 # Obtener datos marinos desde Open-Meteo (oleaje y temperatura del agua)
-print("📡 Consultando Open-Meteo (marine)...")
+print("\U0001F4E1 Consultando Open-Meteo (marine)...")
 marine_url = (
     f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT}&longitude={LON}"
     f"&hourly=wave_height,wave_direction"
@@ -25,7 +25,7 @@ response_marine = requests.get(marine_url)
 data_marine = response_marine.json()
 
 # Obtener datos atmosféricos desde Open-Meteo (viento, temperatura ambiente)
-print("🌬️ Consultando Open-Meteo (forecast)...")
+print("\U0001F32C️ Consultando Open-Meteo (forecast)...")
 
 forecast_url = (
     f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
@@ -33,11 +33,11 @@ forecast_url = (
     f"&timezone=auto"
 )
 response_forecast = requests.get(forecast_url)
-print("🔎 Respuesta Open-Meteo (forecast):", response_forecast.text)
+print("\U0001F50E Respuesta Open-Meteo (forecast):", response_forecast.text)
 data_forecast = response_forecast.json()
 
 # Validar respuestas
-print("🔎 Respuesta Open-Meteo (marine):", json.dumps(data_marine, indent=2))
+print("\U0001F50E Respuesta Open-Meteo (marine):", json.dumps(data_marine, indent=2))
 if "hourly" not in data_marine:
     raise ValueError("❌ Open-Meteo (marine) no devolvió datos 'hourly'.")
 if "hourly" not in data_forecast:
@@ -69,7 +69,7 @@ for i, fecha in enumerate([hoy, manana]):
     horarios["hoy" if i == 0 else "mañana"] = bloques
 
 # Obtener mareas desde WorldTides (requiere API key)
-print("🌊 Consultando WorldTides...")
+print("\U0001F30A Consultando WorldTides...")
 WT_API_KEY = os.environ.get("WORLDTIDES_API_KEY")
 if not WT_API_KEY:
     raise ValueError("❌ WORLDTIDES_API_KEY no está definido en el entorno.")
@@ -78,11 +78,14 @@ worldtides_url = f"https://www.worldtides.info/api/v2?extremes&lat={LAT}&lon={LO
 response_mareas = requests.get(worldtides_url)
 mareas_data = response_mareas.json()
 
-mareas_formateadas = []
+mareas_formateadas = {"hoy": [], "mañana": []}
+
 for m in mareas_data.get("extremes", []):
     tipo = "alta" if m["type"].lower() == "high" else "baja"
-    hora = datetime.fromisoformat(m["date"].replace("+0000", "")).strftime("%H:%M")
-    mareas_formateadas.append({"tipo": tipo, "hora": hora})
+    fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", ""))
+    dia_clave = "hoy" if fecha_evento.date().isoformat() == hoy else "mañana"
+    hora = fecha_evento.strftime("%H:%M")
+    mareas_formateadas[dia_clave].append({"tipo": tipo, "hora": hora})
 
 # Preparar prompt usando los datos reales
 clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
@@ -113,24 +116,32 @@ Usando exclusivamente esta información como base, genera un JSON estructurado c
     }}
   ],
   "mañana": [...],
-  "mareas": [
-    {{"tipo": "alta", "hora": "03:00"}},
-    {{"tipo": "baja", "hora": "09:00"}},
-    {{"tipo": "alta", "hora": "15:30"}},
-    {{"tipo": "baja", "hora": "21:30"}}
-  ]
+  "mareas": {{
+    "hoy": [
+      {{"tipo": "alta", "hora": "03:00"}},
+      {{"tipo": "baja", "hora": "09:00"}}
+    ],
+    "mañana": [
+      {{"tipo": "alta", "hora": "03:30"}},
+      {{"tipo": "baja", "hora": "09:45"}}
+    ]
+  }}
 }}
 
 Reglas:
 - Responde únicamente con JSON válido.
-- Las condiciones deben ser coherentes con los datos reales (viento, oleaje, temperatura).
+- Las condiciones deben ser coherentes con los datos reales (viento, temperatura, oleaje solo como apoyo).
 - Cada bloque horario debe incluir SIEMPRE: viento, oleaje, dirección del oleaje (en palabras), temperatura, condiciones y nivel.
-- Las "condiciones" deben ser una frase útil para el usuario sobre si es un buen momento para hacer SUP y por qué.
-- Asigna "nivel" según criterios como viento (>10 km/h = Avanzado, <5 = Principiante), oleaje (>0.7 m = Avanzado, <0.4 m = Principiante).
+- Las "condiciones" deben ser una frase útil para el usuario sobre si es un buen momento para hacer SUP y por qué. Ej: "Muy tranquilo y seguro, ideal para aprender."
+- Asigna "nivel" de SUP **solo en base al viento**:
+  - Principiante: ≤ 8 km/h
+  - Intermedio: entre 9 y 15 km/h
+  - Avanzado: > 15 km/h
 - No repitas descripciones entre bloques horarios.
+- La clave "mareas" debe contener subclaves "hoy" y "mañana".
 """
 
-print("🤖 Generando JSON con datos reales desde ChatGPT...")
+print("\U0001F916 Generando JSON con datos reales desde ChatGPT...")
 
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
