@@ -12,7 +12,7 @@ LON = -71.3553
 print("📡 Consultando Open-Meteo (marine)...")
 marine_url = (
     f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT}&longitude={LON}"
-    f"&hourly=wave_height,wave_direction,water_temperature"
+    f"&hourly=wave_height,wave_direction"
     f"&timezone=auto"
 )
 response_marine = requests.get(marine_url)
