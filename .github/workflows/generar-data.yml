@@ -40,6 +40,10 @@ jobs:
             echo "Cambios detectados"
             echo "skip_commit=false" >> $GITHUB_ENV
           fi
+          
+      - name: Hacer pull para evitar conflictos
+        if: env.skip_commit == 'false'
+        run: git pull origin main --rebase
 
       - name: Commit y push si hay cambios
         if: env.skip_commit == 'false'
