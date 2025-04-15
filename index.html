@@ -104,6 +104,20 @@
       background: #0096c7;
       color: white;
     }
+
+    #resumen-mareas-footer {
+      white-space: nowrap;
+      overflow-x: auto;
+      padding: 5px 0;
+      text-align: center;
+    }
+    #resumen-mareas-footer::-webkit-scrollbar {
+      height: 4px;
+    }
+    #resumen-mareas-footer::-webkit-scrollbar-thumb {
+      background: #0077b6;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
@@ -111,11 +125,11 @@
     <h1>SUP en La Herradura</h1>
     <div id="fecha"></div>
     <div id="horarios-sol"></div>
-    <div id="horarios-marea"></div>
     <div id="selector-dia">
       <button onclick="cambiarDia('hoy')">Hoy</button>
       <button onclick="cambiarDia('mañana')">Mañana</button>
     </div>
+    <div id="generado-el" style="font-size: 0.85em; color: #d0f0ff; margin-top: 6px;"></div>
     <div class="nota-aviso">
       ⚠️ Esta información es estimada. Usa chaleco salvavidas, conoce tus límites y navega con responsabilidad.
     </div>
@@ -155,11 +169,10 @@
       const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
       solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
 
-      const mareas = window.dataPronostico && window.dataPronostico.mareas ? window.dataPronostico.mareas : [];
-
+      const mareas = window.dataPronostico?.mareas || [];
       const resumenMareas = mareas.map(m => `🌊 <strong>Marea ${m.tipo}</strong>: ${m.hora}`).join(" | ");
-      const mareaEl = document.getElementById("horarios-marea");
-      mareaEl.innerHTML = resumenMareas;
+      const resumenFooter = document.getElementById("resumen-mareas-footer");
+      resumenFooter.innerHTML = resumenMareas;
     }
 
     function obtenerMensaje(dia) {
@@ -220,6 +233,10 @@
         fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
         mensajeDia.textContent = obtenerMensaje("hoy");
         renderizarPronostico("hoy");
+        const generadoEl = document.getElementById("generado-el");
+        if (data.generado) {
+          generadoEl.textContent = `📅 Datos generados: ${data.generado}`;
+        }
       })
       .catch(err => {
         console.error("No se pudo cargar data.json", err);
@@ -236,6 +253,7 @@
 
   </script>
   <footer>
+    <div id="resumen-mareas-footer" style="font-size: 0.8em; margin-bottom: 8px;"></div>
     Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank">@__jokerguzman</a>
   </footer>
 </body>
