@@ -57,15 +57,18 @@ for i, fecha in enumerate([hoy, manana]):
         if timestamp in data_forecast["hourly"]["time"] and timestamp in data_marine["hourly"]["time"]:
             idx_f = data_forecast["hourly"]["time"].index(timestamp)
             idx_m = data_marine["hourly"]["time"].index(timestamp)
-            direccion_grados = int(data_marine['hourly']['wave_direction'][idx_m])
-            direccion_texto = direccion_cardinal(direccion_grados)
-            bloques.append({
+            dir_oleaje_grados = int(data_marine['hourly']['wave_direction'][idx_m])
+            dir_viento_grados = int(data_forecast['hourly']['wind_direction_10m'][idx_f])
+            bloque = {
                 "hora": hora,
                 "viento": f"{data_forecast['hourly']['wind_speed_10m'][idx_f]} km/h",
                 "oleaje": f"{data_marine['hourly']['wave_height'][idx_m]} m",
-                "direccionOleaje": direccion_texto,
-                "temperatura": f"{data_forecast['hourly']['temperature_2m'][idx_f]}°C"
-            })
+                "direccionOleaje": direccion_cardinal(dir_oleaje_grados),
+                "temperatura": f"{data_forecast['hourly']['temperature_2m'][idx_f]}°C",
+                "direccionViento": direccion_cardinal(dir_viento_grados),
+                "direccionVientoGrados": dir_viento_grados
+            }
+            bloques.append(bloque)
     horarios["hoy" if i == 0 else "mañana"] = bloques
 
 # Obtener mareas desde WorldTides (requiere API key)
@@ -82,7 +85,7 @@ mareas_data = response_mareas.json()
 mareas_proximas = []
 for m in mareas_data.get("extremes", [])[:6]:
     tipo = "alta" if m["type"].lower() == "high" else "baja"
-    fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", "")).astimezone(timezone.utc)
+    fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", ""))
     hora = fecha_evento.strftime("%H:%M")
     mareas_proximas.append({"tipo": tipo, "hora": hora})
 
@@ -90,7 +93,7 @@ for m in mareas_data.get("extremes", [])[:6]:
 zona_chile = pytz.timezone("America/Santiago")
 fecha_generacion = datetime.now(zona_chile).strftime("%Y-%m-%d %H:%M:%S")
 
-# Preparar prompt usando los datos reales
+# Preparar prompt para OpenAI
 clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
 marea_contexto = json.dumps(mareas_proximas, indent=2, ensure_ascii=False)
 
@@ -111,6 +114,8 @@ Usando exclusivamente esta información como base, genera un JSON estructurado c
     {{
       "hora": "06:00",
       "viento": "5 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 45,
       "oleaje": "0.3 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "17°C",
@@ -129,8 +134,8 @@ Usando exclusivamente esta información como base, genera un JSON estructurado c
 Reglas:
 - Responde únicamente con JSON válido.
 - Las condiciones deben ser coherentes con los datos reales (viento, temperatura, oleaje solo como apoyo).
-- Cada bloque horario debe incluir SIEMPRE: viento, oleaje, dirección del oleaje (en palabras), temperatura, condiciones y nivel.
-- Las "condiciones" deben ser una frase útil para el usuario sobre si es un buen momento para hacer SUP y por qué. Ej: "Muy tranquilo y seguro, ideal para aprender."
+- Cada bloque horario debe incluir SIEMPRE: viento, dirección del viento (en palabras y en grados), oleaje, dirección del oleaje (en palabras), temperatura, condiciones y nivel.
+- Las "condiciones" deben ser una frase útil para el usuario sobre si es un buen momento para hacer SUP y por qué.
 - Asigna "nivel" de SUP **solo en base al viento**:
   - Principiante: ≤ 8 km/h
   - Intermedio: entre 9 y 15 km/h
@@ -140,13 +145,12 @@ Reglas:
 - Agrega la clave "generado" con exactamente este valor: "{fecha_generacion}"
 """
 
-print("🤖 Generando JSON con datos reales desde ChatGPT...")
-
+print("🤖 Generando JSON con interpretación desde ChatGPT...")
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     raise ValueError("❌ OPENAI_API_KEY no está definido en el entorno.")
-client = openai.OpenAI(api_key=api_key)
 
+client = openai.OpenAI(api_key=api_key)
 response = client.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
@@ -157,12 +161,13 @@ response = client.chat.completions.create(
     max_tokens=2000
 )
 
+# Guardar respuesta final
 try:
     content = response.choices[0].message.content.strip()
     parsed = json.loads(content)
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(parsed, f, indent=2, ensure_ascii=False)
-    print("✅ Archivo data.json generado exitosamente con datos reales.")
+    print("✅ Archivo data.json generado exitosamente con datos reales e interpretación.")
 except Exception as e:
     print("❌ Error al guardar el JSON:", e)
     print("Respuesta cruda:", response.choices[0].message.content)
