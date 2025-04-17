@@ -6,7 +6,73 @@
   <title>Sup Status - La Herradura</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
   <style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        max-width: 90%;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        animation: fadeInSlide 0.3s ease;
+        color: #333;
+        position: relative;
+      }
+
+      .modal-content .detalle {
+        margin-bottom: 6px;
+        font-size: 0.95em;
+      }
+
+      .modal-content .hora {
+        font-weight: bold;
+        font-size: 1.2em;
+        margin-bottom: 10px;
+      }
+
+      .cerrar-modal {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        background: none;
+        border: none;
+        font-size: 1.2em;
+        cursor: pointer;
+      }
+    @keyframes fadeInSlide {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      background: linear-gradient(to right, #3a506b, #5bc0be);
+      color: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      animation: fadeInSlide 0.5s ease-out forwards;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
       background: #e0f7fa;
@@ -142,7 +208,6 @@
     <h1>SUP en La Herradura</h1>
     <div id="fecha"></div>
     <div id="horarios-sol"></div>
-    <div id="horarios-marea"></div>
     <div id="selector-dia">
       <button onclick="cambiarDia('hoy')">Hoy</button>
       <button onclick="cambiarDia('mañana')">Mañana</button>
@@ -153,6 +218,7 @@
     </div>
     <button onclick="compartirInfo()">📤 Compartir condiciones</button>
     <button onclick="alternarModo()">🌓 Modo oscuro</button>
+    <button onclick="verCondicionesActuales()">⏱️ ¿Puedo remar ahora?</button>
   </header>
 
   <div class="container" id="pronostico"></div>
@@ -164,102 +230,178 @@
   <div id="mapa"></div>
 
   <footer>
+    <div id="horarios-marea"></div>
     Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank">@__jokerguzman</a>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script>
-    let pronostico;
-    let diaActual = "hoy";
-    let marcadorViento;
+<script>
+  let pronostico;
+  let diaActual = "hoy";
+  let marcadorViento;
 
-    const lat = -29.983059;
-    const lon = -71.365225;
-    const mapa = L.map('mapa').setView([lat, lon], 17);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '© OpenStreetMap'
-    }).addTo(mapa);
+  const lat = -29.983059;
+  const lon = -71.365225;
+  const mapa = L.map('mapa').setView([lat, lon], 17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '© OpenStreetMap'
+  }).addTo(mapa);
 
-    function renderizarMapaConViento(viento, direccionGrados) {
-      const grados = parseInt(direccionGrados);
-      if (marcadorViento) marcadorViento.remove();
-      const iconoViento = L.divIcon({
-        className: '',
-        html: `<div class="arrow-animada" style="transform: rotate(${grados}deg);"></div>`
+  function renderizarMapaConViento(viento, direccionGrados) {
+    const grados = parseInt(direccionGrados);
+    if (marcadorViento) marcadorViento.remove();
+    const iconoViento = L.divIcon({
+      className: '',
+      html: `<div class="arrow-animada" style="transform: rotate(${grados}deg);"></div>`
+    });
+    marcadorViento = L.marker([lat, lon], { icon: iconoViento })
+      .addTo(mapa)
+      .bindPopup(`Dirección del viento: ${grados}°`);
+  }
+
+  function actualizarMapaDesdeSelector() {
+    const horaSeleccionada = document.getElementById("hora-selector").value;
+    const bloque = pronostico[diaActual].find(b => b.hora === horaSeleccionada);
+    if (bloque) renderizarMapaConViento(bloque.viento, bloque.direccionVientoGrados);
+  }
+
+  function renderizarPronostico(dia) {
+    diaActual = dia;
+
+    const hoy = new Date();
+    const fecha = new Date(hoy); // copia para no modificar el original
+    if (dia === "mañana") {
+      fecha.setDate(hoy.getDate() + 1);
+    }
+    mostrarHorariosSol(fecha);  // 👈 ¡Aquí llamamos a la función!
+
+    const contenedor = document.getElementById("pronostico");
+    const selectorHoras = document.getElementById("hora-selector");
+    contenedor.innerHTML = "";
+    selectorHoras.innerHTML = "";
+
+    pronostico[dia].forEach((item, i) => {
+      const option = document.createElement("option");
+      option.value = item.hora;
+      option.textContent = item.hora;
+      selectorHoras.appendChild(option);
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.animationDelay = `${i * 0.1}s`;
+      card.style.animationName = "fadeInSlide";
+      card.innerHTML = `
+        <div class="hora">${item.hora} Hrs</div>
+        <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento} → ${item.direccionViento}</div>
+        <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje} → 🌐 ${item.direccionOleaje}</div>
+        <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
+        <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
+        <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>`;
+      contenedor.appendChild(card);
+
+      if (i === 0) renderizarMapaConViento(item.viento, item.direccionVientoGrados);
+    });
+  }
+
+  function cambiarDia(valor) {
+    document.querySelectorAll('#selector-dia button').forEach(b => b.classList.remove('activo'));
+    document.querySelector(`#selector-dia button[onclick="cambiarDia('${valor}')"]`).classList.add('activo');
+    renderizarPronostico(valor);
+  }
+
+  function alternarModo() {
+    document.body.classList.toggle("oscuro");
+    localStorage.setItem("modoOscuro", document.body.classList.contains("oscuro"));
+  }
+
+  function compartirInfo() {
+    const texto = 'Revisa las condiciones en SUP La Herradura: ' + window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: 'SUP en La Herradura', text: texto, url: window.location.href });
+    } else {
+      alert("Tu navegador no soporta la función de compartir.");
+    }
+  }
+  function mostrarHorariosSol(fechaBase) {
+      const solContainer = document.getElementById("horarios-sol");
+      const { sunrise, sunset } = SunCalc.getTimes(fechaBase, lat, lon);
+
+      const formatoHora = hora => hora.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+
+      solContainer.textContent = `🌇 Salida Sol: ${formatoHora(sunrise)}  🌅 Atardecer: ${formatoHora(sunset)}`;
+    }
+
+  function mostrarHorariosMarea(data) {
+    const mareaContainer = document.getElementById("horarios-marea");
+    if (!data.mareas) return;
+
+    const iconos = {
+      alta: "🌊⬆️",
+      baja: "🌊⬇️"
+    };
+
+    const texto = data.mareas
+      .slice(0, 4)
+      .map(m => `${iconos[m.tipo] || "🌊"} ${m.tipo} ${m.hora}`)
+      .join(" · ");
+
+    mareaContainer.textContent = texto;
+  }
+
+  if (localStorage.getItem("modoOscuro") === "true") {
+    document.body.classList.add("oscuro");
+  }
+
+  function verCondicionesActuales() {
+      const ahora = new Date();
+      const horaActual = ahora.getHours();
+
+      const bloques = pronostico["hoy"];
+      let bloqueActual = bloques.find(b => {
+        const h = parseInt(b.hora.split(":")[0]);
+        return h >= horaActual;
       });
-      marcadorViento = L.marker([lat, lon], { icon: iconoViento })
-        .addTo(mapa)
-        .bindPopup(`Dirección del viento: ${grados}°`);
+
+      if (!bloqueActual) bloqueActual = bloques[bloques.length - 1];
+
+      const modal = document.getElementById("modal-actual");
+      const contenido = document.getElementById("modal-contenido");
+
+      contenido.innerHTML = `
+        <button onclick="cerrarModal()" class="cerrar-modal">✖</button>
+        <div class="hora">Ahora (aprox ${bloqueActual.hora} Hrs)</div>
+        <div class="detalle"><strong>🌬️ Viento:</strong> ${bloqueActual.viento} → ${bloqueActual.direccionViento}</div>
+        <div class="detalle"><strong>🌊 Oleaje:</strong> ${bloqueActual.oleaje} → 🌐 ${bloqueActual.direccionOleaje}</div>
+        <div class="detalle"><strong>🌡️ Temperatura:</strong> ${bloqueActual.temperatura}</div>
+        <div class="detalle"><strong>🔎 Condiciones:</strong> ${bloqueActual.condiciones}</div>
+        <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${bloqueActual.nivel}</div>`;
+
+      modal.style.display = "flex";
     }
 
-    function actualizarMapaDesdeSelector() {
-      const horaSeleccionada = document.getElementById("hora-selector").value;
-      const bloque = pronostico[diaActual].find(b => b.hora === horaSeleccionada);
-      if (bloque) renderizarMapaConViento(bloque.viento, bloque.direccionVientoGrados);
+    function cerrarModal() {
+      document.getElementById("modal-actual").style.display = "none";
     }
-
-    function renderizarPronostico(dia) {
-      diaActual = dia;
-      const contenedor = document.getElementById("pronostico");
-      const selectorHoras = document.getElementById("hora-selector");
-      contenedor.innerHTML = "";
-      selectorHoras.innerHTML = "";
-
-      pronostico[dia].forEach((item, i) => {
-        const option = document.createElement("option");
-        option.value = item.hora;
-        option.textContent = item.hora;
-        selectorHoras.appendChild(option);
-
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <div class="hora">${item.hora} Hrs</div>
-          <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento} → ${item.direccionViento}</div>
-          <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje} → 🌐 ${item.direccionOleaje}</div>
-          <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
-          <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
-          <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>`;
-        contenedor.appendChild(card);
-
-        if (i === 0) renderizarMapaConViento(item.viento, item.direccionVientoGrados);
-      });
-    }
-
-    function cambiarDia(valor) {
-      document.querySelectorAll('#selector-dia button').forEach(b => b.classList.remove('activo'));
-      document.querySelector(`#selector-dia button[onclick="cambiarDia('${valor}')"]`).classList.add('activo');
-      renderizarPronostico(valor);
-    }
-
-    function alternarModo() {
-      document.body.classList.toggle("oscuro");
-      localStorage.setItem("modoOscuro", document.body.classList.contains("oscuro"));
-    }
-
-    function compartirInfo() {
-      const texto = 'Revisa las condiciones en SUP La Herradura: ' + window.location.href;
-      if (navigator.share) {
-        navigator.share({ title: 'SUP en La Herradura', text: texto, url: window.location.href });
-      } else {
-        alert("Tu navegador no soporta la función de compartir.");
+  
+  fetch("data.json")
+    .then(res => res.json())
+    .then(data => {
+      pronostico = data;
+      renderizarPronostico("hoy");
+      mostrarHorariosSol(new Date());
+      if (data.generado) {
+        document.getElementById("generado-el").textContent = `📅 Datos generados: ${data.generado}`;
       }
-    }
+      mostrarHorariosMarea(data);
+    });
+</script>
 
-    if (localStorage.getItem("modoOscuro") === "true") {
-      document.body.classList.add("oscuro");
-    }
+<div id="modal-actual" class="modal-overlay" style="display: none;">
+  <div class="modal-content" id="modal-contenido">
+    <button onclick="cerrarModal()" class="cerrar-modal">✖</button>
+  </div>
+</div>
 
-    fetch("data.json")
-      .then(res => res.json())
-      .then(data => {
-        pronostico = data;
-        renderizarPronostico("hoy");
-        if (data.generado) {
-          document.getElementById("generado-el").textContent = `📅 Datos generados: ${data.generado}`;
-        }
-      });
-  </script>
 </body>
 </html>
