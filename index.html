@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sup Status - La Herradura</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -19,11 +20,15 @@
       padding: 20px;
       border-bottom: 4px solid #0096c7;
     }
+    header img.logo {
+      max-width: 120px;
+      margin-bottom: 10px;
+    }
     h1 {
       margin: 0;
       font-size: 1.8em;
     }
-    #fecha, #horarios-sol, #horarios-marea {
+    #fecha, #horarios-sol, #horarios-marea, #generado-el {
       font-size: 0.9em;
       color: #d0f0ff;
       margin-top: 5px;
@@ -59,6 +64,23 @@
       font-size: 0.95em;
       margin-bottom: 4px;
     }
+    #mapa {
+      height: 300px;
+      margin: 20px auto;
+      border-radius: 12px;
+      max-width: 600px;
+    }
+    #mapa-controls {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    select {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      border-radius: 10px;
+      border: none;
+      background: #ffffffcc;
+    }
     button {
       background: white;
       color: #0077b6;
@@ -83,6 +105,14 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    .arrow-animada {
+      width: 30px;
+      height: 30px;
+      background-image: url('data:image/svg+xml,%3Csvg viewBox="0 0 24 24" fill="%230077b6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M12 2L15 8H13V22H11V8H9L12 2Z"/%3E%3C/svg%3E');
+      background-size: contain;
+      background-repeat: no-repeat;
+      transition: transform 0.4s ease-in-out;
+    }
     body.oscuro {
       background: #121212;
       color: #e0e0e0;
@@ -104,157 +134,132 @@
       background: #0096c7;
       color: white;
     }
-
-    #resumen-mareas-footer {
-      white-space: nowrap;
-      overflow-x: auto;
-      padding: 5px 0;
-      text-align: center;
-    }
-    #resumen-mareas-footer::-webkit-scrollbar {
-      height: 4px;
-    }
-    #resumen-mareas-footer::-webkit-scrollbar-thumb {
-      background: #0077b6;
-      border-radius: 4px;
-    }
   </style>
 </head>
 <body>
   <header>
+    <img src="logosupstatus.png" alt="SupStatus logo" class="logo">
     <h1>SUP en La Herradura</h1>
     <div id="fecha"></div>
     <div id="horarios-sol"></div>
+    <div id="horarios-marea"></div>
     <div id="selector-dia">
       <button onclick="cambiarDia('hoy')">Hoy</button>
       <button onclick="cambiarDia('mañana')">Mañana</button>
     </div>
-    <div id="generado-el" style="font-size: 0.85em; color: #d0f0ff; margin-top: 6px;"></div>
+    <div id="generado-el"></div>
     <div class="nota-aviso">
       ⚠️ Esta información es estimada. Usa chaleco salvavidas, conoce tus límites y navega con responsabilidad.
     </div>
     <button onclick="compartirInfo()">📤 Compartir condiciones</button>
     <button onclick="alternarModo()">🌓 Modo oscuro</button>
   </header>
+
   <div class="container" id="pronostico"></div>
-  <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+
+  <div id="mapa-controls">
+    <label for="hora-selector">🕒 Hora para el viento:</label>
+    <select id="hora-selector" onchange="actualizarMapaDesdeSelector()"></select>
+  </div>
+  <div id="mapa"></div>
+
+  <footer>
+    Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank">@__jokerguzman</a>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const contenedor = document.getElementById("pronostico");
-    const mensajeDia = document.createElement("p");
-    mensajeDia.style.textAlign = "center";
-    mensajeDia.style.fontSize = "0.95em";
-    mensajeDia.style.color = "#555";
-    document.querySelector(".container").prepend(mensajeDia);
-    const fechaEl = document.getElementById("fecha");
-    const solEl = document.getElementById("horarios-sol");
-    const lat = -29.958055;
-    const lng = -71.343611;
-    const opciones = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    let pronostico;
+    let diaActual = "hoy";
+    let marcadorViento;
+
+    const lat = -29.983059;
+    const lon = -71.365225;
+    const mapa = L.map('mapa').setView([lat, lon], 17);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '© OpenStreetMap'
+    }).addTo(mapa);
+
+    function renderizarMapaConViento(viento, direccionGrados) {
+      const grados = parseInt(direccionGrados);
+      if (marcadorViento) marcadorViento.remove();
+      const iconoViento = L.divIcon({
+        className: '',
+        html: `<div class="arrow-animada" style="transform: rotate(${grados}deg);"></div>`
+      });
+      marcadorViento = L.marker([lat, lon], { icon: iconoViento })
+        .addTo(mapa)
+        .bindPopup(`Dirección del viento: ${grados}°`);
+    }
+
+    function actualizarMapaDesdeSelector() {
+      const horaSeleccionada = document.getElementById("hora-selector").value;
+      const bloque = pronostico[diaActual].find(b => b.hora === horaSeleccionada);
+      if (bloque) renderizarMapaConViento(bloque.viento, bloque.direccionVientoGrados);
+    }
+
+    function renderizarPronostico(dia) {
+      diaActual = dia;
+      const contenedor = document.getElementById("pronostico");
+      const selectorHoras = document.getElementById("hora-selector");
+      contenedor.innerHTML = "";
+      selectorHoras.innerHTML = "";
+
+      pronostico[dia].forEach((item, i) => {
+        const option = document.createElement("option");
+        option.value = item.hora;
+        option.textContent = item.hora;
+        selectorHoras.appendChild(option);
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="hora">${item.hora} Hrs</div>
+          <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento} → ${item.direccionViento}</div>
+          <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje} → 🌐 ${item.direccionOleaje}</div>
+          <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
+          <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
+          <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>`;
+        contenedor.appendChild(card);
+
+        if (i === 0) renderizarMapaConViento(item.viento, item.direccionVientoGrados);
+      });
+    }
+
+    function cambiarDia(valor) {
+      document.querySelectorAll('#selector-dia button').forEach(b => b.classList.remove('activo'));
+      document.querySelector(`#selector-dia button[onclick="cambiarDia('${valor}')"]`).classList.add('activo');
+      renderizarPronostico(valor);
+    }
+
+    function alternarModo() {
+      document.body.classList.toggle("oscuro");
+      localStorage.setItem("modoOscuro", document.body.classList.contains("oscuro"));
+    }
 
     function compartirInfo() {
-      const fecha = fechaEl.textContent;
-      const resumen = document.querySelector(".container p")?.textContent || "Revisa las condiciones en SUP La Herradura.";
-      const texto = `${fecha}\n${resumen}`;
+      const texto = 'Revisa las condiciones en SUP La Herradura: ' + window.location.href;
       if (navigator.share) {
-        navigator.share({ title: 'SUP en La Herradura', text: texto, url: window.location.href })
-          .catch(err => console.error('Error al compartir:', err));
+        navigator.share({ title: 'SUP en La Herradura', text: texto, url: window.location.href });
       } else {
         alert("Tu navegador no soporta la función de compartir.");
       }
     }
 
-    function actualizarHorariosSol(fecha) {
-      const times = SunCalc.getTimes(fecha, lat, lng);
-      const salida = times.sunrise.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-      const puesta = times.sunset.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-      solEl.textContent = `🌞 Sale el sol: ${salida} | 🌇 Se esconde: ${puesta}`;
-
-      const mareas = window.dataPronostico?.mareas || [];
-      const resumenMareas = mareas.map(m => `🌊 <strong>Marea ${m.tipo}</strong>: ${m.hora}`).join(" | ");
-      const resumenFooter = document.getElementById("resumen-mareas-footer");
-      resumenFooter.innerHTML = resumenMareas;
+    if (localStorage.getItem("modoOscuro") === "true") {
+      document.body.classList.add("oscuro");
     }
 
-    function obtenerMensaje(dia) {
-      return dia === "mañana"
-        ? "🌤️ Previsión para mañana en La Herradura."
-        : "🌊 Condiciones para hoy en La Herradura.";
-    }
-
-    function getHorarioLabel(hora) {
-      if (hora >= 6 && hora < 9) return '🌅 Amanecer';
-      if (hora >= 9 && hora < 12) return '🌤️ Mañana';
-      if (hora >= 12 && hora < 15) return '☀️ Mediodía';
-      if (hora >= 15 && hora < 18) return '☀️ Tarde';
-      if (hora >= 18 && hora < 21) return '🌆 Atardecer';
-      return '🌙 Noche';
-    }
-
-    function renderizarPronostico(dia) {
-      const ejemploData = window.dataPronostico && window.dataPronostico[dia] ? window.dataPronostico[dia] : [];
-      contenedor.innerHTML = "";
-      ejemploData.forEach(item => {
-        const horaNum = parseInt(item.hora.split(":" )[0], 10);
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <div class="hora">${getHorarioLabel(horaNum)} (${item.hora} Hrs)</div>
-          <div class="detalle"><strong>🌬️ Viento:</strong> ${item.viento}</div>
-          <div class="detalle"><strong>🌊 Oleaje:</strong> ${item.oleaje} <span style='font-weight:bold;'>→</span> <span title='Dirección del oleaje'>🌐 ${item.direccionOleaje}</span></div>
-          <div class="detalle"><strong>🌡️ Temperatura:</strong> ${item.temperatura}</div>
-          <div class="detalle"><strong>🔎 Condiciones:</strong> ${item.condiciones}</div>
-          <div class="detalle"><strong>🎯 Nivel recomendado:</strong> ${item.nivel}</div>`;
-        contenedor.appendChild(card);
-      });
-    }
-
-    function cambiarDia(value) {
-      const nuevaFecha = new Date();
-      if (value === "mañana") nuevaFecha.setDate(nuevaFecha.getDate() + 1);
-      actualizarHorariosSol(nuevaFecha);
-      document.querySelectorAll("#selector-dia button").forEach(btn => {
-        btn.classList.remove("activo");
-        if (btn.textContent.toLowerCase().includes(value)) {
-          btn.focus();
-          btn.classList.add("activo");
-        }
-      });
-      fechaEl.textContent = nuevaFecha.toLocaleDateString('es-CL', opciones);
-      mensajeDia.textContent = obtenerMensaje(value);
-      renderizarPronostico(value);
-    }
-
-    const hoyFecha = new Date();
     fetch("data.json")
       .then(res => res.json())
       .then(data => {
-        window.dataPronostico = data;
-        actualizarHorariosSol(hoyFecha);
-        fechaEl.textContent = hoyFecha.toLocaleDateString('es-CL', opciones);
-        mensajeDia.textContent = obtenerMensaje("hoy");
+        pronostico = data;
         renderizarPronostico("hoy");
-        const generadoEl = document.getElementById("generado-el");
         if (data.generado) {
-          generadoEl.textContent = `📅 Datos generados: ${data.generado}`;
+          document.getElementById("generado-el").textContent = `📅 Datos generados: ${data.generado}`;
         }
-      })
-      .catch(err => {
-        console.error("No se pudo cargar data.json", err);
-        mensajeDia.textContent = "No se pudo cargar la información del pronóstico.";
       });
-
-      function alternarModo() {
-        document.body.classList.toggle("oscuro");
-        localStorage.setItem("modoOscuro", document.body.classList.contains("oscuro"));
-      }
-      if (localStorage.getItem("modoOscuro") === "true") {
-        document.body.classList.add("oscuro");
-      }
-
   </script>
-  <footer>
-    <div id="resumen-mareas-footer" style="font-size: 0.8em; margin-bottom: 8px;"></div>
-    Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank">@__jokerguzman</a>
-  </footer>
 </body>
 </html>
