@@ -8,6 +8,15 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
   <style>
+    body.oscuro .modal-content {
+      background: #2c3e50;
+      color: #f0f0f0;
+    }
+
+    body.oscuro .cerrar-modal {
+      color: #f0f0f0;
+    }
+
     .modal-overlay {
         position: fixed;
         top: 0;
@@ -157,9 +166,11 @@
       margin: 5px;
       cursor: pointer;
     }
-    .activo {
-      background: #0096c7;
+    #selector-dia button.activo {
+      background: #0077b6;
       color: white;
+      border: 2px solid #0096c7;
+      box-shadow: 0 0 6px rgba(0, 119, 182, 0.5);
     }
     footer {
       text-align: center;
