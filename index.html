@@ -7,6 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ Service Worker registrado'))
+        .catch(err => console.warn('❌ Error registrando Service Worker:', err));
+    }
+  </script>
   <style>
     body.oscuro .modal-content {
       background: #2c3e50;
