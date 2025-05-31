@@ -2,164 +2,156 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "2.9 km/h",
+      "viento": "7.1 km/h",
       "direccionViento": "Este",
-      "direccionVientoGrados": 97,
-      "oleaje": "1.34 m",
+      "direccionVientoGrados": 105,
+      "oleaje": "2.3 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.7°C",
-      "condiciones": "Con viento suave del Este y oleaje moderado del Suroeste, es un momento tranquilo y seguro para principiantes.",
+      "temperatura": "9.2°C",
+      "condiciones": "Con viento moderado del Este, oleaje de 2.3 m y temperatura fresca, se recomienda precaución para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "2.3 km/h",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 162,
-      "oleaje": "1.26 m",
+      "viento": "4.5 km/h",
+      "direccionViento": "Este",
+      "direccionVientoGrados": 104,
+      "oleaje": "2.28 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "10.4°C",
-      "condiciones": "El viento ligero del Sur y oleaje moderado del Suroeste hacen que sea un buen momento para remar, especialmente para principiantes.",
+      "temperatura": "10.8°C",
+      "condiciones": "Con viento ligero del Este, oleaje de 2.28 m y temperatura fresca, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "12:00",
-      "viento": "7.2 km/h",
+      "viento": "6.1 km/h",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 267,
-      "oleaje": "1.22 m",
+      "direccionVientoGrados": 273,
+      "oleaje": "2.3 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.9°C",
-      "condiciones": "Con viento moderado del Oeste y oleaje suave del Suroeste, es un momento adecuado para remar, apto para todos los niveles.",
+      "temperatura": "15.7°C",
+      "condiciones": "Con viento moderado del Oeste, oleaje de 2.3 m y temperatura agradable, es adecuado para todos los niveles.",
       "nivel": "Principiante"
     },
     {
       "hora": "15:00",
-      "viento": "10.9 km/h",
+      "viento": "8.3 km/h",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 276,
-      "oleaje": "1.18 m",
+      "direccionVientoGrados": 272,
+      "oleaje": "2.3 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.7°C",
-      "condiciones": "Con viento moderado a fuerte del Oeste y oleaje suave del Suroeste, es un momento desafiante, más adecuado para niveles intermedios a avanzados.",
-      "nivel": "Intermedio"
+      "temperatura": "15.7°C",
+      "condiciones": "Con viento moderado del Oeste, oleaje de 2.3 m y temperatura agradable, se recomienda precaución para principiantes.",
+      "nivel": "Principiante"
     },
     {
       "hora": "18:00",
-      "viento": "4.7 km/h",
+      "viento": "3.7 km/h",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 261,
-      "oleaje": "1.22 m",
+      "direccionVientoGrados": 259,
+      "oleaje": "2.3 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.9°C",
-      "condiciones": "Con viento suave del Oeste y oleaje suave del Suroeste, es un momento tranquilo y seguro para remar, ideal para principiantes.",
+      "temperatura": "13.5°C",
+      "condiciones": "Con viento ligero del Oeste, oleaje de 2.3 m y temperatura fresca, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "21:00",
-      "viento": "0.8 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 243,
-      "oleaje": "1.28 m",
+      "viento": "1.5 km/h",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 284,
+      "oleaje": "2.26 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "11.9°C",
-      "condiciones": "Con viento casi nulo del Suroeste y oleaje moderado del Suroeste, es un momento tranquilo y seguro para remar, perfecto para principiantes.",
+      "temperatura": "11.7°C",
+      "condiciones": "Con viento casi en calma del Oeste, oleaje de 2.26 m y temperatura fresca, es ideal para principiantes.",
       "nivel": "Principiante"
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "4.8 km/h",
-      "direccionViento": "Este",
-      "direccionVientoGrados": 103,
-      "oleaje": "1.82 m",
+      "viento": "1.1 km/h",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 162,
+      "oleaje": "2.04 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.6°C",
-      "condiciones": "Con viento suave del Este y oleaje moderado del Suroeste, es un momento tranquilo y seguro para principiantes.",
+      "temperatura": "11.6°C",
+      "condiciones": "Con viento muy ligero del Sur, oleaje de 2.04 m y temperatura fresca, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "5.1 km/h",
+      "viento": "1.4 km/h",
       "direccionViento": "Este",
-      "direccionVientoGrados": 98,
-      "oleaje": "2.04 m",
+      "direccionVientoGrados": 90,
+      "oleaje": "1.94 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "11.0°C",
-      "condiciones": "El viento ligero del Este y oleaje moderado del Suroeste hacen que sea un buen momento para remar, especialmente para principiantes.",
+      "temperatura": "12.1°C",
+      "condiciones": "Con viento muy ligero del Este, oleaje de 1.94 m y temperatura fresca, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "12:00",
-      "viento": "5.2 km/h",
+      "viento": "4.8 km/h",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 286,
-      "oleaje": "2.2 m",
+      "direccionVientoGrados": 257,
+      "oleaje": "1.84 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.8°C",
-      "condiciones": "Con viento suave del Oeste y oleaje moderado del Suroeste, es un momento tranquilo y seguro para remar, ideal para principiantes.",
+      "temperatura": "14.8°C",
+      "condiciones": "Con viento moderado del Oeste, oleaje de 1.84 m y temperatura agradable, es adecuado para todos los niveles.",
       "nivel": "Principiante"
     },
     {
       "hora": "15:00",
-      "viento": "6.9 km/h",
+      "viento": "7.6 km/h",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 279,
-      "oleaje": "2.4 m",
+      "direccionVientoGrados": 265,
+      "oleaje": "1.72 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.5°C",
-      "condiciones": "Con viento moderado del Oeste y oleaje moderado del Suroeste, es un momento adecuado para remar, apto para todos los niveles.",
+      "temperatura": "16.0°C",
+      "condiciones": "Con viento moderado del Oeste, oleaje de 1.72 m y temperatura agradable, se recomienda precaución para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "18:00",
-      "viento": "2.5 km/h",
+      "viento": "5.2 km/h",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 278,
-      "oleaje": "2.54 m",
+      "direccionVientoGrados": 254,
+      "oleaje": "1.6 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.6°C",
-      "condiciones": "Con viento suave del Oeste y oleaje moderado del Suroeste, es un momento tranquilo y seguro para remar, ideal para principiantes.",
+      "temperatura": "14.9°C",
+      "condiciones": "Con viento moderado del Oeste, oleaje de 1.6 m y temperatura agradable, es adecuado para todos los niveles.",
       "nivel": "Principiante"
     },
     {
       "hora": "21:00",
-      "viento": "1.3 km/h",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 34,
-      "oleaje": "2.52 m",
+      "viento": "3.0 km/h",
+      "direccionViento": "Este",
+      "direccionVientoGrados": 104,
+      "oleaje": "1.5 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.0°C",
-      "condiciones": "Con viento ligero del Noreste y oleaje moderado del Suroeste, es un momento tranquilo y seguro para remar, ideal para principiantes.",
+      "temperatura": "13.5°C",
+      "condiciones": "Con viento ligero del Este, oleaje de 1.5 m y temperatura fresca, es un buen momento para principiantes.",
       "nivel": "Principiante"
     }
   ],
   "mareas": [
     {
       "tipo": "alta",
-      "hora": "03:25"
+      "hora": "05:17"
     },
     {
       "tipo": "baja",
-      "hora": "08:49"
+      "hora": "10:37"
     },
     {
       "tipo": "alta",
-      "hora": "15:32"
+      "hora": "17:18"
     },
     {
       "tipo": "baja",
-      "hora": "22:27"
-    },
-    {
-      "tipo": "alta",
-      "hora": "04:20"
-    },
-    {
-      "tipo": "baja",
-      "hora": "09:41"
+      "hora": "00:22"
     }
   ],
-  "generado": "2025-05-29 03:16:40"
+  "generado": "2025-05-31 03:14:53"
 }
