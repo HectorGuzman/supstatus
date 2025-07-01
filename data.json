@@ -2,156 +2,74 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "9.4 km/h",
+      "viento": "5.2 km/h",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 187,
-      "oleaje": "1.58 m",
+      "direccionVientoGrados": 168,
+      "oleaje": "1.38 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.4°C",
-      "condiciones": "Con viento moderado del Sur y oleaje moderado del Suroeste, es un buen momento para practicar SUP con precaución.",
-      "nivel": "Intermedio"
-    },
-    {
-      "hora": "09:00",
-      "viento": "7.4 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 203,
-      "oleaje": "1.52 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "12.2°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "12.1°C",
+      "condiciones": "Con viento suave del Sur y oleaje moderado, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "12:00",
-      "viento": "7.2 km/h",
+      "viento": "6.9 km/h",
       "direccionViento": "Suroeste",
-      "direccionVientoGrados": 217,
-      "oleaje": "1.48 m",
+      "direccionVientoGrados": 231,
+      "oleaje": "1.42 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.2°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "15:00",
-      "viento": "7.7 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 242,
-      "oleaje": "1.5 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "13.0°C",
+      "condiciones": "Con viento suave del Suroeste y oleaje moderado, es adecuado para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "18:00",
-      "viento": "4.9 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 216,
-      "oleaje": "1.52 m",
+      "viento": "1.1 km/h",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 288,
+      "oleaje": "1.48 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "21:00",
-      "viento": "4.8 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 207,
-      "oleaje": "1.5 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.6°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "14.3°C",
+      "condiciones": "Con viento casi nulo del Oeste y oleaje moderado, es perfecto para principiantes.",
       "nivel": "Principiante"
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "7.6 km/h",
+      "viento": "4.9 km/h",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 180,
-      "oleaje": "1.4 m",
+      "direccionVientoGrados": 197,
+      "oleaje": "1.44 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.0°C",
-      "condiciones": "Con viento suave del Sur y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "09:00",
-      "viento": "7.3 km/h",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 189,
-      "oleaje": "1.4 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "11.5°C",
-      "condiciones": "Con viento suave del Sur y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "13.6°C",
+      "condiciones": "Con viento suave del Sur y oleaje moderado, es un buen momento para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "12:00",
-      "viento": "4.3 km/h",
+      "viento": "4.7 km/h",
       "direccionViento": "Suroeste",
-      "direccionVientoGrados": 204,
-      "oleaje": "1.44 m",
+      "direccionVientoGrados": 247,
+      "oleaje": "1.4 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.8°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "15:00",
-      "viento": "5.3 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 242,
-      "oleaje": "1.46 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "14.1°C",
+      "condiciones": "Con viento suave del Suroeste y oleaje moderado, es adecuado para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "18:00",
-      "viento": "3.3 km/h",
+      "viento": "2.9 km/h",
       "direccionViento": "Suroeste",
-      "direccionVientoGrados": 229,
-      "oleaje": "1.48 m",
+      "direccionVientoGrados": 240,
+      "oleaje": "1.42 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
-      "condiciones": "Con viento suave del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "21:00",
-      "viento": "4.0 km/h",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 175,
-      "oleaje": "1.5 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.4°C",
-      "condiciones": "Con viento suave del Sur y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "14.6°C",
+      "condiciones": "Con viento suave del Suroeste y oleaje moderado, es adecuado para principiantes.",
       "nivel": "Principiante"
     }
   ],
   "mareas": [
-    {
-      "tipo": "alta",
-      "hora": "05:45"
-    },
-    {
-      "tipo": "baja",
-      "hora": "11:18"
-    },
-    {
-      "tipo": "alta",
-      "hora": "17:42"
-    },
-    {
-      "tipo": "baja",
-      "hora": "00:33"
-    },
     {
       "tipo": "alta",
       "hora": "06:38"
@@ -159,7 +77,15 @@
     {
       "tipo": "baja",
       "hora": "12:16"
+    },
+    {
+      "tipo": "alta",
+      "hora": "18:28"
+    },
+    {
+      "tipo": "baja",
+      "hora": "01:17"
     }
   ],
-  "generado": "2025-06-30 03:18:36"
+  "generado": "2025-07-01 03:18:14"
 }
