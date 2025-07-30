@@ -2,73 +2,139 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "6.7 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 216,
-      "oleaje": "1.1 m",
+      "viento": "6.6 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 41,
+      "oleaje": "1.02 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "13.5°C",
-      "condiciones": "Con viento suave del suroeste y oleaje moderado hacia el oeste, es un buen momento para principiantes.",
+      "temperatura": "14.2°C",
+      "condiciones": "Con viento suave y oleaje moderado, ideal para principiantes.",
       "nivel": "Principiante"
+    },
+    {
+      "hora": "09:00",
+      "viento": "11.9 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 5,
+      "oleaje": "1.0 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "13.7°C",
+      "condiciones": "Con viento moderado y oleaje ligero, apto para todos los niveles.",
+      "nivel": "Intermedio"
     },
     {
       "hora": "12:00",
-      "viento": "7.3 km/h",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 303,
-      "oleaje": "1.1 m",
+      "viento": "14.5 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 48,
+      "oleaje": "1.02 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "14.4°C",
-      "condiciones": "Con viento moderado del noroeste y oleaje constante hacia el oeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
+      "temperatura": "14.1°C",
+      "condiciones": "Con viento moderado y oleaje moderado, recomendado para niveles intermedios.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "15:00",
+      "viento": "4.7 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 23,
+      "oleaje": "1.06 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "15.1°C",
+      "condiciones": "Con viento ligero y oleaje moderado, perfecto para todos los niveles.",
+      "nivel": "Intermedio"
     },
     {
       "hora": "18:00",
-      "viento": "5.0 km/h",
+      "viento": "8.1 km/h",
       "direccionViento": "Norte",
       "direccionVientoGrados": 339,
-      "oleaje": "1.08 m",
+      "oleaje": "1.16 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "14.2°C",
-      "condiciones": "Con viento ligero del norte y oleaje moderado hacia el oeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
+      "temperatura": "14.8°C",
+      "condiciones": "Con viento suave y oleaje moderado, apto para todos los niveles.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "21:00",
+      "viento": "9.3 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 36,
+      "oleaje": "1.32 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "14.5°C",
+      "condiciones": "Con viento suave y oleaje moderado, recomendado para niveles intermedios.",
+      "nivel": "Intermedio"
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "9.7 km/h",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 360,
-      "oleaje": "1.02 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.6°C",
-      "condiciones": "Con viento moderado del norte y oleaje suave hacia el suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
+      "viento": "14.3 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 45,
+      "oleaje": "1.72 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "14.9°C",
+      "condiciones": "Con viento moderado y oleaje alto, recomendado para niveles intermedios.",
+      "nivel": "Intermedio"
     },
     {
       "hora": "09:00",
-      "viento": "10.2 km/h",
+      "viento": "7.6 km/h",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 45,
+      "oleaje": "1.84 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "14.7°C",
+      "condiciones": "Con viento suave y oleaje alto, apto para todos los niveles.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "12:00",
+      "viento": "14.2 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 351,
+      "oleaje": "2.06 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "15.2°C",
+      "condiciones": "Con viento moderado y oleaje alto, recomendado para niveles intermedios.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "15:00",
+      "viento": "28.0 km/h",
       "direccionViento": "Noroeste",
-      "direccionVientoGrados": 312,
-      "oleaje": "1.02 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "14.2°C",
-      "condiciones": "Con viento moderado del noroeste y oleaje suave hacia el suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
+      "direccionVientoGrados": 332,
+      "oleaje": "2.36 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "15.0°C",
+      "condiciones": "Con viento fuerte y oleaje alto, apto para niveles avanzados.",
+      "nivel": "Avanzado"
     },
     {
       "hora": "18:00",
-      "viento": "6.9 km/h",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 28,
-      "oleaje": "1.14 m",
+      "viento": "20.9 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 2,
+      "oleaje": "2.66 m",
+      "direccionOleaje": "Oeste",
+      "temperatura": "14.5°C",
+      "condiciones": "Con viento fuerte y oleaje alto, recomendado para niveles avanzados.",
+      "nivel": "Avanzado"
+    },
+    {
+      "hora": "21:00",
+      "viento": "18.8 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 5,
+      "oleaje": "2.9 m",
       "direccionOleaje": "Oeste",
       "temperatura": "14.4°C",
-      "condiciones": "Con viento moderado del noreste y oleaje moderado hacia el oeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
+      "condiciones": "Con viento fuerte y oleaje alto, apto para niveles avanzados.",
+      "nivel": "Avanzado"
     }
   ],
   "mareas": [],
-  "generado": "2025-07-29 03:22:05"
+  "generado": "2025-07-30 03:22:29"
 }
