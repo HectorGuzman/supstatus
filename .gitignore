@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+backend/node_modules/
+backend/dist/
+
+# Env files
+.env
+backend/.env
+backend/.env.*.local

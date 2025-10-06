@@ -158,6 +158,47 @@ h1 {
   justify-content: flex-end;
 }
 
+.support-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.support-copy {
+  opacity: 0.85;
+}
+
+.bmc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 197, 66, 0.25), rgba(255, 115, 161, 0.35));
+  border: 1px solid rgba(255, 197, 66, 0.55);
+  color: #231942;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bmc-button span {
+  font-size: 1.1rem;
+}
+
+.bmc-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(255, 197, 66, 0.28);
+}
+
+.bmc-button:focus-visible {
+  outline: 3px solid rgba(255, 197, 66, 0.4);
+  outline-offset: 2px;
+}
+
 button {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
@@ -700,6 +741,11 @@ body.oscuro .cerrar-modal {
     width: 100%;
     justify-content: space-between;
     border-radius: 14px;
+  }
+
+  .support-row {
+    justify-content: center;
+    text-align: center;
   }
 
   .branding {
