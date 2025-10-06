@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sup-experience-cache-v1';
+const CACHE_NAME = 'sup-experience-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -32,7 +32,32 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  const { request } = event;
+
+  const isNavigation = request.mode === 'navigate';
+  const isHTML = request.destination === 'document';
+  const isData = request.url.endsWith('/data.json');
+
+  if (isNavigation || isHTML || isData) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(request).then(response => response || fetch(request).then(networkResponse => {
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        const clone = networkResponse.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+      }
+      return networkResponse;
+    }))
   );
 });
