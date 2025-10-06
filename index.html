@@ -127,6 +127,14 @@
       if (bloque) renderizarMapaConViento(bloque.viento, bloque.direccionVientoGrados);
     }
 
+    function actualizarFechaVisor(fecha, etiqueta) {
+      const fechaElemento = document.getElementById("fecha");
+      if (!fechaElemento) return;
+      const formatoFecha = fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+      const capitalizada = formatoFecha.charAt(0).toUpperCase() + formatoFecha.slice(1);
+      fechaElemento.innerHTML = `<strong>📅 ${etiqueta}:</strong> ${capitalizada}`;
+    }
+
     function renderizarPronostico(dia) {
       if (!pronostico || !pronostico[dia]) return;
       diaActual = dia;
@@ -141,6 +149,7 @@
       if (dia === "mañana") {
         fecha.setDate(hoy.getDate() + 1);
       }
+      actualizarFechaVisor(fecha, dia === "mañana" ? "Mañana" : "Hoy");
       mostrarHorariosSol(fecha);
 
       const contenedor = document.getElementById("pronostico");
@@ -224,7 +233,7 @@
       const mareaContainer = document.getElementById("horarios-marea");
       if (!mareaContainer) return;
       if (!data.mareas || data.mareas.length === 0) {
-        mareaContainer.textContent = "Sin datos disponibles.";
+        mareaContainer.innerHTML = `<span class="marea-pill marea-pill--empty">🌀 Sin mareas disponibles</span>`;
         return;
       }
 
@@ -310,13 +319,8 @@
       .then(res => res.json())
       .then(data => {
         pronostico = data;
-        const fechaElemento = document.getElementById("fecha");
-        if (fechaElemento) {
-          const fecha = new Date();
-          const formatoFecha = fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
-          const capitalizada = formatoFecha.charAt(0).toUpperCase() + formatoFecha.slice(1);
-          fechaElemento.innerHTML = `<strong>📅 Hoy:</strong> ${capitalizada}`;
-        }
+        const fechaBase = new Date();
+        actualizarFechaVisor(fechaBase, "Hoy");
 
         renderizarPronostico("hoy");
 
