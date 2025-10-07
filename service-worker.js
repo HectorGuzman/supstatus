@@ -1,8 +1,9 @@
-const CACHE_NAME = 'sup-experience-cache-v3';
+const CACHE_NAME = 'sup-experience-cache-v4';
 const urlsToCache = [
   '/',
   '/index.html',
   '/styles.css',
+  '/auth.js',
   '/data.json',
   '/manifest.json',
   '/icon-192.png',

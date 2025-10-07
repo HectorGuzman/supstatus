@@ -18,6 +18,9 @@ export async function authenticate(
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
+    if (!decoded.email_verified && decoded.firebase?.sign_in_provider === 'password') {
+      return res.status(403).json({ error: 'Email no verificado.' });
+    }
     // Attach decoded token so downstream handlers can access user info
     (req as Request & { user?: typeof decoded }).user = decoded;
     return next();

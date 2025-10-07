@@ -19,11 +19,20 @@
 </head>
 <body>
   <header>
+    <div class="auth-bar">
+      <div class="auth-greeting">
+        <span id="auth-greeting" class="auth-greeting-text">🌊 Conecta tu perfil SUP y guarda tus remadas favoritas</span>
+      </div>
+      <div class="auth-widget">
+        <button class="ghost profile-link" id="profile-link">👤 Mi perfil</button>
+        <button class="ghost" id="auth-button">🔐 Iniciar sesión</button>
+      </div>
+    </div>
     <div class="branding">
       <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Experience logo" class="logo">
       <div class="headline">
         <span class="eyebrow">Planifica tu remada</span>
-        <h1>SUP Experience · La Herradura</h1>
+        <h1>SUP Experience</h1>
         <p class="subtitle">Condiciones confiables, mareas y ventanas ideales para salir con tranquilidad.</p>
       </div>
     </div>
@@ -50,7 +59,7 @@
 
   <main class="layout">
     <section class="forecast">
-      <h2 class="section-title">Pronóstico por bloque</h2>
+      <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
       <div class="cards-grid" id="pronostico"></div>
     </section>
     <section class="map-section">
@@ -87,6 +96,60 @@
       </div>
     </div>
   </footer>
+
+  <div id="auth-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content auth-modal">
+      <button type="button" class="cerrar-modal" onclick="window.closeAuthModal()">✕</button>
+      <h3 class="modal-title">Inicia sesión</h3>
+      <p class="modal-copy">Guarda tus sesiones y personaliza tu experiencia SUP.</p>
+      <div class="auth-options">
+        <button type="button" class="primary" id="google-login-btn">✨ Continuar con Google</button>
+        <div class="auth-divider">
+          <span></span>
+          <em>o con email</em>
+          <span></span>
+        </div>
+        <label class="auth-input">
+          Email
+          <input type="email" id="email-input" placeholder="tu@correo.com">
+        </label>
+        <label class="auth-input">
+          Contraseña
+          <input type="password" id="password-input" placeholder="mínimo 6 caracteres">
+        </label>
+        <button type="button" class="ghost" id="email-login-btn">Ingresar / Crear cuenta</button>
+        <button type="button" class="ghost" id="reset-password-btn">¿Olvidaste tu contraseña?</button>
+        <p class="auth-hint">Te enviaremos correos de verificación y recuperación cuando sea necesario.</p>
+        <p class="auth-error" id="auth-error"></p>
+      </div>
+    </div>
+  </div>
+
+  <div id="profile-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content profile-modal">
+      <button type="button" class="cerrar-modal" onclick="window.closeProfileModal()">✕</button>
+      <h3 class="modal-title">Mi perfil</h3>
+      <p class="profile-email" id="profile-email"></p>
+      <div class="profile-form">
+        <label>
+          Nombre para mostrar
+          <input id="profile-displayName" type="text" placeholder="Tu nombre o apodo">
+        </label>
+        <label>
+          Bio
+          <textarea id="profile-bio" rows="3" placeholder="Comparte un poco sobre tu experiencia SUP"></textarea>
+        </label>
+        <label>
+          ¿Qué esperas del SUP?
+          <textarea id="profile-goals" rows="3" placeholder="Cuéntanos qué te gustaría lograr remando"></textarea>
+        </label>
+      </div>
+      <div class="profile-actions">
+        <button class="primary" id="profile-save">Guardar perfil</button>
+        <span class="profile-status" id="profile-status"></span>
+      </div>
+    </div>
+  </div>
 
   <div id="modal-actual" class="modal-overlay" style="display: none;">
     <div class="modal-content" id="modal-contenido">
@@ -192,7 +255,7 @@
               <span class="hint">${item.direccionOleaje}</span>
             </div>
             <div class="metric">
-              <span class="label">Temperatura</span>
+              <span class="label">Temperatura del agua</span>
               <span class="value">${item.temperatura}</span>
             </div>
           </div>
@@ -291,7 +354,7 @@
             <span class="hint">${bloqueActual.direccionOleaje}</span>
           </div>
           <div class="metric">
-            <span class="label">Temperatura</span>
+            <span class="label">Temperatura del agua</span>
             <span class="value">${bloqueActual.temperatura}</span>
           </div>
         </div>
@@ -347,5 +410,6 @@
         console.error("Error cargando data.json", err);
       });
   </script>
+  <script type="module" src="auth.js"></script>
 </body>
 </html>

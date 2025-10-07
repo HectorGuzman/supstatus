@@ -10,3 +10,6 @@ backend/dist/
 .env
 backend/.env
 backend/.env.*.local
+backend/google-cloud-sdk-*/
+backend/google-cloud-sdk/
+backend/google-cloud-sdk-*.tar.gz
