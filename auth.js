@@ -22,7 +22,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : '';
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://sup-experience-backend-mhhf2ac76q-ue.a.run.app';
 
 const authButton = document.getElementById('auth-button');
 const profileModal = document.getElementById('profile-modal');
