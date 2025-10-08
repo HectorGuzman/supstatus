@@ -10,6 +10,12 @@ import {
   sendPasswordResetEmail,
   signOut,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDdk4ZjSGeyzO5pmlasJ672iF1BdhDtaCI',
@@ -22,6 +28,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const storage = getStorage(app);
 const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://sup-experience-backend-mhhf2ac76q-ue.a.run.app';
 
 const authButton = document.getElementById('auth-button');
@@ -36,6 +43,11 @@ const statusLabel = document.getElementById('profile-status');
 const greetingLabel = document.getElementById('auth-greeting');
 const adminSection = document.getElementById('admin-section');
 const adminProfileList = document.getElementById('admin-profile-list');
+const adminMetrics = document.getElementById('admin-metrics');
+const avatarInput = document.getElementById('profile-avatar-input');
+const avatarPreview = document.getElementById('profile-avatar-preview');
+const avatarStatus = document.getElementById('profile-avatar-status');
+const headerAvatarImg = document.getElementById('auth-header-avatar');
 
 const authModal = document.getElementById('auth-modal');
 const googleLoginBtn = document.getElementById('google-login-btn');
@@ -46,6 +58,8 @@ const passwordInput = document.getElementById('password-input');
 const authError = document.getElementById('auth-error');
 
 const defaultGreeting = '🌊 Conecta tu perfil SUP y guarda tus remadas favoritas';
+const DEFAULT_AVATAR_SRC = 'logosupstatus.png';
+const AVATAR_MAX_SIZE = 3 * 1024 * 1024; // 3 MB
 if (greetingLabel) greetingLabel.textContent = defaultGreeting;
 
 let currentUser = null;
@@ -53,6 +67,43 @@ let currentToken = null;
 let currentProfileData = {};
 let currentIsAdmin = false;
 let isSaving = false;
+let avatarPreviewObjectUrl = null;
+let isUploadingAvatar = false;
+
+function resetAvatarPreviewUrl() {
+  if (avatarPreviewObjectUrl) {
+    URL.revokeObjectURL(avatarPreviewObjectUrl);
+    avatarPreviewObjectUrl = null;
+  }
+}
+
+function setAvatarPreview(src) {
+  if (!avatarPreview) return;
+  avatarPreview.src = src || DEFAULT_AVATAR_SRC;
+}
+
+function setHeaderAvatar(src) {
+  if (!headerAvatarImg) return;
+  headerAvatarImg.src = src || DEFAULT_AVATAR_SRC;
+}
+
+function syncAvatarFromProfile(profile) {
+  resetAvatarPreviewUrl();
+  const src = profile?.avatarUrl || DEFAULT_AVATAR_SRC;
+  setAvatarPreview(src);
+  setHeaderAvatar(src);
+}
+
+function formatDateTime(value) {
+  if (!value) return 'N/A';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'N/A';
+  try {
+    return date.toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' });
+  } catch (_error) {
+    return date.toISOString();
+  }
+}
 
 function openAuthModal() {
   if (authModal) authModal.style.display = 'flex';
@@ -129,6 +180,8 @@ function setAuthButtonLoggedOut() {
   authButton.onclick = openAuthModal;
   if (greetingLabel) greetingLabel.textContent = defaultGreeting;
   if (profileLinkButton) profileLinkButton.style.display = 'none';
+  syncAvatarFromProfile(null);
+  if (avatarStatus) avatarStatus.textContent = '';
   closeProfileModal();
   currentProfileData = {};
   currentIsAdmin = false;
@@ -142,6 +195,9 @@ function setAuthButtonLoggedIn(displayName) {
   const friendlyName = displayName || 'remador/a';
   if (greetingLabel) greetingLabel.textContent = `🌊 ¡Hola, ${friendlyName}! ¿Listo para remar?`;
   if (profileLinkButton) profileLinkButton.style.display = 'inline-flex';
+  if (currentProfileData) {
+    setHeaderAvatar(currentProfileData.avatarUrl || DEFAULT_AVATAR_SRC);
+  }
 }
 
 function fillProfileForm(user, profile = {}) {
@@ -151,6 +207,7 @@ function fillProfileForm(user, profile = {}) {
     bioInput.value = '';
     if (goalsInput) goalsInput.value = '';
     statusLabel.textContent = '';
+    syncAvatarFromProfile(null);
     return;
   }
 
@@ -158,6 +215,8 @@ function fillProfileForm(user, profile = {}) {
   displayNameInput.value = profile.displayName || user.displayName || '';
   bioInput.value = profile.bio || '';
   if (goalsInput) goalsInput.value = profile.goals || '';
+  syncAvatarFromProfile(profile);
+  if (avatarStatus) avatarStatus.textContent = '';
 }
 
 function escapeHtml(value = '') {
@@ -177,6 +236,7 @@ function updateAdminVisibility() {
   } else {
     adminSection.style.display = 'none';
     if (adminProfileList) adminProfileList.innerHTML = '';
+    if (adminMetrics) adminMetrics.innerHTML = '';
   }
 }
 
@@ -198,6 +258,45 @@ async function loadAdminProfiles() {
 
 function renderAdminProfiles(profiles) {
   if (!adminProfileList) return;
+  const total = profiles.length;
+  const withAvatar = profiles.filter((profile) => Boolean(profile.avatarUrl)).length;
+  const withBio = profiles.filter((profile) => Boolean(profile.bio)).length;
+  const withGoals = profiles.filter((profile) => Boolean(profile.goals)).length;
+  let latestUpdated = null;
+  profiles.forEach((profile) => {
+    const updatedIso = profile?._meta?.updatedAt;
+    if (!updatedIso) return;
+    const updatedDate = new Date(updatedIso);
+    if (Number.isNaN(updatedDate.getTime())) return;
+    if (!latestUpdated || updatedDate > latestUpdated) {
+      latestUpdated = updatedDate;
+    }
+  });
+  if (adminMetrics) {
+    const latestUpdatedLabel = latestUpdated ? formatDateTime(latestUpdated.toISOString()) : 'N/A';
+    adminMetrics.innerHTML = `
+      <div class="admin-metric-chip">
+        <span class="admin-metric-label">Usuarios</span>
+        <strong>${total}</strong>
+      </div>
+      <div class="admin-metric-chip">
+        <span class="admin-metric-label">Con avatar</span>
+        <strong>${withAvatar}</strong>
+      </div>
+      <div class="admin-metric-chip">
+        <span class="admin-metric-label">Con bio</span>
+        <strong>${withBio}</strong>
+      </div>
+      <div class="admin-metric-chip">
+        <span class="admin-metric-label">Con objetivos</span>
+        <strong>${withGoals}</strong>
+      </div>
+      <div class="admin-metric-chip">
+        <span class="admin-metric-label">Último cambio</span>
+        <strong>${escapeHtml(latestUpdatedLabel)}</strong>
+      </div>
+    `;
+  }
   if (!profiles.length) {
     adminProfileList.innerHTML = '<p class="admin-hint">Sin perfiles registrados.</p>';
     return;
@@ -209,7 +308,17 @@ function renderAdminProfiles(profiles) {
       const displayName = escapeHtml(profile.displayName || 'Sin nombre');
       const bio = profile.bio ? `<span>${escapeHtml(profile.bio)}</span>` : '';
       const goals = profile.goals ? `<span class=\"admin-goals\">🎯 ${escapeHtml(profile.goals)}</span>` : '';
-      return `<div class=\"admin-profile-card\"><strong>${displayName}</strong><span>${email}</span>${bio}${goals}</div>`;
+      const badges = [];
+      if (profile.avatarUrl) badges.push('📸 Avatar listo');
+      if (profile.bio) badges.push('📝 Bio');
+      if (profile.goals) badges.push('🎯 Objetivos');
+      const badgesHtml = badges.length
+        ? `<div class="admin-profile-flags">${badges.map((badge) => `<span>${escapeHtml(badge)}</span>`).join('')}</div>`
+        : '';
+      const createdLabel = formatDateTime(profile?._meta?.createdAt);
+      const updatedLabel = formatDateTime(profile?._meta?.updatedAt);
+      const metaHtml = `<div class="admin-profile-meta"><span>Creado: ${escapeHtml(createdLabel)}</span><span>Actualizado: ${escapeHtml(updatedLabel)}</span></div>`;
+      return `<div class="admin-profile-card"><strong>${displayName}</strong><span>${email}</span>${bio}${goals}${badgesHtml}${metaHtml}</div>`;
     })
     .join('');
   adminProfileList.innerHTML = items;
@@ -349,4 +458,54 @@ profileLinkButton?.addEventListener('click', () => {
   if (profileModal) profileModal.style.display = 'flex';
 });
 
+avatarInput?.addEventListener('change', async (event) => {
+  if (!avatarInput) return;
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  if (!currentUser || !currentToken) {
+    if (avatarStatus) avatarStatus.textContent = 'Inicia sesión para subir una foto.';
+    avatarInput.value = '';
+    return;
+  }
+  if (!file.type.startsWith('image/')) {
+    if (avatarStatus) avatarStatus.textContent = 'Selecciona un archivo de imagen válido.';
+    avatarInput.value = '';
+    return;
+  }
+  if (file.size > AVATAR_MAX_SIZE) {
+    if (avatarStatus) avatarStatus.textContent = 'La imagen debe pesar menos de 3 MB.';
+    avatarInput.value = '';
+    return;
+  }
+  if (isUploadingAvatar) {
+    avatarInput.value = '';
+    return;
+  }
 
+  try {
+    isUploadingAvatar = true;
+    if (avatarStatus) avatarStatus.textContent = 'Subiendo foto…';
+    resetAvatarPreviewUrl();
+    avatarPreviewObjectUrl = URL.createObjectURL(file);
+    setAvatarPreview(avatarPreviewObjectUrl);
+
+    const storagePath = `users/${currentUser.uid}/avatar`;
+    const fileRef = storageRef(storage, storagePath);
+    await uploadBytes(fileRef, file, { contentType: file.type, cacheControl: 'public,max-age=3600' });
+    const downloadUrl = await getDownloadURL(fileRef);
+
+    const { profile, isAdmin } = await saveProfile(currentToken, { avatarUrl: downloadUrl });
+    currentProfileData = profile;
+    currentIsAdmin = Boolean(isAdmin);
+    updateAdminVisibility();
+    syncAvatarFromProfile(profile);
+    if (avatarStatus) avatarStatus.textContent = 'Foto actualizada ✓';
+  } catch (error) {
+    console.error(error);
+    syncAvatarFromProfile(currentProfileData);
+    if (avatarStatus) avatarStatus.textContent = 'No se pudo subir la imagen.';
+  } finally {
+    isUploadingAvatar = false;
+    avatarInput.value = '';
+  }
+});

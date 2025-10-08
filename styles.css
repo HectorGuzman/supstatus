@@ -168,8 +168,24 @@ h1 {
   gap: 16px;
 }
 
+.auth-greeting {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-greeting-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(38, 198, 218, 0.35);
+  box-shadow: 0 8px 22px rgba(5, 9, 20, 0.4);
+  flex-shrink: 0;
+}
+
 .auth-greeting-text {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: var(--text-primary);
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -202,6 +218,39 @@ h1 {
   opacity: 0.85;
 }
 
+
+
+.profile-avatar {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+.profile-avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(38, 198, 218, 0.4);
+  box-shadow: 0 12px 24px rgba(5, 9, 20, 0.4);
+}
+
+.profile-avatar-upload {
+  font-size: 0.85rem;
+  color: var(--brand-cyan);
+  cursor: pointer;
+}
+
+.profile-avatar-upload input {
+  display: none;
+}
+
+.profile-avatar-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-height: 1.2em;
+}
 
 .profile-form {
   display: grid;
@@ -263,6 +312,36 @@ h1 {
   color: var(--text-muted);
 }
 
+.admin-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 4px;
+}
+
+.admin-metric-chip {
+  min-width: 110px;
+  padding: 8px 12px;
+  background: rgba(38, 198, 218, 0.12);
+  border: 1px solid rgba(38, 198, 218, 0.28);
+  border-radius: 12px;
+  display: grid;
+  gap: 2px;
+}
+
+.admin-metric-chip strong {
+  font-size: 1rem;
+  color: var(--text-primary);
+  letter-spacing: 0.01em;
+}
+
+.admin-metric-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  color: rgba(242, 246, 255, 0.74);
+  letter-spacing: 0.16em;
+}
+
 .admin-list {
   max-height: 240px;
   overflow-y: auto;
@@ -290,6 +369,32 @@ h1 {
 
 .admin-goals {
   color: var(--brand-gold);
+}
+
+.admin-profile-flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.admin-profile-flags span {
+  font-size: 0.75rem;
+  background: rgba(4, 11, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 2px 10px;
+  color: var(--text-muted);
+}
+
+.admin-profile-meta {
+  display: grid;
+  gap: 2px;
+  font-size: 0.75rem;
+  color: rgba(242, 246, 255, 0.65);
+}
+
+.admin-profile-meta span {
+  display: block;
 }
 .profile-status {
   font-size: 0.9rem;
@@ -369,14 +474,64 @@ h1 {
 
 .profile-modal {
   max-width: 460px;
+  max-height: min(90vh, 700px);
   display: grid;
   gap: 16px;
+  overflow-y: auto;
+  padding-right: clamp(8px, 2vw, 14px);
+}
+
+.profile-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-modal::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+}
+
+.profile-modal::-webkit-scrollbar-thumb {
+  background: rgba(38, 198, 218, 0.45);
+  border-radius: 999px;
 }
 
 .profile-modal .profile-email {
   margin: 0;
   font-size: 0.9rem;
   color: var(--text-muted);
+}
+
+
+.profile-avatar {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+.profile-avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(38, 198, 218, 0.4);
+  box-shadow: 0 12px 24px rgba(5, 9, 20, 0.4);
+}
+
+.profile-avatar-upload {
+  font-size: 0.85rem;
+  color: var(--brand-cyan);
+  cursor: pointer;
+}
+
+.profile-avatar-upload input {
+  display: none;
+}
+
+.profile-avatar-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-height: 1.2em;
 }
 
 .profile-form {

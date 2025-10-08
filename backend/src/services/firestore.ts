@@ -67,5 +67,12 @@ export async function listSessions(uid: string) {
 
 export async function listAllProfiles() {
   const snapshot = await firestore.collection('users').orderBy('displayName', 'asc').get();
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    _meta: {
+      createdAt: doc.createTime?.toDate().toISOString(),
+      updatedAt: doc.updateTime?.toDate().toISOString(),
+    },
+  }));
 }

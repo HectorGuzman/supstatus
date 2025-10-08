@@ -20,6 +20,7 @@
   <header>
     <div class="auth-bar">
       <div class="auth-greeting">
+        <img id="auth-header-avatar" class="auth-greeting-avatar" src="logosupstatus.png" alt="Avatar SUP" />
         <span id="auth-greeting" class="auth-greeting-text">🌊 Conecta tu perfil SUP y guarda tus remadas favoritas</span>
       </div>
       <div class="auth-widget">
@@ -129,6 +130,14 @@
       <button type="button" class="cerrar-modal" onclick="window.closeProfileModal()">✕</button>
       <h3 class="modal-title">Mi perfil</h3>
       <p class="profile-email" id="profile-email"></p>
+      <div class="profile-avatar">
+        <img id="profile-avatar-preview" src="logosupstatus.png" alt="Avatar SUP" class="profile-avatar-img">
+        <label class="profile-avatar-upload">
+          <input type="file" id="profile-avatar-input" accept="image/*">
+          <span>Subir foto de perfil</span>
+        </label>
+        <span class="profile-avatar-status" id="profile-avatar-status"></span>
+      </div>
       <div class="profile-form">
         <label>
           Nombre para mostrar
@@ -147,12 +156,13 @@
         <button class="primary" id="profile-save">Guardar perfil</button>
         <span class="profile-status" id="profile-status"></span>
       </div>
-      <div class="admin-section" id="admin-section" style="display: none;">
-        <h4>Perfiles registrados</h4>
-        <p class="admin-hint">Solo el equipo puede ver esta vista.</p>
-        <div class="admin-list" id="admin-profile-list"></div>
-      </div>
+    <div class="admin-section" id="admin-section" style="display: none;">
+      <h4>Perfiles registrados</h4>
+      <p class="admin-hint">Solo el equipo puede ver esta vista.</p>
+      <div class="admin-metrics" id="admin-metrics"></div>
+      <div class="admin-list" id="admin-profile-list"></div>
     </div>
+  </div>
   </div>
 
   <div id="modal-actual" class="modal-overlay" style="display: none;">
