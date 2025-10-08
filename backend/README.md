@@ -26,7 +26,8 @@ Copy `.env.example` to `.env` and adjust as needed.
 
 - `PORT`: listening port (Cloud Run defaults to 8080).
 - `CORS_ORIGIN`: comma-separated list of allowed origins.
-- `FIREBASE_*`: credentials for Firebase Admin. On Google Cloud you can omit them and rely on Application Default Credentials.
+- `FIREBASE_*`: credentials for Firebase Admin. En Cloud Run puedes usar Application Default Credentials.
+- `ADMIN_EMAILS`: lista separada por comas de correos con permisos de administrador (por ejemplo, `hector@example.com`).
 
 ### Google Cloud Notes
 

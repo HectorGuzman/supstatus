@@ -7,6 +7,8 @@ export interface UserProfilePayload {
   displayName?: string;
   avatarUrl?: string;
   bio?: string;
+  goals?: string;
+  email?: string;
 }
 
 export interface SessionPayload {
@@ -26,9 +28,15 @@ export async function getUserProfile(uid: string) {
 
 export async function upsertUserProfile(uid: string, data: UserProfilePayload) {
   const docRef = firestore.collection('users').doc(uid);
+  const sanitized: Record<string, unknown> = {};
+  Object.entries(data || {}).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      sanitized[key] = value;
+    }
+  });
   await docRef.set(
     {
-      ...data,
+      ...sanitized,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     },
@@ -54,5 +62,10 @@ export async function createSession(uid: string, payload: SessionPayload) {
 export async function listSessions(uid: string) {
   const sessionsRef = firestore.collection('users').doc(uid).collection('sessions');
   const snapshot = await sessionsRef.orderBy('startedAt', 'desc').limit(20).get();
+  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
+export async function listAllProfiles() {
+  const snapshot = await firestore.collection('users').orderBy('displayName', 'asc').get();
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }

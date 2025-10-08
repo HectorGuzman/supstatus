@@ -241,6 +241,56 @@ h1 {
   flex-wrap: wrap;
 }
 
+
+.admin-section {
+  margin-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.admin-section h4 {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.05em;
+  font-size: 0.95rem;
+}
+
+.admin-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.admin-list {
+  max-height: 240px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.admin-profile-card {
+  background: rgba(6, 18, 31, 0.6);
+  border: 1px solid rgba(38, 198, 218, 0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: grid;
+  gap: 4px;
+}
+
+.admin-profile-card strong {
+  color: var(--text-primary);
+}
+
+.admin-profile-card span {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.admin-goals {
+  color: var(--brand-gold);
+}
 .profile-status {
   font-size: 0.9rem;
   color: var(--text-muted);

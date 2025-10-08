@@ -34,6 +34,8 @@ const goalsInput = document.getElementById('profile-goals');
 const saveButton = document.getElementById('profile-save');
 const statusLabel = document.getElementById('profile-status');
 const greetingLabel = document.getElementById('auth-greeting');
+const adminSection = document.getElementById('admin-section');
+const adminProfileList = document.getElementById('admin-profile-list');
 
 const authModal = document.getElementById('auth-modal');
 const googleLoginBtn = document.getElementById('google-login-btn');
@@ -49,6 +51,7 @@ if (greetingLabel) greetingLabel.textContent = defaultGreeting;
 let currentUser = null;
 let currentToken = null;
 let currentProfileData = {};
+let currentIsAdmin = false;
 let isSaving = false;
 
 function openAuthModal() {
@@ -93,9 +96,12 @@ async function fetchProfile(token) {
   });
   if (response.ok) {
     const data = await response.json();
-    return data.profile || {};
+    return {
+      profile: data.profile || {},
+      isAdmin: Boolean(data.isAdmin),
+    };
   }
-  if (response.status === 404) return {};
+  if (response.status === 404) return { profile: {}, isAdmin: false };
   throw new Error('No se pudo obtener el perfil');
 }
 
@@ -112,7 +118,10 @@ async function saveProfile(token, payload) {
     throw new Error('No se pudo guardar el perfil');
   }
   const data = await response.json();
-  return data.profile || {};
+  return {
+    profile: data.profile || {},
+    isAdmin: Boolean(data.isAdmin),
+  };
 }
 
 function setAuthButtonLoggedOut() {
@@ -122,6 +131,8 @@ function setAuthButtonLoggedOut() {
   if (profileLinkButton) profileLinkButton.style.display = 'none';
   closeProfileModal();
   currentProfileData = {};
+  currentIsAdmin = false;
+  updateAdminVisibility();
   fillProfileForm(null);
 }
 
@@ -149,6 +160,61 @@ function fillProfileForm(user, profile = {}) {
   if (goalsInput) goalsInput.value = profile.goals || '';
 }
 
+function escapeHtml(value = '') {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function updateAdminVisibility() {
+  if (!adminSection) return;
+  if (currentIsAdmin) {
+    adminSection.style.display = 'grid';
+    loadAdminProfiles();
+  } else {
+    adminSection.style.display = 'none';
+    if (adminProfileList) adminProfileList.innerHTML = '';
+  }
+}
+
+async function loadAdminProfiles() {
+  if (!currentIsAdmin || !currentToken || !adminProfileList) return;
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/profile/all`, {
+      headers: { Authorization: `Bearer ${currentToken}` },
+    });
+    if (!response.ok) {
+      throw new Error('No se pudo obtener la lista de perfiles.');
+    }
+    const data = await response.json();
+    renderAdminProfiles(Array.isArray(data.profiles) ? data.profiles : []);
+  } catch (error) {
+    console.error('[admin] error cargando perfiles', error);
+  }
+}
+
+function renderAdminProfiles(profiles) {
+  if (!adminProfileList) return;
+  if (!profiles.length) {
+    adminProfileList.innerHTML = '<p class="admin-hint">Sin perfiles registrados.</p>';
+    return;
+  }
+  const items = profiles
+    .sort((a, b) => (a.displayName || a.email || '').localeCompare(b.displayName || b.email || ''))
+    .map((profile) => {
+      const email = escapeHtml(profile.email || '');
+      const displayName = escapeHtml(profile.displayName || 'Sin nombre');
+      const bio = profile.bio ? `<span>${escapeHtml(profile.bio)}</span>` : '';
+      const goals = profile.goals ? `<span class=\"admin-goals\">🎯 ${escapeHtml(profile.goals)}</span>` : '';
+      return `<div class=\"admin-profile-card\"><strong>${displayName}</strong><span>${email}</span>${bio}${goals}</div>`;
+    })
+    .join('');
+  adminProfileList.innerHTML = items;
+}
+
 saveButton?.addEventListener('click', async () => {
   if (!currentUser || !currentToken || isSaving) return;
   isSaving = true;
@@ -160,9 +226,12 @@ saveButton?.addEventListener('click', async () => {
       bio: bioInput.value.trim(),
       goals: goalsInput ? goalsInput.value.trim() : undefined,
     };
-    const profile = await saveProfile(currentToken, payload);
+    const { profile, isAdmin } = await saveProfile(currentToken, payload);
     statusLabel.textContent = 'Perfil actualizado ✓';
     currentProfileData = profile;
+    currentIsAdmin = Boolean(isAdmin);
+    updateAdminVisibility();
+    if (currentIsAdmin) loadAdminProfiles();
     fillProfileForm(currentUser, profile);
   } catch (error) {
     console.error(error);
@@ -251,16 +320,18 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   if (!user) {
     setAuthButtonLoggedOut();
-    fillProfileForm(null);
     currentToken = null;
     return;
   }
 
   try {
-    setAuthButtonLoggedIn();
+    setAuthButtonLoggedIn('');
     currentToken = await user.getIdToken();
-    const profile = await fetchProfile(currentToken);
+    const { profile, isAdmin } = await fetchProfile(currentToken);
     currentProfileData = profile;
+    currentIsAdmin = Boolean(isAdmin);
+    updateAdminVisibility();
+    if (currentIsAdmin) loadAdminProfiles();
     const nameToShow = profile.displayName || user.displayName || '';
     setAuthButtonLoggedIn(nameToShow);
     fillProfileForm(user, profile);
@@ -273,6 +344,8 @@ onAuthStateChanged(auth, async (user) => {
 profileLinkButton?.addEventListener('click', () => {
   if (!currentUser) return;
   fillProfileForm(currentUser, currentProfileData || {});
+  updateAdminVisibility();
+  if (currentIsAdmin) loadAdminProfiles();
   if (profileModal) profileModal.style.display = 'flex';
 });
 
