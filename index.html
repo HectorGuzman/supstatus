@@ -62,19 +62,19 @@
       <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
       <div class="cards-grid" id="pronostico"></div>
     </section>
-    <section class="map-section">
-      <div class="map-panel">
-        <div class="map-toolbar" id="mapa-controls">
-          <div class="toolbar-copy">
-            <h2>Dirección del viento</h2>
-            <p>Selecciona un bloque horario para visualizar la orientación del viento directamente en La Herradura.</p>
-          </div>
-          <div class="select-wrapper">
-            <label for="hora-selector">🕒 Bloque horario</label>
-            <select id="hora-selector" onchange="actualizarMapaDesdeSelector()"></select>
-          </div>
+    <section class="stories-section" id="stories-section">
+      <div class="stories-header">
+        <div>
+          <h2 class="section-title">Historias SUP</h2>
+          <p class="stories-subtitle">Descubre cómo la comunidad vive La Herradura y encuentra inspiración para tu próxima remada.</p>
         </div>
-        <div id="mapa"></div>
+        <button class="ghost" id="stories-refresh-button" aria-label="Actualizar historias">🔄 Actualizar</button>
+      </div>
+      <div class="stories-content" id="stories-content">
+        <div class="stories-empty" id="stories-empty">
+          <p>📘 Aún no hay historias destacadas. ¡Comparte la tuya desde tu perfil!</p>
+        </div>
+        <div class="stories-grid" id="stories-grid"></div>
       </div>
     </section>
   </main>
@@ -156,6 +156,35 @@
         <button class="primary" id="profile-save">Guardar perfil</button>
         <span class="profile-status" id="profile-status"></span>
       </div>
+      <div class="story-editor">
+        <div class="story-editor-header">
+          <h4>Tu momento SUP</h4>
+          <p>Escribe un comentario breve y suma una foto si quieres. Lo revisaremos antes de publicarlo.</p>
+        </div>
+        <label class="story-editor-comment">
+          Comentario
+          <textarea id="story-body" rows="4" placeholder="¿Cómo estuvo tu remada hoy?"></textarea>
+        </label>
+        <div class="story-editor-media">
+          <div class="story-media-controls">
+            <label class="story-media-upload">
+              <input type="file" id="story-media-input" accept="image/*">
+              <span>📷 Subir foto (opcional)</span>
+            </label>
+            <button class="ghost story-media-remove" type="button" id="story-media-remove" disabled>Quitar foto</button>
+          </div>
+          <div class="story-media-preview-wrapper" id="story-media-preview-wrapper" style="display: none;">
+            <img id="story-media-preview" class="story-media-preview" src="" alt="Vista previa de la historia">
+          </div>
+          <span class="story-media-status" id="story-media-status"></span>
+        </div>
+        <div class="story-editor-actions">
+          <button class="ghost" type="button" id="story-reset">Restablecer</button>
+          <button class="primary" type="button" id="story-save">Compartir historia</button>
+          <span class="story-editor-status" id="story-status"></span>
+        </div>
+        <p class="story-editor-meta" id="story-meta"></p>
+      </div>
     <div class="admin-section" id="admin-section" style="display: none;">
       <h4>Perfiles registrados</h4>
       <p class="admin-hint">Solo el equipo puede ver esta vista.</p>
@@ -171,43 +200,59 @@
     </div>
   </div>
 
+  <div id="story-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content story-modal">
+      <button type="button" class="cerrar-modal" id="story-modal-close">✕</button>
+      <div class="story-modal-body">
+        <div class="story-modal-media" id="story-modal-media" aria-hidden="true"></div>
+        <div class="story-modal-copy">
+          <span class="story-modal-tag" id="story-modal-featured" style="display: none;">⭐ Destacada</span>
+          <h3 id="story-modal-title"></h3>
+          <p class="story-modal-author" id="story-modal-author"></p>
+          <div class="story-modal-meta" id="story-modal-meta"></div>
+          <div class="story-modal-actions">
+            <button type="button" class="story-like-btn" id="story-modal-like-btn" aria-pressed="false">
+              <span class="like-icon">❤️</span>
+              <span class="like-count" id="story-modal-like-count">0</span>
+            </button>
+          </div>
+          <p class="story-modal-text" id="story-modal-text"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     let pronostico;
     let diaActual = "hoy";
-    let marcadorViento;
+    let miniMaps = [];
 
     const lat = -29.983059;
     const lon = -71.365225;
-    const mapa = L.map('mapa', { zoomControl: false }).setView([lat, lon], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '© OpenStreetMap'
-    }).addTo(mapa);
-    L.control.zoom({ position: 'topright' }).addTo(mapa);
-
-    function renderizarMapaConViento(viento, direccionGrados) {
-      const grados = parseInt(direccionGrados, 10);
-      if (Number.isNaN(grados)) return;
-      if (marcadorViento) marcadorViento.remove();
-      const iconoViento = L.divIcon({
-        className: 'wind-marker',
-        html: `
-          <div class="wind-arrow-wrapper">
-            <div class="wind-arrow" style="transform: rotate(${grados}deg);"></div>
-          </div>
-        `
+    function initializeMiniMap(mapId, direccionGrados) {
+      const container = document.getElementById(mapId);
+      if (!container || Number.isNaN(direccionGrados)) return;
+      const miniMap = L.map(container, {
+        attributionControl: false,
+        zoomControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        tap: false,
+      }).setView([lat, lon], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+      }).addTo(miniMap);
+      const iconoMini = L.divIcon({
+        className: 'mini-wind-marker',
+        html: `<div class="mini-wind-arrow" style="transform: rotate(${direccionGrados}deg);"></div>`,
       });
-      marcadorViento = L.marker([lat, lon], { icon: iconoViento })
-        .addTo(mapa)
-        .bindPopup(`<strong>Dirección:</strong> ${grados}°<br><strong>Velocidad:</strong> ${viento}`);
-    }
-
-    function actualizarMapaDesdeSelector() {
-      if (!pronostico || !pronostico[diaActual]) return;
-      const horaSeleccionada = document.getElementById("hora-selector").value;
-      const bloque = pronostico[diaActual].find(b => b.hora === horaSeleccionada);
-      if (bloque) renderizarMapaConViento(bloque.viento, bloque.direccionVientoGrados);
+      L.marker([lat, lon], { icon: iconoMini }).addTo(miniMap);
+      miniMaps.push(miniMap);
+      setTimeout(() => miniMap.invalidateSize(), 120);
     }
 
     function actualizarFechaVisor(fecha, etiqueta) {
@@ -216,6 +261,15 @@
       const formatoFecha = fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
       const capitalizada = formatoFecha.charAt(0).toUpperCase() + formatoFecha.slice(1);
       fechaElemento.innerHTML = `<strong>📅 ${etiqueta}:</strong> ${capitalizada}`;
+    }
+
+    function cleanupMiniMaps() {
+      miniMaps.forEach((mapInstance) => {
+        try {
+          mapInstance.remove();
+        } catch (_error) {}
+      });
+      miniMaps = [];
     }
 
     function renderizarPronostico(dia) {
@@ -236,21 +290,17 @@
       mostrarHorariosSol(fecha);
 
       const contenedor = document.getElementById("pronostico");
-      const selectorHoras = document.getElementById("hora-selector");
       contenedor.innerHTML = "";
-      selectorHoras.innerHTML = "";
+
+      cleanupMiniMaps();
 
       pronostico[dia].forEach((item, i) => {
-        const option = document.createElement("option");
-        option.value = item.hora;
-        option.textContent = item.hora;
-        selectorHoras.appendChild(option);
-
         const card = document.createElement("article");
         card.className = "card";
         card.style.animationDelay = `${i * 0.08}s`;
 
         const nivelClass = item.nivel.toLowerCase();
+        const mapId = `mini-map-${dia}-${i}`;
 
         card.innerHTML = `
           <div class="card-header">
@@ -273,17 +323,21 @@
               <span class="value">${item.temperatura}</span>
             </div>
           </div>
+          <div class="card-map">
+            <div class="card-map-header">
+              <span>Dirección del viento</span>
+            </div>
+            <div class="mini-map" id="${mapId}" aria-hidden="true"></div>
+            <span class="mini-map-note">Viento: ${item.direccionViento}</span>
+          </div>
           <p class="condiciones">${item.condiciones}</p>
         `;
 
         contenedor.appendChild(card);
+        initializeMiniMap(mapId, Number.parseInt(item.direccionVientoGrados, 10));
 
-        if (i === 0) renderizarMapaConViento(item.viento, item.direccionVientoGrados);
       });
 
-      if (selectorHoras.firstChild) {
-        selectorHoras.value = pronostico[dia][0].hora;
-      }
     }
 
     function cambiarDia(valor) {
@@ -328,6 +382,310 @@
 
       mareaContainer.innerHTML = chips;
     }
+
+    const STORIES_API_BASE = window.location.hostname === 'localhost'
+      ? 'http://localhost:8080'
+      : 'https://sup-experience-backend-mhhf2ac76q-ue.a.run.app';
+    const storiesState = { stories: [], loading: false, pendingLikes: new Set() };
+    const storiesGrid = document.getElementById('stories-grid');
+    const storiesEmpty = document.getElementById('stories-empty');
+    const storiesRefreshButton = document.getElementById('stories-refresh-button');
+    const storyModal = document.getElementById('story-modal');
+    const storyModalClose = document.getElementById('story-modal-close');
+    const storyModalMedia = document.getElementById('story-modal-media');
+    const storyModalTitle = document.getElementById('story-modal-title');
+    const storyModalAuthor = document.getElementById('story-modal-author');
+    const storyModalMeta = document.getElementById('story-modal-meta');
+    const storyModalText = document.getElementById('story-modal-text');
+    const storyModalFeatured = document.getElementById('story-modal-featured');
+    const storyModalLikeButton = document.getElementById('story-modal-like-btn');
+    const storyModalLikeCount = document.getElementById('story-modal-like-count');
+    let currentModalStoryId = null;
+
+    function escapeHtml(value = '') {
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatStoryDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function buildExcerpt(text = '', maxLength = 160) {
+      const trimmed = text.trim();
+      if (!trimmed) return '';
+      if (trimmed.length <= maxLength) return trimmed;
+      const slice = trimmed.slice(0, maxLength);
+      return `${slice.replace(/\s+\S*$/, '')}…`;
+    }
+
+    function safeMediaUrl(value) {
+      if (typeof value !== 'string') return '';
+      const url = value.trim();
+      if (!/^https?:\/\//i.test(url)) return '';
+      return url;
+    }
+
+    function storyTimestamp(story) {
+      const source = story.publishedAt || story.updatedAt || story.createdAt;
+      if (!source) return 0;
+      const date = new Date(source);
+      return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+    }
+
+    function renderStories(stories) {
+      if (!storiesGrid) return;
+      storiesGrid.innerHTML = '';
+      if (!stories || !stories.length) {
+        if (storiesEmpty) {
+          storiesEmpty.style.display = 'block';
+          storiesEmpty.innerHTML = '<p>📘 Aún no hay historias destacadas. ¡Comparte la tuya desde tu perfil!</p>';
+        }
+        return;
+      }
+      if (storiesEmpty) storiesEmpty.style.display = 'none';
+      const sorted = [...stories].sort((a, b) => {
+        if (Boolean(a.featured) !== Boolean(b.featured)) {
+          return b.featured ? 1 : -1;
+        }
+        return storyTimestamp(b) - storyTimestamp(a);
+      });
+      sorted.forEach((story) => {
+        const card = document.createElement('article');
+        card.className = 'story-card';
+        const excerpt = buildExcerpt(story.body || '');
+        const dateLabel = formatStoryDate(story.publishedAt || story.updatedAt || story.createdAt);
+        const mediaUrl = safeMediaUrl(story.mediaUrl);
+        const likes = Number.isFinite(story.likes) ? story.likes : 0;
+        const isLiked = Boolean(story.liked);
+        const isLoadingLike = storiesState.pendingLikes.has(story.id);
+        card.innerHTML = `
+          <div class="story-card-media">
+            ${mediaUrl ? `<img src="${escapeHtml(mediaUrl)}" alt="Historia SUP" loading="lazy">` : '<span>🌊</span>'}
+          </div>
+          <div class="story-card-body">
+            <span class="story-card-author">${escapeHtml(story.authorName || 'Remador SUP')}</span>
+            <h3 class="story-card-title">${escapeHtml(story.title || 'Historia SUP')}</h3>
+            <p class="story-card-excerpt">${escapeHtml(excerpt || 'Descubre cómo viven SUP en La Herradura.')}</p>
+            <div class="story-card-tags">
+              ${story.spot ? `<span class="story-card-tag">📍 ${escapeHtml(story.spot)}</span>` : ''}
+              ${story.bestConditions ? `<span class="story-card-tag">⚓ ${escapeHtml(story.bestConditions)}</span>` : ''}
+            </div>
+            <div class="story-card-footer">
+              <div class="story-card-meta">
+                ${dateLabel ? `<span>${escapeHtml(dateLabel)}</span>` : ''}
+                ${story.featured ? '<span class="story-card-featured">⭐ Destacada</span>' : ''}
+              </div>
+              <button type="button" class="story-like-btn${isLiked ? ' liked' : ''}${isLoadingLike ? ' loading' : ''}" data-story-id="${story.id}" aria-pressed="${isLiked}" ${isLoadingLike ? 'disabled' : ''}>
+                <span class="like-icon">❤️</span>
+                <span class="like-count">${likes}</span>
+              </button>
+            </div>
+          </div>
+        `;
+        card.addEventListener('click', () => openStoryModal(story.id));
+        const likeButton = card.querySelector('.story-like-btn');
+        likeButton?.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const storyId = likeButton.dataset.storyId;
+          if (storyId) toggleStoryLike(storyId);
+        });
+      storiesGrid.appendChild(card);
+      });
+    }
+
+    function updateStoryEntry(updatedStory) {
+      if (!updatedStory || !updatedStory.id) return;
+      const index = storiesState.stories.findIndex((item) => item.id === updatedStory.id);
+      if (index >= 0) {
+        storiesState.stories[index] = { ...storiesState.stories[index], ...updatedStory };
+      } else {
+        storiesState.stories.push(updatedStory);
+      }
+    }
+
+    function setStoryModalLikeState(story) {
+      if (!storyModalLikeButton || !storyModalLikeCount) return;
+      if (!story) {
+        storyModalLikeButton.dataset.storyId = '';
+        storyModalLikeButton.setAttribute('aria-pressed', 'false');
+        storyModalLikeButton.classList.remove('liked', 'loading');
+        storyModalLikeButton.disabled = true;
+        storyModalLikeCount.textContent = '0';
+        return;
+      }
+      const likes = Number.isFinite(story.likes) ? story.likes : 0;
+      storyModalLikeCount.textContent = String(likes);
+      storyModalLikeButton.dataset.storyId = story.id;
+      const isLiked = Boolean(story.liked);
+      storyModalLikeButton.setAttribute('aria-pressed', String(isLiked));
+      storyModalLikeButton.classList.toggle('liked', isLiked);
+      const isLoading = storiesState.pendingLikes.has(story.id);
+      storyModalLikeButton.classList.toggle('loading', isLoading);
+      storyModalLikeButton.disabled = isLoading;
+    }
+
+    async function toggleStoryLike(storyId) {
+      if (!storyId || storiesState.pendingLikes.has(storyId)) return;
+      const authState = window.supAuth && typeof window.supAuth.getState === 'function' ? window.supAuth.getState() : null;
+      const token = authState?.token;
+      if (!token) {
+        window.supAuth?.openAuthModal?.();
+        return;
+      }
+      storiesState.pendingLikes.add(storyId);
+      renderStories(storiesState.stories);
+      if (currentModalStoryId === storyId) {
+        const modalStory = storiesState.stories.find((item) => item.id === storyId);
+        if (modalStory) setStoryModalLikeState({ ...modalStory, liked: modalStory.liked, likes: modalStory.likes });
+      }
+      try {
+        const response = await fetch(`${STORIES_API_BASE}/v1/stories/${storyId}/like`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.story) {
+          updateStoryEntry(data.story);
+          if (currentModalStoryId === storyId) {
+            setStoryModalLikeState(data.story);
+          }
+        }
+      } catch (error) {
+        console.error('Error al registrar me gusta', error);
+      } finally {
+        storiesState.pendingLikes.delete(storyId);
+        renderStories(storiesState.stories);
+        if (currentModalStoryId === storyId) {
+          const modalStory = storiesState.stories.find((item) => item.id === storyId);
+          if (modalStory) setStoryModalLikeState(modalStory);
+        }
+      }
+    }
+
+    function openStoryModal(storyId) {
+      if (!storyModal) return;
+      const story = storiesState.stories.find((item) => item.id === storyId);
+      if (!story) return;
+      currentModalStoryId = story.id;
+      if (storyModalMedia) {
+        storyModalMedia.innerHTML = '';
+        const mediaUrl = safeMediaUrl(story.mediaUrl);
+        if (mediaUrl) {
+          const img = document.createElement('img');
+          img.src = mediaUrl;
+          img.alt = `Historia de ${story.authorName || 'la comunidad SUP'}`;
+          img.loading = 'lazy';
+          storyModalMedia.appendChild(img);
+          storyModalMedia.style.display = 'block';
+          storyModalMedia.setAttribute('aria-hidden', 'false');
+        } else {
+          storyModalMedia.style.display = 'none';
+          storyModalMedia.setAttribute('aria-hidden', 'true');
+        }
+      }
+      if (storyModalTitle) storyModalTitle.textContent = story.title || 'Historia SUP';
+      if (storyModalAuthor) storyModalAuthor.textContent = story.authorName
+        ? `Por ${story.authorName}`
+        : 'Historia de la comunidad SUP';
+      if (storyModalText) storyModalText.textContent = story.body || '';
+      if (storyModalFeatured) {
+        storyModalFeatured.style.display = story.featured ? 'inline-flex' : 'none';
+      }
+      if (storyModalMeta) {
+        const bits = [];
+        if (story.spot) bits.push(`📍 ${story.spot}`);
+        if (story.bestConditions) bits.push(`⚓ ${story.bestConditions}`);
+        const dateLabel = formatStoryDate(story.publishedAt || story.updatedAt || story.createdAt);
+        if (dateLabel) bits.push(`🗓 ${dateLabel}`);
+        storyModalMeta.innerHTML = bits.map((bit) => `<span>${escapeHtml(bit)}</span>`).join('');
+        storyModalMeta.style.display = bits.length ? 'flex' : 'none';
+      }
+      setStoryModalLikeState(story);
+      storyModal.style.display = 'flex';
+    }
+
+    function closeStoryModal() {
+      if (!storyModal) return;
+      storyModal.style.display = 'none';
+      currentModalStoryId = null;
+      setStoryModalLikeState(null);
+    }
+
+    function setStoriesLoading(isLoading) {
+      storiesState.loading = isLoading;
+      if (storiesRefreshButton) {
+        storiesRefreshButton.disabled = isLoading;
+        storiesRefreshButton.textContent = isLoading ? '⏳ Cargando…' : '🔄 Actualizar';
+      }
+      if (isLoading && storiesEmpty) {
+        storiesEmpty.style.display = 'block';
+        storiesEmpty.innerHTML = '<p>⏳ Cargando historias…</p>';
+      }
+    }
+
+    function loadStories(force = false) {
+      if (!storiesGrid || storiesState.loading) return;
+      setStoriesLoading(true);
+      const url = new URL(`${STORIES_API_BASE}/v1/stories`);
+      if (force) {
+        url.searchParams.set('cb', String(Date.now()));
+      }
+      const authState = window.supAuth && typeof window.supAuth.getState === 'function' ? window.supAuth.getState() : null;
+      const headers = {};
+      if (authState?.token) {
+        headers.Authorization = `Bearer ${authState.token}`;
+      }
+      fetch(url.toString(), { cache: 'no-store', headers })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          storiesState.stories = Array.isArray(data.stories) ? data.stories : [];
+          renderStories(storiesState.stories);
+        })
+        .catch((error) => {
+          console.error('Error cargando historias', error);
+          if (storiesEmpty) {
+            storiesEmpty.style.display = 'block';
+            storiesEmpty.innerHTML = '<p>⚠️ No pudimos cargar las historias. Intenta nuevamente más tarde.</p>';
+          }
+        })
+        .finally(() => {
+          setStoriesLoading(false);
+        });
+    }
+
+    storiesRefreshButton?.addEventListener('click', () => loadStories(true));
+    window.addEventListener('sup-auth-changed', () => loadStories(true));
+    storyModalClose?.addEventListener('click', closeStoryModal);
+    storyModalLikeButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const storyId = storyModalLikeButton.dataset.storyId;
+      if (storyId) toggleStoryLike(storyId);
+    });
+    storyModal?.addEventListener('click', (event) => {
+      if (event.target === storyModal) {
+        closeStoryModal();
+      }
+    });
 
     if (localStorage.getItem("modoOscuro") === "true") {
       document.body.classList.add("oscuro");
@@ -395,8 +753,11 @@
     document.addEventListener("keydown", event => {
       if (event.key === "Escape") {
         cerrarModal();
+        closeStoryModal();
       }
     });
+
+    loadStories();
 
     fetch(`data.json?cb=${Date.now()}`, { cache: "no-store" })
       .then(res => res.json())
@@ -415,10 +776,6 @@
         }
 
         mostrarHorariosMarea(data);
-
-        setTimeout(() => {
-          mapa.invalidateSize();
-        }, 400);
       })
       .catch(err => {
         console.error("Error cargando data.json", err);

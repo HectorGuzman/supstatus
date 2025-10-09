@@ -44,6 +44,16 @@ const greetingLabel = document.getElementById('auth-greeting');
 const adminSection = document.getElementById('admin-section');
 const adminProfileList = document.getElementById('admin-profile-list');
 const adminMetrics = document.getElementById('admin-metrics');
+const storyBodyInput = document.getElementById('story-body');
+const storyMediaFileInput = document.getElementById('story-media-input');
+const storyMediaRemoveButton = document.getElementById('story-media-remove');
+const storyMediaStatus = document.getElementById('story-media-status');
+const storyMediaPreviewWrapper = document.getElementById('story-media-preview-wrapper');
+const storyMediaPreview = document.getElementById('story-media-preview');
+const storySaveButton = document.getElementById('story-save');
+const storyResetButton = document.getElementById('story-reset');
+const storyStatusLabel = document.getElementById('story-status');
+const storyMetaLabel = document.getElementById('story-meta');
 const avatarInput = document.getElementById('profile-avatar-input');
 const avatarPreview = document.getElementById('profile-avatar-preview');
 const avatarStatus = document.getElementById('profile-avatar-status');
@@ -56,10 +66,12 @@ const resetPasswordBtn = document.getElementById('reset-password-btn');
 const emailInput = document.getElementById('email-input');
 const passwordInput = document.getElementById('password-input');
 const authError = document.getElementById('auth-error');
+const authSubscribers = new Set();
 
 const defaultGreeting = '🌊 Conecta tu perfil SUP y guarda tus remadas favoritas';
 const DEFAULT_AVATAR_SRC = 'logosupstatus.png';
 const AVATAR_MAX_SIZE = 3 * 1024 * 1024; // 3 MB
+const STORY_MEDIA_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 if (greetingLabel) greetingLabel.textContent = defaultGreeting;
 
 let currentUser = null;
@@ -69,6 +81,12 @@ let currentIsAdmin = false;
 let isSaving = false;
 let avatarPreviewObjectUrl = null;
 let isUploadingAvatar = false;
+let currentStory = null;
+let isSavingStory = false;
+let storyStatusTimeout = null;
+let currentStoryMediaUrl = '';
+let storyMediaUploading = false;
+let storyMediaPreviewUrl = null;
 
 function resetAvatarPreviewUrl() {
   if (avatarPreviewObjectUrl) {
@@ -92,6 +110,107 @@ function syncAvatarFromProfile(profile) {
   const src = profile?.avatarUrl || DEFAULT_AVATAR_SRC;
   setAvatarPreview(src);
   setHeaderAvatar(src);
+}
+
+function revokeStoryMediaPreview() {
+  if (storyMediaPreviewUrl) {
+    URL.revokeObjectURL(storyMediaPreviewUrl);
+    storyMediaPreviewUrl = null;
+  }
+}
+
+function setStoryMediaPreview(url) {
+  if (!storyMediaPreviewWrapper || !storyMediaPreview) return;
+  if (url) {
+    storyMediaPreview.src = url;
+    storyMediaPreviewWrapper.style.display = 'block';
+  } else {
+    storyMediaPreview.src = '';
+    storyMediaPreviewWrapper.style.display = 'none';
+  }
+}
+
+function updateStoryMediaUI(url) {
+  currentStoryMediaUrl = url || '';
+  revokeStoryMediaPreview();
+  setStoryMediaPreview(currentStoryMediaUrl);
+  if (storyMediaStatus) storyMediaStatus.textContent = '';
+  if (storyMediaRemoveButton) {
+    if (currentStoryMediaUrl) {
+      storyMediaRemoveButton.disabled = false;
+    } else {
+      storyMediaRemoveButton.disabled = true;
+    }
+  }
+}
+
+function setStoryMediaFromStory(story) {
+  const url = story?.mediaUrl || '';
+  updateStoryMediaUI(url);
+  if (storyMediaStatus) {
+    storyMediaStatus.textContent = url ? 'Foto guardada.' : '';
+  }
+}
+
+function clearStoryMediaSelection() {
+  updateStoryMediaUI('');
+  if (storyMediaFileInput) storyMediaFileInput.value = '';
+}
+
+function clearStoryStatusMessage() {
+  if (storyStatusTimeout) {
+    window.clearTimeout(storyStatusTimeout);
+    storyStatusTimeout = null;
+  }
+  if (storyStatusLabel) {
+    storyStatusLabel.textContent = '';
+  }
+}
+
+function fillStoryForm(story) {
+  if (storyBodyInput) storyBodyInput.value = story?.body || '';
+  setStoryMediaFromStory(story);
+  updateStoryMeta(story);
+  clearStoryStatusMessage();
+}
+
+function resetStoryForm() {
+  currentStory = null;
+  fillStoryForm(null);
+}
+
+function storyStatusCopy(status) {
+  switch (status) {
+    case 'published':
+      return 'Publicada ✅. Tu historia ya es visible para toda la comunidad.';
+    case 'archived':
+      return 'Archivada 💤. Edita tu comentario y vuelve a enviarlo cuando quieras.';
+    case 'pending':
+    default:
+      return 'En revisión ✍️. El equipo revisará tu comentario antes de publicarlo.';
+  }
+}
+
+function updateStoryMeta(story) {
+  if (!storyMetaLabel) return;
+  if (!story) {
+    storyMetaLabel.textContent = 'Estado: sin historia aún. Comparte un comentario para inspirar a otros remadores.';
+    return;
+  }
+  const statusMessage = storyStatusCopy(story.status);
+  const updatedLabel = formatDateTime(story.updatedAt || story.createdAt);
+  storyMetaLabel.textContent = updatedLabel ? `${statusMessage} · Última actualización ${updatedLabel}` : statusMessage;
+}
+
+function getStoryPayload() {
+  const body = storyBodyInput?.value?.trim() || '';
+  const payload = { body };
+  if (currentStoryMediaUrl) {
+    payload.mediaUrl = currentStoryMediaUrl;
+  } else if (currentStory?.mediaUrl) {
+    payload.mediaUrl = '';
+  }
+  return payload;
 }
 
 function formatDateTime(value) {
@@ -120,6 +239,30 @@ function closeProfileModal() {
 }
 
 window.closeProfileModal = closeProfileModal;
+
+const supAuthGlobal = window.supAuth || {};
+supAuthGlobal.getState = () => ({ token: currentToken, user: currentUser });
+supAuthGlobal.openAuthModal = openAuthModal;
+supAuthGlobal.subscribe = (callback) => {
+  if (typeof callback !== 'function') return () => {};
+  authSubscribers.add(callback);
+  return () => authSubscribers.delete(callback);
+};
+window.supAuth = supAuthGlobal;
+
+function notifyAuthChange() {
+  const detail = { token: currentToken, user: currentUser };
+  authSubscribers.forEach((callback) => {
+    try {
+      callback(detail);
+    } catch (error) {
+      console.error('[auth] auth subscriber error', error);
+    }
+  });
+  window.dispatchEvent(new CustomEvent('sup-auth-changed', { detail }));
+}
+
+notifyAuthChange();
 
 
 if (authModal) {
@@ -175,6 +318,51 @@ async function saveProfile(token, payload) {
   };
 }
 
+async function fetchStory(token) {
+  const response = await fetch(`${API_BASE_URL}/v1/stories/me`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error('No se pudo obtener la historia');
+  }
+  const data = await response.json();
+  return data.story || null;
+}
+
+async function saveStoryRequest(token, payload) {
+  const response = await fetch(`${API_BASE_URL}/v1/stories/me`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    const message = error?.error || 'No se pudo guardar la historia';
+    throw new Error(message);
+  }
+  const data = await response.json();
+  return data.story || null;
+}
+
+async function loadUserStory(token) {
+  try {
+    const story = await fetchStory(token);
+    currentStory = story;
+    fillStoryForm(story);
+  } catch (error) {
+    console.error('[stories] error fetching user story', error);
+    resetStoryForm();
+    if (storyStatusLabel) storyStatusLabel.textContent = 'No se pudo cargar tu historia.';
+    storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 4000);
+  }
+}
+
 function setAuthButtonLoggedOut() {
   authButton.textContent = '🔐 Iniciar sesión';
   authButton.onclick = openAuthModal;
@@ -184,9 +372,12 @@ function setAuthButtonLoggedOut() {
   if (avatarStatus) avatarStatus.textContent = '';
   closeProfileModal();
   currentProfileData = {};
+  currentStory = null;
   currentIsAdmin = false;
   updateAdminVisibility();
   fillProfileForm(null);
+  resetStoryForm();
+  notifyAuthChange();
 }
 
 function setAuthButtonLoggedIn(displayName) {
@@ -351,6 +542,111 @@ saveButton?.addEventListener('click', async () => {
   }
 });
 
+storyResetButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  fillStoryForm(currentStory);
+  clearStoryStatusMessage();
+});
+
+storySaveButton?.addEventListener('click', async () => {
+  if (!currentUser || !currentToken || isSavingStory || storyMediaUploading) {
+    if (storyMediaUploading && storyStatusLabel) {
+      storyStatusLabel.textContent = 'Espera a que la foto termine de subir.';
+    }
+    return;
+  }
+  const payload = getStoryPayload();
+  if (!payload.body || payload.body.length < 10) {
+    if (storyStatusLabel) storyStatusLabel.textContent = 'Comparte al menos 10 caracteres sobre tu experiencia.';
+    storyBodyInput?.focus();
+    return;
+  }
+  clearStoryStatusMessage();
+  isSavingStory = true;
+  if (storyStatusLabel) storyStatusLabel.textContent = 'Guardando historia…';
+  storySaveButton.disabled = true;
+  storyResetButton?.setAttribute('disabled', 'true');
+  storyMediaFileInput?.setAttribute('disabled', 'true');
+  try {
+    const story = await saveStoryRequest(currentToken, payload);
+    currentStory = story;
+    fillStoryForm(story);
+    if (storyStatusLabel) storyStatusLabel.textContent = 'Tu historia está en revisión. ¡Gracias por compartirla!';
+    storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 5000);
+  } catch (error) {
+    console.error(error);
+    const message = error instanceof Error ? error.message : 'No se pudo guardar la historia.';
+    if (storyStatusLabel) storyStatusLabel.textContent = message;
+  } finally {
+    isSavingStory = false;
+    storySaveButton.disabled = false;
+    storyResetButton?.removeAttribute('disabled');
+    storyMediaFileInput?.removeAttribute('disabled');
+  }
+});
+
+storyMediaFileInput?.addEventListener('change', async (event) => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  if (!currentUser || !currentToken) {
+    if (storyMediaStatus) storyMediaStatus.textContent = 'Inicia sesión para subir una foto.';
+    storyMediaFileInput.value = '';
+    return;
+  }
+  if (!file.type.startsWith('image/')) {
+    if (storyMediaStatus) storyMediaStatus.textContent = 'Selecciona un archivo de imagen válido.';
+    storyMediaFileInput.value = '';
+    return;
+  }
+  if (file.size > STORY_MEDIA_MAX_SIZE) {
+    if (storyMediaStatus) storyMediaStatus.textContent = 'La foto debe pesar menos de 5 MB.';
+    storyMediaFileInput.value = '';
+    return;
+  }
+  if (storyMediaUploading) {
+    storyMediaFileInput.value = '';
+    return;
+  }
+
+  const previousUrl = currentStoryMediaUrl || currentStory?.mediaUrl || '';
+  storyMediaUploading = true;
+  if (storyMediaStatus) storyMediaStatus.textContent = 'Subiendo foto…';
+  storyMediaFileInput.disabled = true;
+  storyMediaRemoveButton?.setAttribute('disabled', 'true');
+  revokeStoryMediaPreview();
+  storyMediaPreviewUrl = URL.createObjectURL(file);
+  setStoryMediaPreview(storyMediaPreviewUrl);
+
+  const storagePath = `stories/${currentUser.uid}/media`;
+  const fileRef = storageRef(storage, storagePath);
+  try {
+    await uploadBytes(fileRef, file, { contentType: file.type, cacheControl: 'public,max-age=3600' });
+    const downloadUrl = await getDownloadURL(fileRef);
+    updateStoryMediaUI(downloadUrl);
+    if (storyMediaStatus) storyMediaStatus.textContent = 'Foto lista ✓';
+  } catch (error) {
+    console.error(error);
+    updateStoryMediaUI(previousUrl);
+    if (storyMediaStatus) storyMediaStatus.textContent = 'No se pudo subir la foto.';
+  } finally {
+    storyMediaUploading = false;
+    storyMediaFileInput.disabled = false;
+    storyMediaFileInput.value = '';
+    if (currentStoryMediaUrl) {
+      storyMediaRemoveButton?.removeAttribute('disabled');
+    } else {
+      storyMediaRemoveButton?.setAttribute('disabled', 'true');
+    }
+  }
+});
+
+storyMediaRemoveButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (storyMediaUploading) return;
+  clearStoryMediaSelection();
+  if (storyMediaStatus) storyMediaStatus.textContent = 'Foto quitada.';
+});
+
 googleLoginBtn?.addEventListener('click', async () => {
   authError.textContent = '';
   try {
@@ -436,6 +732,7 @@ onAuthStateChanged(auth, async (user) => {
   try {
     setAuthButtonLoggedIn('');
     currentToken = await user.getIdToken();
+    notifyAuthChange();
     const { profile, isAdmin } = await fetchProfile(currentToken);
     currentProfileData = profile;
     currentIsAdmin = Boolean(isAdmin);
@@ -444,6 +741,8 @@ onAuthStateChanged(auth, async (user) => {
     const nameToShow = profile.displayName || user.displayName || '';
     setAuthButtonLoggedIn(nameToShow);
     fillProfileForm(user, profile);
+    notifyAuthChange();
+    await loadUserStory(currentToken);
   } catch (error) {
     console.error(error);
     statusLabel.textContent = 'No se pudo cargar tu perfil.';
@@ -453,6 +752,7 @@ onAuthStateChanged(auth, async (user) => {
 profileLinkButton?.addEventListener('click', () => {
   if (!currentUser) return;
   fillProfileForm(currentUser, currentProfileData || {});
+  fillStoryForm(currentStory);
   updateAdminVisibility();
   if (currentIsAdmin) loadAdminProfiles();
   if (profileModal) profileModal.style.display = 'flex';
