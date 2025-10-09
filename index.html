@@ -34,6 +34,7 @@
         <span class="eyebrow">Planifica tu remada</span>
         <h1>SUP Experience</h1>
         <p class="subtitle">Condiciones confiables, mareas y ventanas ideales para salir con tranquilidad.</p>
+        <button class="ghost story-create-trigger" id="story-create-open">✨ Compartir mi historia</button>
       </div>
     </div>
     <div class="info-grid">
@@ -156,10 +157,28 @@
         <button class="primary" id="profile-save">Guardar perfil</button>
         <span class="profile-status" id="profile-status"></span>
       </div>
+    <div class="admin-section" id="admin-section" style="display: none;">
+      <h4>Perfiles registrados</h4>
+      <p class="admin-hint">Solo el equipo puede ver esta vista.</p>
+      <div class="admin-metrics" id="admin-metrics"></div>
+      <div class="admin-list" id="admin-profile-list"></div>
+    </div>
+  </div>
+  </div>
+
+  <div id="modal-actual" class="modal-overlay" style="display: none;">
+    <div class="modal-content" id="modal-contenido">
+      <button onclick="cerrarModal()" class="cerrar-modal">✕</button>
+    </div>
+  </div>
+
+  <div id="story-create-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content story-create-modal">
+      <button type="button" class="cerrar-modal" id="story-create-close">✕</button>
       <div class="story-editor">
         <div class="story-editor-header">
-          <h4>Tu momento SUP</h4>
-          <p>Escribe un comentario breve y suma una foto si quieres. Lo revisaremos antes de publicarlo.</p>
+          <h4>Comparte tu momento SUP</h4>
+          <p>Cuenta cómo estuvo tu sesión, agrega una foto y un spot cercano.</p>
         </div>
         <label class="story-editor-comment">
           Comentario
@@ -193,18 +212,6 @@
         </div>
         <p class="story-editor-meta" id="story-meta"></p>
       </div>
-    <div class="admin-section" id="admin-section" style="display: none;">
-      <h4>Perfiles registrados</h4>
-      <p class="admin-hint">Solo el equipo puede ver esta vista.</p>
-      <div class="admin-metrics" id="admin-metrics"></div>
-      <div class="admin-list" id="admin-profile-list"></div>
-    </div>
-  </div>
-  </div>
-
-  <div id="modal-actual" class="modal-overlay" style="display: none;">
-    <div class="modal-content" id="modal-contenido">
-      <button onclick="cerrarModal()" class="cerrar-modal">✕</button>
     </div>
   </div>
 
@@ -400,6 +407,9 @@
     const storiesRefreshButton = document.getElementById('stories-refresh-button');
     const storyModal = document.getElementById('story-modal');
     const storyModalClose = document.getElementById('story-modal-close');
+    const storyCreateModal = document.getElementById('story-create-modal');
+    const storyCreateOpenButton = document.getElementById('story-create-open');
+    const storyCreateCloseButton = document.getElementById('story-create-close');
     const storyModalMedia = document.getElementById('story-modal-media');
     const storyModalTitle = document.getElementById('story-modal-title');
     const storyModalAuthor = document.getElementById('story-modal-author');
@@ -583,6 +593,25 @@
         }
       }
     }
+
+    function openStoryCreateModal() {
+      const authState = window.supAuth && typeof window.supAuth.getState === 'function' ? window.supAuth.getState() : null;
+      const token = authState?.token;
+      if (!token) {
+        window.supAuth?.openAuthModal?.();
+        return;
+      }
+      if (storyCreateModal) {
+        storyCreateModal.style.display = 'flex';
+      }
+    }
+
+    function closeStoryCreateModal() {
+      if (storyCreateModal) {
+        storyCreateModal.style.display = 'none';
+      }
+    }
+
     function openStoryModal(storyId) {
       if (!storyModal) return;
       const story = storiesState.stories.find((item) => item.id === storyId);
@@ -681,6 +710,14 @@
 
     storiesRefreshButton?.addEventListener('click', () => loadStories(true));
     window.addEventListener('sup-auth-changed', () => loadStories(true));
+    storyCreateOpenButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      openStoryCreateModal();
+    });
+    storyCreateCloseButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      closeStoryCreateModal();
+    });
     storyModalClose?.addEventListener('click', closeStoryModal);
     storyModalLikeButton?.addEventListener('click', (event) => {
       event.preventDefault();
@@ -693,6 +730,12 @@
         closeStoryModal();
       }
     });
+    storyCreateModal?.addEventListener('click', (event) => {
+      if (event.target === storyCreateModal) {
+        closeStoryCreateModal();
+      }
+    });
+    window.addEventListener('story-saved', closeStoryCreateModal);
 
     if (localStorage.getItem("modoOscuro") === "true") {
       document.body.classList.add("oscuro");

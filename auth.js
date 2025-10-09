@@ -752,6 +752,7 @@ storySaveButton?.addEventListener('click', async () => {
     fillStoryForm(story);
     if (storyStatusLabel) storyStatusLabel.textContent = 'Tu historia está en revisión. ¡Gracias por compartirla!';
     storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 5000);
+    window.dispatchEvent(new CustomEvent('story-saved'));
   } catch (error) {
     console.error(error);
     const message = error instanceof Error ? error.message : 'No se pudo guardar la historia.';
