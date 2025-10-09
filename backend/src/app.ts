@@ -4,6 +4,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { ensureFirebase } from './config/firebase.js';
 import profileRouter from './routes/profile.js';
+import storiesRouter from './routes/stories.js';
 
 ensureFirebase();
 
@@ -29,5 +30,6 @@ app.get('/v1/ping', (_req, res) => {
 });
 
 app.use('/v1/profile', profileRouter);
+app.use('/v1/stories', storiesRouter);
 
 export default app;
