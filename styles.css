@@ -625,6 +625,60 @@ h1 {
   gap: 12px;
 }
 
+.story-location {
+  display: grid;
+  gap: 8px;
+}
+
+.story-location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.story-location-btn {
+  font-size: 0.85rem;
+}
+
+.story-location-clear {
+  font-size: 0.8rem;
+  display: none;
+}
+
+.story-location-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  min-height: 1.1em;
+}
+
+.story-location-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.story-location-suggestions button {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(38, 198, 218, 0.32);
+  background: rgba(38, 198, 218, 0.12);
+  color: rgba(242, 246, 255, 0.85);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border 0.18s ease;
+}
+
+.story-location-suggestions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(38, 198, 218, 0.22);
+}
+
+.story-location-suggestions button.selected {
+  background: linear-gradient(135deg, rgba(38, 198, 218, 0.28), rgba(255, 197, 66, 0.22));
+  border-color: rgba(255, 197, 66, 0.5);
+  color: var(--text-primary);
+}
+
 .story-media-controls {
   display: flex;
   flex-wrap: wrap;

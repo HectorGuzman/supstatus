@@ -140,6 +140,14 @@ export async function upsertUserStory(uid: string, payload: StoryPayload, author
     }
   }
 
+  if (payload.spot !== undefined) {
+    if (typeof payload.spot === 'string' && payload.spot.trim().length) {
+      nextData.spot = payload.spot.trim();
+    } else {
+      nextData.spot = admin.firestore.FieldValue.delete();
+    }
+  }
+
   const exists = existingSnap.exists;
   if (!exists) {
     nextData.createdAt = now;

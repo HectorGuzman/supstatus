@@ -80,14 +80,22 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
   }
 
   const mediaUrl = typeof payload?.mediaUrl === 'string' ? payload.mediaUrl.trim() : undefined;
+  const spotValue = typeof payload?.spot === 'string' ? payload.spot.trim() : undefined;
+
+  const storyPayload: StoryPayload = {
+    body: bodyText,
+  };
+  if (mediaUrl !== undefined) {
+    storyPayload.mediaUrl = mediaUrl;
+  }
+  if (spotValue !== undefined) {
+    storyPayload.spot = spotValue;
+  }
 
   try {
     const story = await upsertUserStory(
       decoded.uid,
-      {
-        body: bodyText,
-        mediaUrl,
-      },
+      storyPayload,
       {
         displayName: decoded.name || decoded.displayName || null,
         email: decoded.email || null,

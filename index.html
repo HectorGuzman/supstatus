@@ -165,6 +165,14 @@
           Comentario
           <textarea id="story-body" rows="4" placeholder="¿Cómo estuvo tu remada hoy?"></textarea>
         </label>
+        <div class="story-location">
+          <div class="story-location-actions">
+            <button class="ghost story-location-btn" type="button" id="story-location-button">📍 Obtener sugerencias cercanas</button>
+            <button class="ghost story-location-clear" type="button" id="story-location-clear" style="display: none;">✕ Quitar sugerencia</button>
+          </div>
+          <span class="story-location-status" id="story-location-status"></span>
+          <div class="story-location-suggestions" id="story-location-suggestions"></div>
+        </div>
         <div class="story-editor-media">
           <div class="story-media-controls">
             <label class="story-media-upload">
@@ -575,7 +583,6 @@
         }
       }
     }
-
     function openStoryModal(storyId) {
       if (!storyModal) return;
       const story = storiesState.stories.find((item) => item.id === storyId);

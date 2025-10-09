@@ -54,6 +54,10 @@ const storySaveButton = document.getElementById('story-save');
 const storyResetButton = document.getElementById('story-reset');
 const storyStatusLabel = document.getElementById('story-status');
 const storyMetaLabel = document.getElementById('story-meta');
+const storyLocationButton = document.getElementById('story-location-button');
+const storyLocationClearButton = document.getElementById('story-location-clear');
+const storyLocationStatus = document.getElementById('story-location-status');
+const storyLocationSuggestionsContainer = document.getElementById('story-location-suggestions');
 const avatarInput = document.getElementById('profile-avatar-input');
 const avatarPreview = document.getElementById('profile-avatar-preview');
 const avatarStatus = document.getElementById('profile-avatar-status');
@@ -72,7 +76,36 @@ const defaultGreeting = '🌊 Conecta tu perfil SUP y guarda tus remadas favorit
 const DEFAULT_AVATAR_SRC = 'logosupstatus.png';
 const AVATAR_MAX_SIZE = 3 * 1024 * 1024; // 3 MB
 const STORY_MEDIA_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
+const SPOT_SUGGESTIONS = [
+  { name: 'La Herradura - Club de Yates', lat: -29.983059, lon: -71.365225 },
+  { name: 'La Herradura - Playa Chica', lat: -29.991385, lon: -71.356782 },
+  { name: 'Peñuelas', lat: -29.955497, lon: -71.338849 },
+  { name: 'Coquimbo Centro', lat: -29.953052, lon: -71.343914 },
+  { name: 'Playa Blanca', lat: -29.930418, lon: -71.301394 },
+];
 if (greetingLabel) greetingLabel.textContent = defaultGreeting;
+
+function toRadians(value) {
+  return (value * Math.PI) / 180;
+}
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function getNearestSpots(lat, lon, limit = 3) {
+  return SPOT_SUGGESTIONS.map((spot) => ({
+    ...spot,
+    distanceKm: haversineDistance(lat, lon, spot.lat, spot.lon),
+  }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, limit);
+}
 
 let currentUser = null;
 let currentToken = null;
@@ -87,6 +120,10 @@ let storyStatusTimeout = null;
 let currentStoryMediaUrl = '';
 let storyMediaUploading = false;
 let storyMediaPreviewUrl = null;
+let storySelectedSpot = '';
+let storyLocationSuggestions = [];
+let storyLocationLoading = false;
+let storyLocationCoords = null;
 
 function resetAvatarPreviewUrl() {
   if (avatarPreviewObjectUrl) {
@@ -111,6 +148,108 @@ function syncAvatarFromProfile(profile) {
   setAvatarPreview(src);
   setHeaderAvatar(src);
 }
+
+function renderStoryLocationState(statusOverride) {
+  if (storyLocationButton) {
+    storyLocationButton.disabled = storyLocationLoading;
+    storyLocationButton.textContent = storyLocationLoading ? '📍 Obteniendo ubicación…' : '📍 Obtener sugerencias cercanas';
+  }
+  if (storyLocationClearButton) {
+    const shouldShow = Boolean(storySelectedSpot || storyLocationSuggestions.length);
+    storyLocationClearButton.style.display = shouldShow ? 'inline-flex' : 'none';
+    storyLocationClearButton.disabled = storyLocationLoading;
+  }
+  if (storyLocationStatus) {
+    if (statusOverride) {
+      storyLocationStatus.textContent = statusOverride;
+    } else if (storyLocationLoading) {
+      storyLocationStatus.textContent = 'Solicitando tu ubicación…';
+    } else if (storyLocationSuggestions.length) {
+      storyLocationStatus.textContent = storySelectedSpot
+        ? `Usaremos: ${storySelectedSpot}. Puedes elegir otro si prefieres.`
+        : 'Selecciona el spot que mejor describe tu historia.';
+    } else if (storySelectedSpot) {
+      storyLocationStatus.textContent = `Usaremos: ${storySelectedSpot}`;
+    } else {
+      storyLocationStatus.textContent = 'Puedes agregar un spot cercano a tu historia.';
+    }
+  }
+  if (storyLocationSuggestionsContainer) {
+    if (!storyLocationSuggestions.length) {
+      storyLocationSuggestionsContainer.innerHTML = '';
+    } else {
+      storyLocationSuggestionsContainer.innerHTML = storyLocationSuggestions
+        .map((suggestion) => {
+          const distanceCopy = suggestion.distanceKm < 1
+            ? `${Math.round(suggestion.distanceKm * 1000)} m`
+            : `${suggestion.distanceKm.toFixed(1)} km`;
+          const selected = suggestion.name === storySelectedSpot ? 'selected' : '';
+          const safeName = escapeHtml(suggestion.name);
+          const encodedName = encodeURIComponent(suggestion.name);
+          return `<button type="button" data-spot="${escapeHtml(encodedName)}" class="${selected}">${safeName} · ${escapeHtml(distanceCopy)}</button>`;
+        })
+        .join('');
+    }
+  }
+}
+
+function selectStorySpot(spotName) {
+  if (!spotName) {
+    storySelectedSpot = '';
+  } else if (storySelectedSpot === spotName) {
+    storySelectedSpot = '';
+  } else {
+    storySelectedSpot = spotName;
+  }
+  renderStoryLocationState();
+}
+
+function handleStoryLocationSuccess(position) {
+  const { latitude, longitude } = position.coords;
+  storyLocationCoords = { latitude, longitude };
+  storyLocationSuggestions = getNearestSpots(latitude, longitude, 3);
+  if (!storySelectedSpot && storyLocationSuggestions.length) {
+    storySelectedSpot = storyLocationSuggestions[0].name;
+  }
+  storyLocationLoading = false;
+  renderStoryLocationState();
+}
+
+function handleStoryLocationError(error) {
+  console.error('[stories] geolocation error', error);
+  storyLocationCoords = null;
+  storyLocationSuggestions = [];
+  storyLocationLoading = false;
+  let message = 'No pudimos obtener tu ubicación.';
+  switch (error.code) {
+    case error.PERMISSION_DENIED:
+      message = 'No pudimos obtener tu ubicación (permiso denegado).';
+      break;
+    case error.POSITION_UNAVAILABLE:
+      message = 'La información de ubicación no está disponible.';
+      break;
+    case error.TIMEOUT:
+      message = 'La solicitud de ubicación tardó demasiado.';
+      break;
+  }
+  renderStoryLocationState(message);
+}
+
+function requestStoryLocation() {
+  if (!navigator.geolocation) {
+    renderStoryLocationState('Tu navegador no soporta geolocalización.');
+    return;
+  }
+  storyLocationLoading = true;
+  renderStoryLocationState();
+  navigator.geolocation.getCurrentPosition(handleStoryLocationSuccess, handleStoryLocationError, {
+    enableHighAccuracy: true,
+    timeout: 12000,
+    maximumAge: 300000,
+  });
+}
+
+renderStoryLocationState();
 
 function revokeStoryMediaPreview() {
   if (storyMediaPreviewUrl) {
@@ -168,6 +307,11 @@ function clearStoryStatusMessage() {
 }
 
 function fillStoryForm(story) {
+  storySelectedSpot = story?.spot || '';
+  storyLocationSuggestions = [];
+  storyLocationCoords = null;
+  storyLocationLoading = false;
+  renderStoryLocationState();
   if (storyBodyInput) storyBodyInput.value = story?.body || '';
   setStoryMediaFromStory(story);
   updateStoryMeta(story);
@@ -209,6 +353,11 @@ function getStoryPayload() {
     payload.mediaUrl = currentStoryMediaUrl;
   } else if (currentStory?.mediaUrl) {
     payload.mediaUrl = '';
+  }
+  if (storySelectedSpot) {
+    payload.spot = storySelectedSpot.trim();
+  } else if (currentStory?.spot) {
+    payload.spot = '';
   }
   return payload;
 }
@@ -548,10 +697,40 @@ storyResetButton?.addEventListener('click', (event) => {
   clearStoryStatusMessage();
 });
 
+storyLocationButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (storyLocationLoading) return;
+  requestStoryLocation();
+});
+
+storyLocationClearButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (storyLocationLoading) return;
+  storySelectedSpot = '';
+  storyLocationSuggestions = [];
+  storyLocationCoords = null;
+  renderStoryLocationState();
+});
+
+storyLocationSuggestionsContainer?.addEventListener('click', (event) => {
+  const button = event.target.closest('button[data-spot]');
+  if (!button) return;
+  event.preventDefault();
+  let decoded = button.dataset.spot || '';
+  try {
+    decoded = decodeURIComponent(decoded);
+  } catch (_error) {
+    // ignore decode errors
+  }
+  selectStorySpot(decoded.trim());
+});
+
 storySaveButton?.addEventListener('click', async () => {
-  if (!currentUser || !currentToken || isSavingStory || storyMediaUploading) {
+  if (!currentUser || !currentToken || isSavingStory || storyMediaUploading || storyLocationLoading) {
     if (storyMediaUploading && storyStatusLabel) {
       storyStatusLabel.textContent = 'Espera a que la foto termine de subir.';
+    } else if (storyLocationLoading && storyStatusLabel) {
+      storyStatusLabel.textContent = 'Espera a que se carguen las sugerencias de ubicación.';
     }
     return;
   }
