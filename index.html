@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SUP Experience - La Herradura</title>
+  <title>SUP Status - La Herradura</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
@@ -29,10 +29,10 @@
       </div>
     </div>
     <div class="branding">
-      <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Experience logo" class="logo">
+      <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Status logo" class="logo">
       <div class="headline">
         <span class="eyebrow">Planifica tu remada</span>
-        <h1>SUP Experience</h1>
+        <h1>SUP Status</h1>
         <p class="subtitle">Condiciones confiables, mareas y ventanas ideales para salir con tranquilidad.</p>
         <button class="ghost story-create-trigger" id="story-create-open">✨ Compartir mi historia</button>
       </div>
@@ -61,7 +61,7 @@
   <main class="layout">
     <section class="forecast">
       <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
-      <div class="cards-grid" id="pronostico"></div>
+      <div class="cards-carousel" id="pronostico"></div>
     </section>
     <section class="stories-section" id="stories-section">
       <div class="stories-header">
@@ -287,6 +287,19 @@
       miniMaps = [];
     }
 
+    function getFeaturedIndex(blocks, dia) {
+      if (!Array.isArray(blocks) || !blocks.length) return 0;
+      if (dia !== 'hoy') return 0;
+      const now = new Date();
+      const currentHour = now.getHours();
+      let index = blocks.findIndex((item) => {
+        const hour = Number.parseInt((item.hora || '').split(':')[0], 10);
+        return !Number.isNaN(hour) && hour >= currentHour;
+      });
+      if (index === -1) index = blocks.length - 1;
+      return Math.max(index, 0);
+    }
+
     function renderizarPronostico(dia) {
       if (!pronostico || !pronostico[dia]) return;
       diaActual = dia;
@@ -309,10 +322,22 @@
 
       cleanupMiniMaps();
 
-      pronostico[dia].forEach((item, i) => {
+      const bloquesOriginales = pronostico[dia];
+      const highlightedIndex = getFeaturedIndex(bloquesOriginales, dia);
+      const bloques = [
+        ...bloquesOriginales.slice(highlightedIndex),
+        ...bloquesOriginales.slice(0, highlightedIndex),
+      ];
+
+      bloques.forEach((item, i) => {
         const card = document.createElement("article");
         card.className = "card";
-        card.style.animationDelay = `${i * 0.08}s`;
+
+        if (i === 0) {
+          card.classList.add('featured');
+        }
+
+        card.style.animationDelay = `${i * 0.06}s`;
 
         const nivelClass = item.nivel.toLowerCase();
         const mapId = `mini-map-${dia}-${i}`;
@@ -350,8 +375,13 @@
 
         contenedor.appendChild(card);
         initializeMiniMap(mapId, Number.parseInt(item.direccionVientoGrados, 10));
-
       });
+
+      if (typeof contenedor.scrollTo === 'function') {
+        contenedor.scrollTo({ left: 0, behavior: 'smooth' });
+      } else if (contenedor instanceof HTMLElement) {
+        contenedor.scrollLeft = 0;
+      }
 
     }
 
@@ -365,9 +395,9 @@
     }
 
     function compartirInfo() {
-      const texto = 'Revisa las condiciones en SUP Experience - La Herradura: ' + window.location.href;
+      const texto = 'Revisa las condiciones en SUP Status - La Herradura: ' + window.location.href;
       if (navigator.share) {
-        navigator.share({ title: 'SUP Experience - La Herradura', text: texto, url: window.location.href });
+        navigator.share({ title: 'SUP Status - La Herradura', text: texto, url: window.location.href });
       } else {
         alert("Tu navegador no soporta la función de compartir.");
       }

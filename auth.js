@@ -16,6 +16,7 @@ import {
   uploadBytes,
   getDownloadURL,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+import heic2any from 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDdk4ZjSGeyzO5pmlasJ672iF1BdhDtaCI',
@@ -76,12 +77,24 @@ const defaultGreeting = '🌊 Conecta tu perfil SUP y guarda tus remadas favorit
 const DEFAULT_AVATAR_SRC = 'logosupstatus.png';
 const AVATAR_MAX_SIZE = 3 * 1024 * 1024; // 3 MB
 const STORY_MEDIA_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-const SPOT_SUGGESTIONS = [
+const LOCAL_SPOT_SUGGESTIONS = [
   { name: 'La Herradura - Club de Yates', lat: -29.983059, lon: -71.365225 },
   { name: 'La Herradura - Playa Chica', lat: -29.991385, lon: -71.356782 },
+  { name: 'La Herradura - Playa Grande', lat: -29.989642, lon: -71.351008 },
   { name: 'Peñuelas', lat: -29.955497, lon: -71.338849 },
   { name: 'Coquimbo Centro', lat: -29.953052, lon: -71.343914 },
   { name: 'Playa Blanca', lat: -29.930418, lon: -71.301394 },
+];
+
+const DEFAULT_SPOT_SUGGESTIONS = [
+  'La Herradura - Club de Yates',
+  'La Herradura - Playa Chica',
+  'Peñuelas',
+  'Bahía Cisnes',
+  'Playa Las Tacas',
+  'Playa Blanca',
+  'Coquimbo Centro',
+  'Tongoy',
 ];
 const STORY_MEDIA_MAX_DIMENSION = 1600; // px
 const STORY_MEDIA_DEFAULT_QUALITY = 0.85;
@@ -101,7 +114,7 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
 }
 
 function getNearestSpots(lat, lon, limit = 3) {
-  return SPOT_SUGGESTIONS.map((spot) => ({
+  return LOCAL_SPOT_SUGGESTIONS.map((spot) => ({
     ...spot,
     distanceKm: haversineDistance(lat, lon, spot.lat, spot.lon),
   }))
@@ -186,7 +199,14 @@ function canvasToBlob(canvas, type, quality) {
 
 async function prepareImageForUpload(file) {
   try {
-    const { image, width, height, isBitmap } = await loadImageFromFile(file);
+    let workingFile = file;
+    if (/\.hei[cf]$/i.test(file.name || '') || file.type === 'image/heic' || file.type === 'image/heif') {
+      if (storyMediaStatus) storyMediaStatus.textContent = 'Convirtiendo HEIC…';
+      const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: STORY_MEDIA_DEFAULT_QUALITY });
+      workingFile = new File([convertedBlob], `${(file.name?.split?.('.')?.[0] || 'story')}.jpg`, { type: 'image/jpeg' });
+    }
+
+    const { image, width, height, isBitmap } = await loadImageFromFile(workingFile);
     const scale = Math.min(STORY_MEDIA_MAX_DIMENSION / width, STORY_MEDIA_MAX_DIMENSION / height, 1);
     const targetWidth = Math.round(width * scale);
     const targetHeight = Math.round(height * scale);
@@ -238,12 +258,19 @@ function renderStoryLocationState(statusOverride) {
     } else if (storySelectedSpot) {
       storyLocationStatus.textContent = `Usaremos: ${storySelectedSpot}`;
     } else {
-      storyLocationStatus.textContent = 'Puedes agregar un spot cercano a tu historia.';
+      storyLocationStatus.textContent = 'Puedes agregar un spot cercano a tu historia o elegir uno sugerido.';
     }
   }
   if (storyLocationSuggestionsContainer) {
     if (!storyLocationSuggestions.length) {
-      storyLocationSuggestionsContainer.innerHTML = '';
+      storyLocationSuggestionsContainer.innerHTML = DEFAULT_SPOT_SUGGESTIONS
+        .map((name) => {
+          const safeName = escapeHtml(name);
+          const encodedName = encodeURIComponent(name);
+          const selected = storySelectedSpot === name ? 'selected' : '';
+          return `<button type="button" data-spot="${escapeHtml(encodedName)}" class="${selected}">${safeName}</button>`;
+        })
+        .join('');
     } else {
       storyLocationSuggestionsContainer.innerHTML = storyLocationSuggestions
         .map((suggestion) => {
@@ -274,7 +301,11 @@ function selectStorySpot(spotName) {
 function handleStoryLocationSuccess(position) {
   const { latitude, longitude } = position.coords;
   storyLocationCoords = { latitude, longitude };
-  storyLocationSuggestions = getNearestSpots(latitude, longitude, 3);
+  const nearest = getNearestSpots(latitude, longitude, 3);
+  const fallback = DEFAULT_SPOT_SUGGESTIONS.filter((name) => !nearest.some((spot) => spot.name === name))
+    .slice(0, 3 - nearest.length)
+    .map((name) => ({ name, lat: null, lon: null, distanceKm: Number.POSITIVE_INFINITY }));
+  storyLocationSuggestions = [...nearest, ...fallback];
   if (!storySelectedSpot && storyLocationSuggestions.length) {
     storySelectedSpot = storyLocationSuggestions[0].name;
   }
@@ -299,7 +330,7 @@ function handleStoryLocationError(error) {
       message = 'La solicitud de ubicación tardó demasiado.';
       break;
   }
-  renderStoryLocationState(message);
+  renderStoryLocationState(`${message} Selecciona un spot sugerido de la lista.`);
 }
 
 function requestStoryLocation() {
