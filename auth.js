@@ -83,6 +83,8 @@ const SPOT_SUGGESTIONS = [
   { name: 'Coquimbo Centro', lat: -29.953052, lon: -71.343914 },
   { name: 'Playa Blanca', lat: -29.930418, lon: -71.301394 },
 ];
+const STORY_MEDIA_MAX_DIMENSION = 1600; // px
+const STORY_MEDIA_DEFAULT_QUALITY = 0.85;
 if (greetingLabel) greetingLabel.textContent = defaultGreeting;
 
 function toRadians(value) {
@@ -147,6 +149,71 @@ function syncAvatarFromProfile(profile) {
   const src = profile?.avatarUrl || DEFAULT_AVATAR_SRC;
   setAvatarPreview(src);
   setHeaderAvatar(src);
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+async function loadImageFromFile(file) {
+  if ('createImageBitmap' in window) {
+    try {
+      const bitmap = await createImageBitmap(file);
+      return { image: bitmap, width: bitmap.width, height: bitmap.height, isBitmap: true };
+    } catch (error) {
+      console.warn('[stories] createImageBitmap falló, usando Image()', error);
+    }
+  }
+  const dataUrl = await readFileAsDataURL(file);
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve({ image, width: image.naturalWidth, height: image.naturalHeight, isBitmap: false });
+    image.onerror = reject;
+    image.src = dataUrl;
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), type, quality);
+  });
+}
+
+async function prepareImageForUpload(file) {
+  try {
+    const { image, width, height, isBitmap } = await loadImageFromFile(file);
+    const scale = Math.min(STORY_MEDIA_MAX_DIMENSION / width, STORY_MEDIA_MAX_DIMENSION / height, 1);
+    const targetWidth = Math.round(width * scale);
+    const targetHeight = Math.round(height * scale);
+    const needsResize = scale < 1 || file.size > STORY_MEDIA_MAX_SIZE;
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
+    if (isBitmap && typeof image.close === 'function') {
+      image.close();
+    }
+    const qualities = needsResize ? [STORY_MEDIA_DEFAULT_QUALITY, 0.75, 0.65, 0.55] : [STORY_MEDIA_DEFAULT_QUALITY];
+    for (const quality of qualities) {
+      const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+      if (!blob) continue;
+      if (blob.size <= STORY_MEDIA_MAX_SIZE || quality === qualities[qualities.length - 1]) {
+        const optimizedName = `${(file.name?.split?.('.')?.[0] || 'story')}-optimized.jpg`;
+        return new File([blob], optimizedName, { type: 'image/jpeg' });
+      }
+    }
+    return file;
+  } catch (error) {
+    console.warn('[stories] No se pudo optimizar la imagen, usando original.', error);
+    return file;
+  }
 }
 
 function renderStoryLocationState(statusOverride) {
@@ -238,6 +305,10 @@ function handleStoryLocationError(error) {
 function requestStoryLocation() {
   if (!navigator.geolocation) {
     renderStoryLocationState('Tu navegador no soporta geolocalización.');
+    return;
+  }
+  if (!window.isSecureContext) {
+    renderStoryLocationState('Activa HTTPS o usa localhost para compartir tu ubicación.');
     return;
   }
   storyLocationLoading = true;
@@ -778,8 +849,8 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
     storyMediaFileInput.value = '';
     return;
   }
-  if (file.size > STORY_MEDIA_MAX_SIZE) {
-    if (storyMediaStatus) storyMediaStatus.textContent = 'La foto debe pesar menos de 5 MB.';
+  if (file.size > STORY_MEDIA_MAX_SIZE * 6) {
+    if (storyMediaStatus) storyMediaStatus.textContent = 'La imagen es muy pesada. Prueba con una versión más liviana.';
     storyMediaFileInput.value = '';
     return;
   }
@@ -790,20 +861,28 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
 
   const previousUrl = currentStoryMediaUrl || currentStory?.mediaUrl || '';
   storyMediaUploading = true;
-  if (storyMediaStatus) storyMediaStatus.textContent = 'Subiendo foto…';
+  if (storyMediaStatus) storyMediaStatus.textContent = 'Optimizando foto…';
   storyMediaFileInput.disabled = true;
   storyMediaRemoveButton?.setAttribute('disabled', 'true');
   revokeStoryMediaPreview();
-  storyMediaPreviewUrl = URL.createObjectURL(file);
+
+  let processedFile = file;
+  try {
+    processedFile = await prepareImageForUpload(file);
+  } catch (error) {
+    console.warn('[stories] Error optimizando imagen', error);
+  }
+
+  storyMediaPreviewUrl = URL.createObjectURL(processedFile);
   setStoryMediaPreview(storyMediaPreviewUrl);
 
   const storagePath = `stories/${currentUser.uid}/media`;
   const fileRef = storageRef(storage, storagePath);
   try {
-    await uploadBytes(fileRef, file, { contentType: file.type, cacheControl: 'public,max-age=3600' });
+    await uploadBytes(fileRef, processedFile, { contentType: processedFile.type || file.type, cacheControl: 'public,max-age=3600' });
     const downloadUrl = await getDownloadURL(fileRef);
     updateStoryMediaUI(downloadUrl);
-    if (storyMediaStatus) storyMediaStatus.textContent = 'Foto lista ✓';
+    if (storyMediaStatus) storyMediaStatus.textContent = processedFile === file ? 'Foto lista ✓' : 'Foto optimizada ✓';
   } catch (error) {
     console.error(error);
     updateStoryMediaUI(previousUrl);
