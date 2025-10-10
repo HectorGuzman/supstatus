@@ -17,9 +17,15 @@
     }
   </script>
 </head>
-<body>
+<body id="top">
   <header class="top-bar container">
-    <div class="top-brand-spacer"></div>
+    <a class="top-brand" href="#top" aria-label="SUP Status · La Herradura">
+      <img src="icon-192.png" alt="" class="top-brand-logo" width="40" height="40" />
+      <span class="top-brand-text">
+        <strong>SUP Status</strong>
+        <small>La Herradura</small>
+      </span>
+    </a>
     <div class="top-actions">
       <button type="button" class="top-avatar-trigger" id="profile-link" aria-label="Abrir perfil">
         <img id="auth-header-avatar" class="top-avatar" src="logosupstatus.png" alt="Avatar SUP" />
@@ -889,7 +895,7 @@
         if (data.generado) {
           const generado = document.getElementById("generado-el");
           if (generado) {
-            generado.innerHTML = `<strong>🕒 Generado:</strong> ${data.generado}`;
+            generado.innerHTML = `<strong>🕒 Datos generados:</strong> ${data.generado}`;
           }
         }
 
