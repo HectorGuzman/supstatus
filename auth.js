@@ -16,7 +16,6 @@ import {
   uploadBytes,
   getDownloadURL,
 } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
-import heic2any from 'https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDdk4ZjSGeyzO5pmlasJ672iF1BdhDtaCI',
@@ -154,14 +153,20 @@ function setAvatarPreview(src) {
 
 function setHeaderAvatar(src) {
   if (!headerAvatarImg) return;
-  headerAvatarImg.src = src || DEFAULT_AVATAR_SRC;
+  if (src) {
+    headerAvatarImg.src = src;
+    headerAvatarImg.style.display = 'block';
+  } else {
+    headerAvatarImg.src = DEFAULT_AVATAR_SRC;
+    headerAvatarImg.style.display = 'none';
+  }
 }
 
 function syncAvatarFromProfile(profile) {
   resetAvatarPreviewUrl();
   const src = profile?.avatarUrl || DEFAULT_AVATAR_SRC;
   setAvatarPreview(src);
-  setHeaderAvatar(src);
+  setHeaderAvatar(profile?.avatarUrl || '');
 }
 
 function readFileAsDataURL(file) {
@@ -200,22 +205,28 @@ function canvasToBlob(canvas, type, quality) {
 async function prepareImageForUpload(file) {
   try {
     let workingFile = file;
-    if (/\.hei[cf]$/i.test(file.name || '') || file.type === 'image/heic' || file.type === 'image/heif') {
+    const heicConverter = globalThis.heic2any;
+    const isHeic = /\.hei[cf]$/i.test(file.name || '') || file.type === 'image/heic' || file.type === 'image/heif';
+    if (heicConverter && isHeic) {
       if (storyMediaStatus) storyMediaStatus.textContent = 'Convirtiendo HEIC…';
-      const convertedBlob = await heic2any({ blob: file, toType: 'image/jpeg', quality: STORY_MEDIA_DEFAULT_QUALITY });
+      const convertedBlob = await heicConverter({ blob: file, toType: 'image/jpeg', quality: STORY_MEDIA_DEFAULT_QUALITY });
       workingFile = new File([convertedBlob], `${(file.name?.split?.('.')?.[0] || 'story')}.jpg`, { type: 'image/jpeg' });
+    } else if (isHeic) {
+      console.warn('[stories] Navegador sin soporte para heic2any.');
+      if (storyMediaStatus) storyMediaStatus.textContent = 'Tu navegador no puede convertir HEIC. Usa formato JPG o ajusta la cámara.';
+      return file;
     }
 
     const { image, width, height, isBitmap } = await loadImageFromFile(workingFile);
     const scale = Math.min(STORY_MEDIA_MAX_DIMENSION / width, STORY_MEDIA_MAX_DIMENSION / height, 1);
     const targetWidth = Math.round(width * scale);
     const targetHeight = Math.round(height * scale);
-    const needsResize = scale < 1 || file.size > STORY_MEDIA_MAX_SIZE;
+    const needsResize = scale < 1 || workingFile.size > STORY_MEDIA_MAX_SIZE;
     const canvas = document.createElement('canvas');
     canvas.width = targetWidth;
     canvas.height = targetHeight;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return file;
+    if (!ctx) return workingFile;
     ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
     if (isBitmap && typeof image.close === 'function') {
       image.close();
@@ -225,11 +236,11 @@ async function prepareImageForUpload(file) {
       const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
       if (!blob) continue;
       if (blob.size <= STORY_MEDIA_MAX_SIZE || quality === qualities[qualities.length - 1]) {
-        const optimizedName = `${(file.name?.split?.('.')?.[0] || 'story')}-optimized.jpg`;
+        const optimizedName = `${(workingFile.name?.split?.('.')?.[0] || 'story')}-optimized.jpg`;
         return new File([blob], optimizedName, { type: 'image/jpeg' });
       }
     }
-    return file;
+    return workingFile;
   } catch (error) {
     console.warn('[stories] No se pudo optimizar la imagen, usando original.', error);
     return file;

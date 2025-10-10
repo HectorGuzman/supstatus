@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="styles.css">
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations?.().then((regs) => {
@@ -17,78 +18,96 @@
   </script>
 </head>
 <body>
-  <header>
-    <div class="auth-bar">
-      <div class="auth-greeting">
-        <img id="auth-header-avatar" class="auth-greeting-avatar" src="logosupstatus.png" alt="Avatar SUP" />
-        <span id="auth-greeting" class="auth-greeting-text">🌊 Conecta tu perfil SUP y guarda tus remadas favoritas</span>
-      </div>
-      <div class="auth-widget">
-        <button class="ghost profile-link" id="profile-link">👤 Mi perfil</button>
-        <button class="ghost" id="auth-button">🔐 Iniciar sesión</button>
-      </div>
-    </div>
-    <div class="branding">
-      <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Status logo" class="logo">
-      <div class="headline">
-        <span class="eyebrow">Planifica tu remada</span>
-        <h1>SUP Status</h1>
-        <p class="subtitle">Condiciones confiables, mareas y ventanas ideales para salir con tranquilidad.</p>
-        <button class="ghost story-create-trigger" id="story-create-open">✨ Compartir mi historia</button>
-      </div>
-    </div>
-    <div class="info-grid">
-      <div id="fecha" class="info-chip">📅 Cargando fecha…</div>
-      <div id="horarios-sol" class="info-chip">🌅 Calculando sol…</div>
-      <div id="generado-el" class="info-chip">🕒 Actualizando datos…</div>
-    </div>
-    <div class="control-row">
-      <div id="selector-dia" class="segmented">
-        <button data-dia="hoy" class="activo" onclick="cambiarDia('hoy')">Hoy</button>
-        <button data-dia="mañana" onclick="cambiarDia('mañana')">Mañana</button>
-      </div>
-      <div class="actions">
-        <button class="ghost" onclick="compartirInfo()">📤 Compartir</button>
-        <button class="ghost" onclick="alternarModo()">🌓 Modo oscuro</button>
-        <button class="primary" onclick="verCondicionesActuales()">⏱️ ¿Puedo remar ahora?</button>
-      </div>
-    </div>
-    <div class="nota-aviso">
-      ⚠️ Usa chaleco salvavidas, verifica el spot en terreno y navega de forma responsable.
+  <header class="top-bar">
+    <div class="top-brand-spacer"></div>
+    <div class="top-actions">
+      <img id="auth-header-avatar" class="top-avatar" src="logosupstatus.png" alt="Avatar SUP" />
+      <button class="ghost story-create-trigger" id="story-create-open">✨ Compartir historia</button>
+      <button class="ghost profile-link" id="profile-link">👤 Mi perfil</button>
+      <button class="ghost" id="auth-button">🔐 Iniciar sesión</button>
     </div>
   </header>
 
   <main class="layout">
-    <section class="forecast">
-      <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
-      <div class="cards-carousel" id="pronostico"></div>
-    </section>
-    <section class="stories-section" id="stories-section">
-      <div class="stories-header">
-        <div>
-          <h2 class="section-title">Historias SUP</h2>
-          <p class="stories-subtitle">Descubre cómo la comunidad vive La Herradura y encuentra inspiración para tu próxima remada.</p>
+    <section class="hero">
+      <div class="hero-copy">
+        <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Status logo" class="hero-logo">
+        <span class="hero-tagline">Condiciones para tu remada</span>
+        <p class="subtitle">Condiciones confiables, mareas y ventanas ideales para remar con tranquilidad en La Herradura.</p>
+        <div class="hero-actions">
+          <button class="primary" onclick="verCondicionesActuales()">⏱️ ¿Puedo remar ahora?</button>
+          <button class="ghost" onclick="compartirInfo()">📤 Compartir reporte</button>
         </div>
-        <button class="ghost" id="stories-refresh-button" aria-label="Actualizar historias">🔄 Actualizar</button>
+        <span id="auth-greeting" class="hero-greeting">🌊 Conecta tu perfil SUP y guarda tus remadas favoritas</span>
       </div>
-      <div class="stories-content" id="stories-content">
-        <div class="stories-empty" id="stories-empty">
-          <p>📘 Aún no hay historias destacadas. ¡Comparte la tuya desde tu perfil!</p>
+      <div class="hero-card" id="estado-actual">
+        <div class="hero-card-header">
+          <span class="hero-card-eyebrow">Siguiente ventana ideal</span>
+          <span class="hero-card-chip" id="estado-nivel">—</span>
         </div>
-        <div class="stories-grid" id="stories-grid"></div>
+        <h3 id="estado-hora">--:-- hrs</h3>
+        <p id="estado-detalle">Esperando pronóstico…</p>
+        <div class="hero-card-metrics">
+          <span id="estado-viento">🌬️ --</span>
+          <span id="estado-oleaje">🌊 --</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="info-band">
+      <div id="fecha" class="info-chip">📅 Cargando fecha…</div>
+      <div id="horarios-sol" class="info-chip">🌅 Calculando sol…</div>
+      <div id="generado-el" class="info-chip">🕒 Actualizando datos…</div>
+    </section>
+
+    <section class="forecast">
+      <div class="forecast-header">
+        <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
+        <div class="forecast-controls">
+          <div id="selector-dia" class="segmented">
+            <button data-dia="hoy" class="activo" onclick="cambiarDia('hoy')">Hoy</button>
+            <button data-dia="mañana" onclick="cambiarDia('mañana')">Mañana</button>
+          </div>
+          <button class="ghost" onclick="alternarModo()">🌓 Modo oscuro</button>
+        </div>
+      </div>
+      <div class="cards-grid" id="pronostico"></div>
+    </section>
+
+    <section class="insights">
+      <div class="insights-card">
+        <h2>Mareas próximas</h2>
+        <p class="insights-subtitle">Mantén a la vista los próximos eventos de marea para ajustar tu salida.</p>
+        <div id="horarios-marea" class="marea-chips">Cargando mareas…</div>
+      </div>
+      <div class="insights-card">
+        <h2>Consejo rápido</h2>
+        <p class="insights-tip">⚠️ Usa chaleco salvavidas, verifica el spot en terreno y navega de forma responsable. Revisa siempre las condiciones al llegar.</p>
+      </div>
+    </section>
+
+    <section class="stories-section" id="stories-section">
+      <div class="stories-wrapper">
+        <div class="stories-header">
+          <div>
+            <h2 class="section-title">Historias SUP</h2>
+            <p class="stories-subtitle">Descubre cómo la comunidad vive La Herradura y encuentra inspiración para tu próxima remada.</p>
+          </div>
+          <button class="ghost" id="stories-refresh-button" aria-label="Actualizar historias">🔄 Actualizar</button>
+        </div>
+        <div class="stories-content" id="stories-content">
+          <div class="stories-empty" id="stories-empty">
+            <p>📘 Aún no hay historias destacadas. ¡Comparte la tuya desde tu perfil!</p>
+          </div>
+          <div class="stories-grid" id="stories-grid"></div>
+        </div>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="footer-panel">
-      <div>
-        <h3>Mareas próximas</h3>
-        <div id="horarios-marea" class="marea-chips">Cargando mareas…</div>
-      </div>
-      <p class="creditos">
-        Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank" rel="noopener">@__jokerguzman</a>
-      </p>
+      <p class="creditos">Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank" rel="noopener">@__jokerguzman</a></p>
       <div class="support-row">
         <span class="support-copy">¿Te gusta el proyecto?</span>
         <a class="bmc-button" href="https://buymeacoffee.com/jokerguzman" target="_blank" rel="noopener" aria-label="Invítanos un café en Buy Me a Coffee">
@@ -242,6 +261,11 @@
     let pronostico;
     let diaActual = "hoy";
     let miniMaps = [];
+    const estadoHoraEl = document.getElementById('estado-hora');
+    const estadoNivelEl = document.getElementById('estado-nivel');
+    const estadoDetalleEl = document.getElementById('estado-detalle');
+    const estadoVientoEl = document.getElementById('estado-viento');
+    const estadoOleajeEl = document.getElementById('estado-oleaje');
 
     const lat = -29.983059;
     const lon = -71.365225;
@@ -300,6 +324,15 @@
       return Math.max(index, 0);
     }
 
+    function actualizarEstadoActualCard(item) {
+      if (!item || !estadoHoraEl) return;
+      estadoHoraEl.textContent = `${item.hora || '--:--'} hrs`;
+      if (estadoNivelEl) estadoNivelEl.textContent = item.nivel || '—';
+      if (estadoDetalleEl) estadoDetalleEl.textContent = item.condiciones || 'Mantente atento a las actualizaciones.';
+      if (estadoVientoEl) estadoVientoEl.textContent = `🌬️ ${item.viento || '--'}`;
+      if (estadoOleajeEl) estadoOleajeEl.textContent = `🌊 ${item.oleaje || '--'}`;
+    }
+
     function renderizarPronostico(dia) {
       if (!pronostico || !pronostico[dia]) return;
       diaActual = dia;
@@ -318,26 +351,23 @@
       mostrarHorariosSol(fecha);
 
       const contenedor = document.getElementById("pronostico");
+      if (!contenedor) return;
       contenedor.innerHTML = "";
 
       cleanupMiniMaps();
 
-      const bloquesOriginales = pronostico[dia];
-      const highlightedIndex = getFeaturedIndex(bloquesOriginales, dia);
-      const bloques = [
-        ...bloquesOriginales.slice(highlightedIndex),
-        ...bloquesOriginales.slice(0, highlightedIndex),
-      ];
+      const bloques = pronostico[dia];
+      const highlightedIndex = getFeaturedIndex(bloques, dia);
 
       bloques.forEach((item, i) => {
         const card = document.createElement("article");
         card.className = "card";
 
-        if (i === 0) {
+        if (i === highlightedIndex) {
           card.classList.add('featured');
         }
 
-        card.style.animationDelay = `${i * 0.06}s`;
+        card.style.animationDelay = `${i * 0.08}s`;
 
         const nivelClass = item.nivel.toLowerCase();
         const mapId = `mini-map-${dia}-${i}`;
@@ -377,12 +407,7 @@
         initializeMiniMap(mapId, Number.parseInt(item.direccionVientoGrados, 10));
       });
 
-      if (typeof contenedor.scrollTo === 'function') {
-        contenedor.scrollTo({ left: 0, behavior: 'smooth' });
-      } else if (contenedor instanceof HTMLElement) {
-        contenedor.scrollLeft = 0;
-      }
-
+      actualizarEstadoActualCard(bloques[highlightedIndex]);
     }
 
     function cambiarDia(valor) {
