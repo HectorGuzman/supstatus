@@ -21,7 +21,7 @@ const firebaseConfig = {
   apiKey: 'AIzaSyDdk4ZjSGeyzO5pmlasJ672iF1BdhDtaCI',
   authDomain: 'supstatus-c1ab5.firebaseapp.com',
   projectId: 'supstatus-c1ab5',
-  storageBucket: 'supstatus-c1ab5.firebasestorage.app',
+  storageBucket: 'supstatus-c1ab5.appspot.com',
   messagingSenderId: '858880938649',
   appId: '1:858880938649:web:7340bdd7f957a078ac1e08',
 };
@@ -97,6 +97,10 @@ const DEFAULT_SPOT_SUGGESTIONS = [
 ];
 const STORY_MEDIA_MAX_DIMENSION = 1600; // px
 const STORY_MEDIA_DEFAULT_QUALITY = 0.85;
+const isAppleDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const LOCATION_PERMISSION_HELP = isAppleDevice
+  ? 'Abre Ajustes > Privacidad > Localización y permite el acceso a Safari para obtener sugerencias automáticas.'
+  : 'Revisa los permisos de ubicación del navegador (icono de candado) y vuelve a intentarlo permitiendo el acceso.';
 if (greetingLabel) greetingLabel.textContent = defaultGreeting;
 
 function toRadians(value) {
@@ -242,6 +246,24 @@ async function prepareImageForUpload(file) {
   }
 }
 
+function buildReadableUploadError(error, fallback = 'No se pudo subir la foto.') {
+  if (!error || typeof error !== 'object') return fallback;
+  const code = typeof error.code === 'string' ? error.code : '';
+  if (code.includes('unauthorized')) {
+    return 'Tu cuenta no tiene permisos para subir archivos. Revisa que tu sesión siga activa.';
+  }
+  if (code.includes('quota-exceeded')) {
+    return 'Se alcanzó el límite de almacenamiento. Intenta nuevamente más tarde.';
+  }
+  if (code.includes('cancelled')) {
+    return 'La subida fue cancelada antes de finalizar.';
+  }
+  if (code.includes('retry-limit-exceeded')) {
+    return 'La conexión falló varias veces. Comprueba tu señal y vuelve a intentarlo.';
+  }
+  return fallback;
+}
+
 function renderStoryLocationState(statusOverride) {
   if (storyLocationButton) {
     storyLocationButton.disabled = storyLocationLoading;
@@ -327,7 +349,7 @@ function handleStoryLocationError(error) {
   let message = 'No pudimos obtener tu ubicación.';
   switch (error.code) {
     case error.PERMISSION_DENIED:
-      message = 'No pudimos obtener tu ubicación (permiso denegado).';
+      message = `No pudimos obtener tu ubicación (permiso denegado). ${LOCATION_PERMISSION_HELP}`;
       break;
     case error.POSITION_UNAVAILABLE:
       message = 'La información de ubicación no está disponible.';
@@ -339,7 +361,24 @@ function handleStoryLocationError(error) {
   renderStoryLocationState(`${message} Selecciona un spot sugerido de la lista.`);
 }
 
-function requestStoryLocation() {
+async function ensureLocationPermissionAvailable() {
+  if (!('permissions' in navigator) || typeof navigator.permissions.query !== 'function') {
+    return true;
+  }
+  try {
+    const status = await navigator.permissions.query({ name: 'geolocation' });
+    if (status.state === 'denied') {
+      renderStoryLocationState(`No pudimos acceder a tu ubicación porque el permiso está bloqueado. ${LOCATION_PERMISSION_HELP}`);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.warn('[stories] geolocation permissions query failed', error);
+    return true;
+  }
+}
+
+async function requestStoryLocation() {
   if (!navigator.geolocation) {
     renderStoryLocationState('Tu navegador no soporta geolocalización.');
     return;
@@ -348,6 +387,8 @@ function requestStoryLocation() {
     renderStoryLocationState('Activa HTTPS o usa localhost para compartir tu ubicación.');
     return;
   }
+  const canRequest = await ensureLocationPermissionAvailable();
+  if (!canRequest) return;
   storyLocationLoading = true;
   renderStoryLocationState();
   navigator.geolocation.getCurrentPosition(handleStoryLocationSuccess, handleStoryLocationError, {
@@ -811,10 +852,10 @@ storyResetButton?.addEventListener('click', (event) => {
   clearStoryStatusMessage();
 });
 
-storyLocationButton?.addEventListener('click', (event) => {
+storyLocationButton?.addEventListener('click', async (event) => {
   event.preventDefault();
   if (storyLocationLoading) return;
-  requestStoryLocation();
+  await requestStoryLocation();
 });
 
 storyLocationClearButton?.addEventListener('click', (event) => {
@@ -923,17 +964,24 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
   storyMediaPreviewUrl = URL.createObjectURL(processedFile);
   setStoryMediaPreview(storyMediaPreviewUrl);
 
-  const storagePath = `stories/${currentUser.uid}/media`;
+  const nameFromFile = (processedFile.name || file.name || '').split('.').pop();
+  const baseExtension = typeof nameFromFile === 'string' && nameFromFile.length ? nameFromFile.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+  const inferredExtension = baseExtension || (processedFile.type === 'image/png' ? 'png' : 'jpg');
+  const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const storagePath = `stories/${currentUser.uid}/media/${uniqueSuffix}.${inferredExtension}`;
   const fileRef = storageRef(storage, storagePath);
   try {
-    await uploadBytes(fileRef, processedFile, { contentType: processedFile.type || file.type, cacheControl: 'public,max-age=3600' });
+    await uploadBytes(fileRef, processedFile, {
+      contentType: processedFile.type || file.type || 'image/jpeg',
+      cacheControl: 'public,max-age=3600',
+    });
     const downloadUrl = await getDownloadURL(fileRef);
     updateStoryMediaUI(downloadUrl);
     if (storyMediaStatus) storyMediaStatus.textContent = processedFile === file ? 'Foto lista ✓' : 'Foto optimizada ✓';
   } catch (error) {
     console.error(error);
     updateStoryMediaUI(previousUrl);
-    if (storyMediaStatus) storyMediaStatus.textContent = 'No se pudo subir la foto.';
+    if (storyMediaStatus) storyMediaStatus.textContent = buildReadableUploadError(error);
   } finally {
     storyMediaUploading = false;
     storyMediaFileInput.disabled = false;
