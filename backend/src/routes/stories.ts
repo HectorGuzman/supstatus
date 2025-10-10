@@ -5,12 +5,12 @@ import { ensureFirebase } from '../config/firebase.js';
 import { authenticate } from '../middleware/authenticate.js';
 import { env } from '../config/env.js';
 import {
-  getUserStory,
+  createUserStory,
   listAllStories,
   listPublishedStories,
+  listUserStories,
   toggleStoryLike,
   updateStoryAdmin,
-  upsertUserStory,
   type StoryPayload,
   type StoryStatus,
 } from '../services/stories.js';
@@ -59,11 +59,11 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'UID no disponible en el token.' });
   }
   try {
-    const story = await getUserStory(decoded.uid);
-    res.json({ story });
+    const stories = await listUserStories(decoded.uid, 20);
+    res.json({ stories });
   } catch (error) {
     console.error('[stories] error fetching user story', error);
-    res.status(500).json({ error: 'No se pudo obtener tu historia.' });
+    res.status(500).json({ error: 'No se pudieron obtener tus historias.' });
   }
 });
 
@@ -93,7 +93,7 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
   }
 
   try {
-    const story = await upsertUserStory(
+    const story = await createUserStory(
       decoded.uid,
       storyPayload,
       {

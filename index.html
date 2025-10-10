@@ -18,18 +18,18 @@
   </script>
 </head>
 <body>
-  <header class="top-bar">
+  <header class="top-bar container">
     <div class="top-brand-spacer"></div>
     <div class="top-actions">
       <img id="auth-header-avatar" class="top-avatar" src="logosupstatus.png" alt="Avatar SUP" />
-      <button class="ghost story-create-trigger" id="story-create-open">✨ Compartir historia</button>
+      <button class="ghost story-create-trigger" data-story-open>✨ Compartir historia</button>
       <button class="ghost profile-link" id="profile-link">👤 Mi perfil</button>
       <button class="ghost" id="auth-button">🔐 Iniciar sesión</button>
     </div>
   </header>
 
   <main class="layout">
-    <section class="hero">
+    <section class="hero container">
       <div class="hero-copy">
         <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Status logo" class="hero-logo">
         <span class="hero-tagline">Condiciones para tu remada</span>
@@ -54,13 +54,13 @@
       </div>
     </section>
 
-    <section class="info-band">
+    <section class="info-band container">
       <div id="fecha" class="info-chip">📅 Cargando fecha…</div>
       <div id="horarios-sol" class="info-chip">🌅 Calculando sol…</div>
       <div id="generado-el" class="info-chip">🕒 Actualizando datos…</div>
     </section>
 
-    <section class="forecast">
+    <section class="forecast container">
       <div class="forecast-header">
         <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
         <div class="forecast-controls">
@@ -74,7 +74,7 @@
       <div class="cards-grid" id="pronostico"></div>
     </section>
 
-    <section class="insights">
+    <section class="insights container">
       <div class="insights-card">
         <h2>Mareas próximas</h2>
         <p class="insights-subtitle">Mantén a la vista los próximos eventos de marea para ajustar tu salida.</p>
@@ -86,7 +86,7 @@
       </div>
     </section>
 
-    <section class="stories-section" id="stories-section">
+    <section class="stories-section container" id="stories-section">
       <div class="stories-wrapper">
         <div class="stories-header">
           <div>
@@ -105,7 +105,7 @@
     </section>
   </main>
 
-  <footer>
+  <footer class="container">
     <div class="footer-panel">
       <p class="creditos">Hecho con ❤️ por <a href="https://instagram.com/__jokerguzman" target="_blank" rel="noopener">@__jokerguzman</a></p>
       <div class="support-row">
@@ -230,6 +230,13 @@
           <span class="story-editor-status" id="story-status"></span>
         </div>
         <p class="story-editor-meta" id="story-meta"></p>
+        <div class="story-history">
+          <div class="story-history-header">
+            <h5>Mis historias</h5>
+            <span class="story-history-count" id="user-story-count">0</span>
+          </div>
+          <div class="story-history-list" id="user-story-list"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -255,6 +262,8 @@
       </div>
     </div>
   </div>
+
+  <button type="button" class="story-create-fab" data-story-open aria-label="Compartir historia">✨ Compartir</button>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
@@ -463,7 +472,7 @@
     const storyModal = document.getElementById('story-modal');
     const storyModalClose = document.getElementById('story-modal-close');
     const storyCreateModal = document.getElementById('story-create-modal');
-    const storyCreateOpenButton = document.getElementById('story-create-open');
+    const storyCreateButtons = Array.from(document.querySelectorAll('[data-story-open]'));
     const storyCreateCloseButton = document.getElementById('story-create-close');
     const storyModalMedia = document.getElementById('story-modal-media');
     const storyModalTitle = document.getElementById('story-modal-title');
@@ -765,9 +774,11 @@
 
     storiesRefreshButton?.addEventListener('click', () => loadStories(true));
     window.addEventListener('sup-auth-changed', () => loadStories(true));
-    storyCreateOpenButton?.addEventListener('click', (event) => {
-      event.preventDefault();
-      openStoryCreateModal();
+    storyCreateButtons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        openStoryCreateModal();
+      });
     });
     storyCreateCloseButton?.addEventListener('click', (event) => {
       event.preventDefault();

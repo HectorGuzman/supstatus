@@ -99,19 +99,11 @@ function sanitizePayload(payload: StoryPayload) {
   return sanitized;
 }
 
-export async function getUserStory(uid: string) {
-  const snapshot = await storiesCollection.doc(uid).get();
-  if (!snapshot.exists) return null;
-  return serializeStoryDoc(snapshot);
-}
-
-export async function upsertUserStory(uid: string, payload: StoryPayload, author: AuthorMeta) {
-  const docRef = storiesCollection.doc(uid);
-  const existingSnap = await docRef.get();
+export async function createUserStory(uid: string, payload: StoryPayload, author: AuthorMeta) {
+  const docRef = storiesCollection.doc();
   const sanitized = sanitizePayload(payload);
   const now = admin.firestore.FieldValue.serverTimestamp();
 
-  const authorName = author.displayName?.trim() || sanitized.title || author.email || null;
   const bodyText = sanitized.body || payload.body?.trim() || '';
   const fallbackTitle =
     sanitized.title ||
@@ -122,53 +114,39 @@ export async function upsertUserStory(uid: string, payload: StoryPayload, author
         : author.email
           ? `Historia de ${author.email.split('@')[0]}`
           : 'Historia SUP');
-  const nextData: Record<string, unknown> = {
-    ...sanitized,
+
+  const data: Record<string, unknown> = {
     authorUid: uid,
-    authorName,
+    authorName: author.displayName?.trim() || sanitized.title || author.email || null,
     authorEmail: author.email ?? null,
+    likes: 0,
+    featured: false,
+    status: 'published',
+    createdAt: now,
     updatedAt: now,
+    publishedAt: now,
     title: fallbackTitle,
     body: bodyText,
   };
 
-  if (payload.mediaUrl !== undefined) {
-    if (typeof payload.mediaUrl === 'string' && payload.mediaUrl.trim().length) {
-      nextData.mediaUrl = payload.mediaUrl.trim();
-    } else {
-      nextData.mediaUrl = admin.firestore.FieldValue.delete();
-    }
-  }
+  Object.entries(sanitized).forEach(([key, value]) => {
+    data[key] = value;
+  });
 
-  if (payload.spot !== undefined) {
-    if (typeof payload.spot === 'string' && payload.spot.trim().length) {
-      nextData.spot = payload.spot.trim();
-    } else {
-      nextData.spot = admin.firestore.FieldValue.delete();
-    }
-  }
+  await docRef.set(data);
+  const snapshot = await docRef.get();
+  return serializeStoryDoc(snapshot);
+}
 
-  const exists = existingSnap.exists;
-  if (!exists) {
-    nextData.createdAt = now;
-    nextData.likes = 0;
-    nextData.featured = false;
-    nextData.status = 'published';
-    nextData.publishedAt = now;
-  } else {
-    const existingData = existingSnap.data() || {};
-    nextData.likes = typeof existingData.likes === 'number' ? existingData.likes : 0;
-    nextData.featured = Boolean(existingData.featured);
-    const previousStatus = typeof existingData.status === 'string' ? (existingData.status as StoryStatus) : 'published';
-    const shouldPublish = previousStatus !== 'archived';
-    nextData.status = shouldPublish ? 'published' : 'archived';
-    nextData.publishedAt = shouldPublish ? now : existingData.publishedAt ?? null;
-    nextData.createdAt = existingData.createdAt || now;
-  }
-
-  await docRef.set(nextData, { merge: true });
-  const updatedSnap = await docRef.get();
-  return serializeStoryDoc(updatedSnap);
+export async function listUserStories(uid: string, limit = 10) {
+  const snapshot = await storiesCollection
+    .where('authorUid', '==', uid)
+    .orderBy('createdAt', 'desc')
+    .limit(limit)
+    .get();
+  return snapshot.docs
+    .map((doc) => serializeStoryDoc(doc, uid))
+    .filter((story): story is StoryRecord => story !== null);
 }
 
 export async function listPublishedStories(limit = 20, currentUid?: string | null) {

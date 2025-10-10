@@ -128,7 +128,7 @@ let currentIsAdmin = false;
 let isSaving = false;
 let avatarPreviewObjectUrl = null;
 let isUploadingAvatar = false;
-let currentStory = null;
+let currentUserStories = [];
 let isSavingStory = false;
 let storyStatusTimeout = null;
 let currentStoryMediaUrl = '';
@@ -419,7 +419,7 @@ function clearStoryStatusMessage() {
   }
 }
 
-function fillStoryForm(story) {
+function fillStoryForm(story = null) {
   storySelectedSpot = story?.spot || '';
   storyLocationSuggestions = [];
   storyLocationCoords = null;
@@ -427,12 +427,10 @@ function fillStoryForm(story) {
   renderStoryLocationState();
   if (storyBodyInput) storyBodyInput.value = story?.body || '';
   setStoryMediaFromStory(story);
-  updateStoryMeta(story);
   clearStoryStatusMessage();
 }
 
 function resetStoryForm() {
-  currentStory = null;
   fillStoryForm(null);
 }
 
@@ -448,15 +446,24 @@ function storyStatusCopy(status) {
   }
 }
 
-function updateStoryMeta(story) {
+function updateStoryMetaSummary() {
   if (!storyMetaLabel) return;
-  if (!story) {
+  const total = currentUserStories.length;
+  if (!total) {
     storyMetaLabel.textContent = 'Estado: sin historia aún. Comparte un comentario para inspirar a otros remadores.';
     return;
   }
-  const statusMessage = storyStatusCopy(story.status);
-  const updatedLabel = formatDateTime(story.updatedAt || story.createdAt);
-  storyMetaLabel.textContent = updatedLabel ? `${statusMessage} · Última actualización ${updatedLabel}` : statusMessage;
+  const latest = currentUserStories[0];
+  const statusMessage = latest ? storyStatusCopy(latest.status) : '';
+  const updatedLabel = latest ? formatDateTime(latest.updatedAt || latest.createdAt) : '';
+  const countCopy = total === 1 ? 'Has compartido 1 historia.' : `Has compartido ${total} historias.`;
+  if (updatedLabel && statusMessage) {
+    storyMetaLabel.textContent = `${countCopy} ${statusMessage} · Última actualización ${updatedLabel}`;
+  } else if (statusMessage) {
+    storyMetaLabel.textContent = `${countCopy} ${statusMessage}`;
+  } else {
+    storyMetaLabel.textContent = countCopy;
+  }
 }
 
 function getStoryPayload() {
@@ -464,13 +471,9 @@ function getStoryPayload() {
   const payload = { body };
   if (currentStoryMediaUrl) {
     payload.mediaUrl = currentStoryMediaUrl;
-  } else if (currentStory?.mediaUrl) {
-    payload.mediaUrl = '';
   }
   if (storySelectedSpot) {
     payload.spot = storySelectedSpot.trim();
-  } else if (currentStory?.spot) {
-    payload.spot = '';
   }
   return payload;
 }
@@ -580,7 +583,7 @@ async function saveProfile(token, payload) {
   };
 }
 
-async function fetchStory(token) {
+async function fetchUserStories(token) {
   const response = await fetch(`${API_BASE_URL}/v1/stories/me`, {
     method: 'GET',
     headers: {
@@ -588,10 +591,10 @@ async function fetchStory(token) {
     },
   });
   if (!response.ok) {
-    throw new Error('No se pudo obtener la historia');
+    throw new Error('No se pudieron obtener tus historias');
   }
   const data = await response.json();
-  return data.story || null;
+  return Array.isArray(data.stories) ? data.stories : [];
 }
 
 async function saveStoryRequest(token, payload) {
@@ -612,15 +615,17 @@ async function saveStoryRequest(token, payload) {
   return data.story || null;
 }
 
-async function loadUserStory(token) {
+async function loadUserStories(token) {
   try {
-    const story = await fetchStory(token);
-    currentStory = story;
-    fillStoryForm(story);
+    currentUserStories = await fetchUserStories(token);
+    fillStoryForm(null);
+    updateStoryMetaSummary();
   } catch (error) {
     console.error('[stories] error fetching user story', error);
+    currentUserStories = [];
     resetStoryForm();
-    if (storyStatusLabel) storyStatusLabel.textContent = 'No se pudo cargar tu historia.';
+    updateStoryMetaSummary();
+    if (storyStatusLabel) storyStatusLabel.textContent = 'No se pudieron cargar tus historias.';
     storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 4000);
   }
 }
@@ -634,11 +639,12 @@ function setAuthButtonLoggedOut() {
   if (avatarStatus) avatarStatus.textContent = '';
   closeProfileModal();
   currentProfileData = {};
-  currentStory = null;
+  currentUserStories = [];
   currentIsAdmin = false;
   updateAdminVisibility();
   fillProfileForm(null);
   resetStoryForm();
+  updateStoryMetaSummary();
   notifyAuthChange();
 }
 
@@ -649,7 +655,7 @@ function setAuthButtonLoggedIn(displayName) {
   if (greetingLabel) greetingLabel.textContent = `🌊 ¡Hola, ${friendlyName}! ¿Listo para remar?`;
   if (profileLinkButton) profileLinkButton.style.display = 'inline-flex';
   if (currentProfileData) {
-    setHeaderAvatar(currentProfileData.avatarUrl || DEFAULT_AVATAR_SRC);
+    setHeaderAvatar(currentProfileData.avatarUrl || '');
   }
 }
 
@@ -806,7 +812,7 @@ saveButton?.addEventListener('click', async () => {
 
 storyResetButton?.addEventListener('click', (event) => {
   event.preventDefault();
-  fillStoryForm(currentStory);
+  fillStoryForm(null);
   clearStoryStatusMessage();
 });
 
@@ -861,10 +867,14 @@ storySaveButton?.addEventListener('click', async () => {
   storyMediaFileInput?.setAttribute('disabled', 'true');
   try {
     const story = await saveStoryRequest(currentToken, payload);
-    currentStory = story;
-    fillStoryForm(story);
-    if (storyStatusLabel) storyStatusLabel.textContent = 'Tu historia está en revisión. ¡Gracias por compartirla!';
+    if (story) {
+      currentUserStories = [story, ...currentUserStories];
+    }
+    fillStoryForm(null);
+    updateStoryMetaSummary();
+    if (storyStatusLabel) storyStatusLabel.textContent = 'Tu historia está publicada. ¡Gracias por compartirla!';
     storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 5000);
+    loadStories(true);
     window.dispatchEvent(new CustomEvent('story-saved'));
   } catch (error) {
     console.error(error);
@@ -901,7 +911,7 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
     return;
   }
 
-  const previousUrl = currentStoryMediaUrl || currentStory?.mediaUrl || '';
+  const previousUrl = currentStoryMediaUrl || '';
   storyMediaUploading = true;
   if (storyMediaStatus) storyMediaStatus.textContent = 'Optimizando foto…';
   storyMediaFileInput.disabled = true;
@@ -1043,17 +1053,20 @@ onAuthStateChanged(auth, async (user) => {
     setAuthButtonLoggedIn(nameToShow);
     fillProfileForm(user, profile);
     notifyAuthChange();
-    await loadUserStory(currentToken);
+    await loadUserStories(currentToken);
   } catch (error) {
     console.error(error);
     statusLabel.textContent = 'No se pudo cargar tu perfil.';
   }
 });
 
+renderStoryLocationState();
+updateStoryMetaSummary();
+
 profileLinkButton?.addEventListener('click', () => {
   if (!currentUser) return;
   fillProfileForm(currentUser, currentProfileData || {});
-  fillStoryForm(currentStory);
+  fillStoryForm(null);
   updateAdminVisibility();
   if (currentIsAdmin) loadAdminProfiles();
   if (profileModal) profileModal.style.display = 'flex';
