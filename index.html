@@ -92,7 +92,7 @@
         <div class="stories-header">
           <div>
             <h2 class="section-title">Historias SUP</h2>
-            <p class="stories-subtitle">Descubre cómo la comunidad vive La Herradura y encuentra inspiración para tu próxima remada.</p>
+            <p class="stories-subtitle">Descubre cómo la comunidad vive el SUP y encuentra inspiración para tu próxima remada.</p>
           </div>
           <button class="ghost" id="stories-refresh-button" aria-label="Actualizar historias">🔄 Actualizar</button>
         </div>
@@ -165,12 +165,42 @@
           <input id="profile-displayName" type="text" placeholder="Tu nombre o apodo">
         </label>
         <label>
+          Nivel de experiencia
+          <select id="profile-experienceLevel">
+            <option value="">Selecciona tu nivel</option>
+            <option value="Inicio reciente">Inicio reciente</option>
+            <option value="Intermedio · sesiones regulares">Intermedio · sesiones regulares</option>
+            <option value="Avanzado · largas distancias">Avanzado · largas distancias</option>
+            <option value="Competencia / instructor">Competencia / instructor</option>
+          </select>
+        </label>
+        <label>
+          Modalidad favorita
+          <select id="profile-favoriteDiscipline">
+            <option value="">¿Qué te motiva más?</option>
+            <option value="Placer / recreacional">Placer / recreacional</option>
+            <option value="Racing / resistencia">Racing / resistencia</option>
+            <option value="Downwind / mar abierto">Downwind / mar abierto</option>
+            <option value="SUP surf">SUP surf</option>
+            <option value="SUP yoga / fitness">SUP yoga / fitness</option>
+            <option value="Exploración / travesías">Exploración / travesías</option>
+          </select>
+        </label>
+        <label>
+          Equipo principal
+          <input id="profile-boardSetup" type="text" placeholder="Tabla, remo u otros detalles clave">
+        </label>
+        <label>
           Bio
           <textarea id="profile-bio" rows="3" placeholder="Comparte un poco sobre tu experiencia SUP"></textarea>
         </label>
         <label>
-          ¿Qué esperas del SUP?
+          Objetivo actual en el SUP
           <textarea id="profile-goals" rows="3" placeholder="Cuéntanos qué te gustaría lograr remando"></textarea>
+        </label>
+        <label>
+          Rutina o enfoque actual
+          <textarea id="profile-practiceFocus" rows="2" placeholder="Ej: mejorar técnica de giro, preparar travesía, más equilibrio, etc."></textarea>
         </label>
       </div>
       <div class="profile-actions">

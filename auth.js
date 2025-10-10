@@ -38,6 +38,10 @@ const profileLinkButton = document.getElementById('profile-link');
 const displayNameInput = document.getElementById('profile-displayName');
 const bioInput = document.getElementById('profile-bio');
 const goalsInput = document.getElementById('profile-goals');
+const experienceLevelSelect = document.getElementById('profile-experienceLevel');
+const favoriteDisciplineSelect = document.getElementById('profile-favoriteDiscipline');
+const boardSetupInput = document.getElementById('profile-boardSetup');
+const practiceFocusInput = document.getElementById('profile-practiceFocus');
 const saveButton = document.getElementById('profile-save');
 const statusLabel = document.getElementById('profile-status');
 const greetingLabel = document.getElementById('auth-greeting');
@@ -76,24 +80,13 @@ const defaultGreeting = '🌊 Conecta tu perfil SUP y guarda tus remadas favorit
 const DEFAULT_AVATAR_SRC = 'logosupstatus.png';
 const AVATAR_MAX_SIZE = 3 * 1024 * 1024; // 3 MB
 const STORY_MEDIA_MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-const LOCAL_SPOT_SUGGESTIONS = [
-  { name: 'La Herradura - Club de Yates', lat: -29.983059, lon: -71.365225 },
-  { name: 'La Herradura - Playa Chica', lat: -29.991385, lon: -71.356782 },
-  { name: 'La Herradura - Playa Grande', lat: -29.989642, lon: -71.351008 },
-  { name: 'Peñuelas', lat: -29.955497, lon: -71.338849 },
-  { name: 'Coquimbo Centro', lat: -29.953052, lon: -71.343914 },
-  { name: 'Playa Blanca', lat: -29.930418, lon: -71.301394 },
-];
-
 const DEFAULT_SPOT_SUGGESTIONS = [
-  'La Herradura - Club de Yates',
-  'La Herradura - Playa Chica',
-  'Peñuelas',
-  'Bahía Cisnes',
-  'Playa Las Tacas',
-  'Playa Blanca',
-  'Coquimbo Centro',
-  'Tongoy',
+  'Sesión libre de SUP',
+  'Explorando un nuevo spot',
+  'Entrenamiento en lago o río',
+  'Downwind con amigos',
+  'Yoga SUP o equilibrio',
+  'Competencia o race day',
 ];
 const STORY_MEDIA_MAX_DIMENSION = 1600; // px
 const STORY_MEDIA_DEFAULT_QUALITY = 0.85;
@@ -107,22 +100,41 @@ function toRadians(value) {
   return (value * Math.PI) / 180;
 }
 
-function haversineDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // km
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+function formatCoordinate(value, type) {
+  const abs = Math.abs(value).toFixed(2);
+  const suffix = type === 'lat' ? (value >= 0 ? 'N' : 'S') : value >= 0 ? 'E' : 'O';
+  return `${abs}°${suffix}`;
 }
 
-function getNearestSpots(lat, lon, limit = 3) {
-  return LOCAL_SPOT_SUGGESTIONS.map((spot) => ({
-    ...spot,
-    distanceKm: haversineDistance(lat, lon, spot.lat, spot.lon),
-  }))
-    .sort((a, b) => a.distanceKm - b.distanceKm)
-    .slice(0, limit);
+function describeHemisphere(lat) {
+  if (Math.abs(lat) < 5) return 'cerca del ecuador';
+  if (lat >= 0) {
+    if (lat > 45) return 'hemisferio norte · latitudes frías';
+    if (lat > 23.5) return 'hemisferio norte · zona templada';
+    return 'hemisferio norte · zona tropical';
+  }
+  if (lat < -45) return 'hemisferio sur · latitudes frías';
+  if (lat < -23.5) return 'hemisferio sur · zona templada';
+  return 'hemisferio sur · zona tropical';
+}
+
+function buildLocationSuggestions(lat, lon) {
+  const latLabel = formatCoordinate(lat, 'lat');
+  const lonLabel = formatCoordinate(lon, 'lon');
+  return [
+    {
+      name: `Coordenadas detectadas (${latLabel}, ${lonLabel})`,
+      note: 'Edita el spot si prefieres un nombre propio.',
+    },
+    {
+      name: 'Sesión en progreso',
+      note: describeHemisphere(lat),
+    },
+    {
+      name: 'Compartir spot favorito',
+      note: 'Describe el lugar en tu historia para inspirar a otros.',
+    },
+  ];
 }
 
 let currentUser = null;
@@ -206,10 +218,12 @@ async function prepareImageForUpload(file) {
     let workingFile = file;
     const heicConverter = globalThis.heic2any;
     const isHeic = /\.hei[cf]$/i.test(file.name || '') || file.type === 'image/heic' || file.type === 'image/heif';
+    let convertedFromHeic = false;
     if (heicConverter && isHeic) {
       if (storyMediaStatus) storyMediaStatus.textContent = 'Convirtiendo HEIC…';
       const convertedBlob = await heicConverter({ blob: file, toType: 'image/jpeg', quality: STORY_MEDIA_DEFAULT_QUALITY });
       workingFile = new File([convertedBlob], `${(file.name?.split?.('.')?.[0] || 'story')}.jpg`, { type: 'image/jpeg' });
+      convertedFromHeic = true;
     } else if (isHeic) {
       console.warn('[stories] Navegador sin soporte para heic2any.');
       if (storyMediaStatus) storyMediaStatus.textContent = 'Tu navegador no puede convertir HEIC. Usa formato JPG o ajusta la cámara.';
@@ -220,7 +234,15 @@ async function prepareImageForUpload(file) {
     const scale = Math.min(STORY_MEDIA_MAX_DIMENSION / width, STORY_MEDIA_MAX_DIMENSION / height, 1);
     const targetWidth = Math.round(width * scale);
     const targetHeight = Math.round(height * scale);
-    const needsResize = scale < 1 || workingFile.size > STORY_MEDIA_MAX_SIZE;
+    const shouldResize = scale < 1;
+    const shouldCompress = workingFile.size > STORY_MEDIA_MAX_SIZE;
+    const needsProcessing = convertedFromHeic || shouldResize || shouldCompress;
+    if (!needsProcessing) {
+      if (isBitmap && typeof image.close === 'function') {
+        image.close();
+      }
+      return workingFile;
+    }
     const canvas = document.createElement('canvas');
     canvas.width = targetWidth;
     canvas.height = targetHeight;
@@ -230,6 +252,7 @@ async function prepareImageForUpload(file) {
     if (isBitmap && typeof image.close === 'function') {
       image.close();
     }
+    const needsResize = shouldResize || shouldCompress;
     const qualities = needsResize ? [STORY_MEDIA_DEFAULT_QUALITY, 0.75, 0.65, 0.55] : [STORY_MEDIA_DEFAULT_QUALITY];
     for (const quality of qualities) {
       const blob = await canvasToBlob(canvas, 'image/jpeg', quality);
@@ -286,7 +309,7 @@ function renderStoryLocationState(statusOverride) {
     } else if (storySelectedSpot) {
       storyLocationStatus.textContent = `Usaremos: ${storySelectedSpot}`;
     } else {
-      storyLocationStatus.textContent = 'Puedes agregar un spot cercano a tu historia o elegir uno sugerido.';
+      storyLocationStatus.textContent = 'Puedes agregar un spot para tu historia o elegir una de las opciones sugeridas.';
     }
   }
   if (storyLocationSuggestionsContainer) {
@@ -302,13 +325,13 @@ function renderStoryLocationState(statusOverride) {
     } else {
       storyLocationSuggestionsContainer.innerHTML = storyLocationSuggestions
         .map((suggestion) => {
-          const distanceCopy = suggestion.distanceKm < 1
-            ? `${Math.round(suggestion.distanceKm * 1000)} m`
-            : `${suggestion.distanceKm.toFixed(1)} km`;
           const selected = suggestion.name === storySelectedSpot ? 'selected' : '';
           const safeName = escapeHtml(suggestion.name);
           const encodedName = encodeURIComponent(suggestion.name);
-          return `<button type="button" data-spot="${escapeHtml(encodedName)}" class="${selected}">${safeName} · ${escapeHtml(distanceCopy)}</button>`;
+          const note = suggestion.note && suggestion.note.trim().length
+            ? ` · ${escapeHtml(suggestion.note)}`
+            : '';
+          return `<button type="button" data-spot="${escapeHtml(encodedName)}" class="${selected}">${safeName}${note}</button>`;
         })
         .join('');
     }
@@ -329,11 +352,12 @@ function selectStorySpot(spotName) {
 function handleStoryLocationSuccess(position) {
   const { latitude, longitude } = position.coords;
   storyLocationCoords = { latitude, longitude };
-  const nearest = getNearestSpots(latitude, longitude, 3);
-  const fallback = DEFAULT_SPOT_SUGGESTIONS.filter((name) => !nearest.some((spot) => spot.name === name))
-    .slice(0, 3 - nearest.length)
-    .map((name) => ({ name, lat: null, lon: null, distanceKm: Number.POSITIVE_INFINITY }));
-  storyLocationSuggestions = [...nearest, ...fallback];
+  const geoSuggestions = buildLocationSuggestions(latitude, longitude);
+  const fallback = DEFAULT_SPOT_SUGGESTIONS.filter(
+    (name) => !geoSuggestions.some((spot) => spot.name === name),
+  ).slice(0, Math.max(0, 3 - geoSuggestions.length))
+    .map((name) => ({ name, note: '' }));
+  storyLocationSuggestions = [...geoSuggestions, ...fallback];
   if (!storySelectedSpot && storyLocationSuggestions.length) {
     storySelectedSpot = storyLocationSuggestions[0].name;
   }
@@ -701,6 +725,10 @@ function fillProfileForm(user, profile = {}) {
     displayNameInput.value = '';
     bioInput.value = '';
     if (goalsInput) goalsInput.value = '';
+    if (experienceLevelSelect) experienceLevelSelect.value = '';
+    if (favoriteDisciplineSelect) favoriteDisciplineSelect.value = '';
+    if (boardSetupInput) boardSetupInput.value = '';
+    if (practiceFocusInput) practiceFocusInput.value = '';
     statusLabel.textContent = '';
     syncAvatarFromProfile(null);
     return;
@@ -710,6 +738,10 @@ function fillProfileForm(user, profile = {}) {
   displayNameInput.value = profile.displayName || user.displayName || '';
   bioInput.value = profile.bio || '';
   if (goalsInput) goalsInput.value = profile.goals || '';
+  if (experienceLevelSelect) experienceLevelSelect.value = profile.experienceLevel || '';
+  if (favoriteDisciplineSelect) favoriteDisciplineSelect.value = profile.favoriteDiscipline || '';
+  if (boardSetupInput) boardSetupInput.value = profile.boardSetup || '';
+  if (practiceFocusInput) practiceFocusInput.value = profile.practiceFocus || '';
   syncAvatarFromProfile(profile);
   if (avatarStatus) avatarStatus.textContent = '';
 }
@@ -807,6 +839,9 @@ function renderAdminProfiles(profiles) {
       if (profile.avatarUrl) badges.push('📸 Avatar listo');
       if (profile.bio) badges.push('📝 Bio');
       if (profile.goals) badges.push('🎯 Objetivos');
+      if (profile.experienceLevel) badges.push(`🏄 ${profile.experienceLevel}`);
+      if (profile.favoriteDiscipline) badges.push(`🌊 ${profile.favoriteDiscipline}`);
+      if (profile.boardSetup) badges.push(`🛶 ${profile.boardSetup}`);
       const badgesHtml = badges.length
         ? `<div class="admin-profile-flags">${badges.map((badge) => `<span>${escapeHtml(badge)}</span>`).join('')}</div>`
         : '';
@@ -828,7 +863,11 @@ saveButton?.addEventListener('click', async () => {
     const payload = {
       displayName: displayNameInput.value.trim(),
       bio: bioInput.value.trim(),
-      goals: goalsInput ? goalsInput.value.trim() : undefined,
+      goals: goalsInput ? goalsInput.value.trim() : '',
+      experienceLevel: experienceLevelSelect ? experienceLevelSelect.value : '',
+      favoriteDiscipline: favoriteDisciplineSelect ? favoriteDisciplineSelect.value : '',
+      boardSetup: boardSetupInput ? boardSetupInput.value.trim() : '',
+      practiceFocus: practiceFocusInput ? practiceFocusInput.value.trim() : '',
     };
     const { profile, isAdmin } = await saveProfile(currentToken, payload);
     statusLabel.textContent = 'Perfil actualizado ✓';
@@ -949,7 +988,7 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
 
   const previousUrl = currentStoryMediaUrl || '';
   storyMediaUploading = true;
-  if (storyMediaStatus) storyMediaStatus.textContent = 'Optimizando foto…';
+  if (storyMediaStatus) storyMediaStatus.textContent = 'Preparando foto…';
   storyMediaFileInput.disabled = true;
   storyMediaRemoveButton?.setAttribute('disabled', 'true');
   revokeStoryMediaPreview();
@@ -971,6 +1010,7 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
   const storagePath = `stories/${currentUser.uid}/media/${uniqueSuffix}.${inferredExtension}`;
   const fileRef = storageRef(storage, storagePath);
   try {
+    if (storyMediaStatus) storyMediaStatus.textContent = 'Subiendo foto…';
     await uploadBytes(fileRef, processedFile, {
       contentType: processedFile.type || file.type || 'image/jpeg',
       cacheControl: 'public,max-age=3600',
