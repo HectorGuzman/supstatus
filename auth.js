@@ -153,13 +153,8 @@ function setAvatarPreview(src) {
 
 function setHeaderAvatar(src) {
   if (!headerAvatarImg) return;
-  if (src) {
-    headerAvatarImg.src = src;
-    headerAvatarImg.style.display = 'block';
-  } else {
-    headerAvatarImg.src = DEFAULT_AVATAR_SRC;
-    headerAvatarImg.style.display = 'none';
-  }
+  headerAvatarImg.src = src || DEFAULT_AVATAR_SRC;
+  headerAvatarImg.classList.toggle('has-custom', Boolean(src));
 }
 
 function syncAvatarFromProfile(profile) {
@@ -653,7 +648,7 @@ function setAuthButtonLoggedIn(displayName) {
   authButton.onclick = () => signOut(auth);
   const friendlyName = displayName || 'remador/a';
   if (greetingLabel) greetingLabel.textContent = `🌊 ¡Hola, ${friendlyName}! ¿Listo para remar?`;
-  if (profileLinkButton) profileLinkButton.style.display = 'inline-flex';
+  if (profileLinkButton) profileLinkButton.style.display = 'flex';
   if (currentProfileData) {
     setHeaderAvatar(currentProfileData.avatarUrl || '');
   }

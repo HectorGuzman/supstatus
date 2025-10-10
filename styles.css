@@ -214,6 +214,30 @@ h1 {
   flex-wrap: wrap;
 }
 
+.top-avatar-trigger {
+  display: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  border-radius: 999px;
+  min-width: 64px;
+  align-items: center;
+  flex-direction: column;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
+.top-avatar-trigger:focus-visible {
+  outline: 3px solid rgba(38, 198, 218, 0.45);
+  outline-offset: 4px;
+}
+
 .top-avatar {
   width: 44px;
   height: 44px;
@@ -221,7 +245,25 @@ h1 {
   object-fit: cover;
   border: 2px solid rgba(38, 198, 218, 0.35);
   box-shadow: 0 6px 18px rgba(5, 9, 20, 0.35);
-  display: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.top-avatar.has-custom {
+  border-color: rgba(255, 115, 161, 0.6);
+  box-shadow: 0 8px 20px rgba(255, 115, 161, 0.35);
+}
+
+.top-avatar-trigger:hover .top-avatar,
+.top-avatar-trigger:focus-visible .top-avatar {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(38, 198, 218, 0.32);
+}
+
+.top-avatar-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
 @media (max-width: 960px) {
@@ -237,25 +279,31 @@ h1 {
   }
 
   .top-actions {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    width: calc(100% + 2 * var(--content-padding));
-    margin-inline: calc(-1 * var(--content-padding));
-    padding-inline: var(--content-padding);
-    padding-bottom: 6px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
+    width: 100%;
+    justify-content: space-between;
+    margin: 0;
+    padding-inline: 0;
+    overflow: visible;
   }
 
   .top-actions > * {
     flex: 0 0 auto;
-    scroll-snap-align: start;
   }
 
-  .top-actions::-webkit-scrollbar {
-    display: none;
+  .top-avatar-trigger {
+    order: -1;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .top-avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .top-avatar-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
   }
 }
 
@@ -2010,10 +2058,6 @@ body.oscuro .cerrar-modal {
     margin-bottom: clamp(24px, 8vw, 40px);
   }
 }
-.top-actions .profile-link {
-  display: none;
-}
-
 .info-band {
   margin: 0 auto;
   padding-block: 0;

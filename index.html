@@ -21,9 +21,11 @@
   <header class="top-bar container">
     <div class="top-brand-spacer"></div>
     <div class="top-actions">
-      <img id="auth-header-avatar" class="top-avatar" src="logosupstatus.png" alt="Avatar SUP" />
+      <button type="button" class="top-avatar-trigger" id="profile-link" aria-label="Abrir perfil">
+        <img id="auth-header-avatar" class="top-avatar" src="logosupstatus.png" alt="Avatar SUP" />
+        <span class="top-avatar-label">Mi perfil</span>
+      </button>
       <button class="ghost story-create-trigger" data-story-open>✨ Compartir historia</button>
-      <button class="ghost profile-link" id="profile-link">👤 Mi perfil</button>
       <button class="ghost" id="auth-button">🔐 Iniciar sesión</button>
     </div>
   </header>
