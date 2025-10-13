@@ -105,10 +105,11 @@ export async function createUserStory(uid: string, payload: StoryPayload, author
   const now = admin.firestore.FieldValue.serverTimestamp();
 
   const bodyText = sanitized.body || payload.body?.trim() || '';
+  const displayName = author.displayName?.trim() || '';
   const fallbackTitle =
-    sanitized.title ||
-    (author.displayName?.trim()
-      ? `${author.displayName.trim()} en La Herradura`
+    sanitized.title
+    || (displayName
+      ? `Remada de ${displayName}`
       : bodyText
         ? `${bodyText.slice(0, 42)}${bodyText.length > 42 ? '…' : ''}`
         : author.email
@@ -117,7 +118,7 @@ export async function createUserStory(uid: string, payload: StoryPayload, author
 
   const data: Record<string, unknown> = {
     authorUid: uid,
-    authorName: author.displayName?.trim() || sanitized.title || author.email || null,
+    authorName: displayName || sanitized.title || author.email || null,
     authorEmail: author.email ?? null,
     likes: 0,
     featured: false,
@@ -139,14 +140,34 @@ export async function createUserStory(uid: string, payload: StoryPayload, author
 }
 
 export async function listUserStories(uid: string, limit = 10) {
-  const snapshot = await storiesCollection
-    .where('authorUid', '==', uid)
-    .orderBy('createdAt', 'desc')
-    .limit(limit)
-    .get();
-  return snapshot.docs
-    .map((doc) => serializeStoryDoc(doc, uid))
-    .filter((story): story is StoryRecord => story !== null);
+  try {
+    const snapshot = await storiesCollection
+      .where('authorUid', '==', uid)
+      .orderBy('createdAt', 'desc')
+      .limit(limit)
+      .get();
+    return snapshot.docs
+      .map((doc) => serializeStoryDoc(doc, uid))
+      .filter((story): story is StoryRecord => story !== null);
+  } catch (error) {
+    const code = (error as { code?: unknown })?.code;
+    if (code === 9 || code === 'failed-precondition' || code === 'FAILED_PRECONDITION') {
+      console.warn('[stories] composite index unavailable, falling back to unsorted query');
+      const fallbackSnapshot = await storiesCollection
+        .where('authorUid', '==', uid)
+        .limit(limit * 2)
+        .get();
+      const results = fallbackSnapshot.docs
+        .map((doc) => serializeStoryDoc(doc, uid))
+        .filter((story): story is StoryRecord => story !== null);
+      return results.sort((a, b) => {
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      }).slice(0, limit);
+    }
+    throw error;
+  }
 }
 
 export async function listPublishedStories(limit = 20, currentUid?: string | null) {
@@ -198,6 +219,30 @@ export async function updateStoryAdmin(storyId: string, update: StoryAdminUpdate
   await docRef.set(updates, { merge: true });
   const refreshed = await docRef.get();
   return serializeStoryDoc(refreshed);
+}
+
+export async function deleteUserStory(storyId: string, uid: string) {
+  const docRef = storiesCollection.doc(storyId);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) {
+    return { removed: false, reason: 'NOT_FOUND' as const };
+  }
+  const data = snapshot.data();
+  if (!data || data.authorUid !== uid) {
+    return { removed: false, reason: 'FORBIDDEN' as const };
+  }
+  await docRef.delete();
+  return { removed: true as const };
+}
+
+export async function deleteStoryAdmin(storyId: string) {
+  const docRef = storiesCollection.doc(storyId);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) {
+    return { removed: false, reason: 'NOT_FOUND' as const };
+  }
+  await docRef.delete();
+  return { removed: true as const };
 }
 
 export async function toggleStoryLike(storyId: string, uid: string) {

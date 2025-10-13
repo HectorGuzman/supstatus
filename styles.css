@@ -1368,9 +1368,22 @@ main.layout {
   gap: 6px;
 }
 
+.story-history-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .story-history-item strong {
   font-size: 0.9rem;
   color: var(--text-primary);
+}
+
+.story-history-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .story-history-item span {
@@ -1385,10 +1398,62 @@ main.layout {
   line-height: 1.45;
 }
 
+.story-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.story-history-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.72rem;
+  color: rgba(242, 246, 255, 0.75);
+}
+
 .story-history-empty {
   margin: 0;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.story-history-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.story-history-delete {
+  border: 1px solid rgba(255, 115, 161, 0.5);
+  background: rgba(255, 115, 161, 0.18);
+  color: var(--brand-pink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.story-history-delete:hover {
+  background: rgba(255, 115, 161, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(255, 115, 161, 0.25);
+}
+
+.story-history-delete:focus-visible {
+  outline: 3px solid rgba(255, 115, 161, 0.45);
+  outline-offset: 2px;
+}
+
+.story-history-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .story-create-fab {
@@ -1629,12 +1694,44 @@ main.layout {
 .story-modal-actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 12px;
 }
 
 .story-modal-actions .story-like-btn {
   font-size: 0.9rem;
   padding: 8px 16px;
+}
+
+.story-modal-actions .story-modal-delete-btn {
+  margin-left: auto;
+  border: 1px solid rgba(255, 115, 161, 0.5);
+  background: rgba(255, 115, 161, 0.18);
+  color: var(--brand-pink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.story-modal-actions .story-modal-delete-btn:hover {
+  background: rgba(255, 115, 161, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(255, 115, 161, 0.28);
+}
+
+.story-modal-actions .story-modal-delete-btn:focus-visible {
+  outline: 3px solid rgba(255, 115, 161, 0.45);
+  outline-offset: 2px;
+}
+
+.story-modal-actions .story-modal-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .story-modal-text {

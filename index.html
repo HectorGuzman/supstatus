@@ -287,6 +287,7 @@
               <span class="like-icon">❤️</span>
               <span class="like-count" id="story-modal-like-count">0</span>
             </button>
+            <button type="button" class="story-modal-delete-btn" id="story-modal-delete-btn" style="display: none;">🗑 Eliminar</button>
           </div>
           <p class="story-modal-text" id="story-modal-text"></p>
         </div>
@@ -513,7 +514,9 @@
     const storyModalFeatured = document.getElementById('story-modal-featured');
     const storyModalLikeButton = document.getElementById('story-modal-like-btn');
     const storyModalLikeCount = document.getElementById('story-modal-like-count');
+    const storyModalDeleteButton = document.getElementById('story-modal-delete-btn');
     let currentModalStoryId = null;
+    let currentModalStoryData = null;
 
     function escapeHtml(value = '') {
       return value
@@ -586,7 +589,7 @@
           <div class="story-card-body">
             <span class="story-card-author">${escapeHtml(story.authorName || 'Remador SUP')}</span>
             <h3 class="story-card-title">${escapeHtml(story.title || 'Historia SUP')}</h3>
-            <p class="story-card-excerpt">${escapeHtml(excerpt || 'Descubre cómo viven SUP en La Herradura.')}</p>
+            <p class="story-card-excerpt">${escapeHtml(excerpt || 'Descubre cómo viven el SUP en distintos spots.')}</p>
             <div class="story-card-tags">
               ${story.spot ? `<span class="story-card-tag">📍 ${escapeHtml(story.spot)}</span>` : ''}
               ${story.bestConditions ? `<span class="story-card-tag">⚓ ${escapeHtml(story.bestConditions)}</span>` : ''}
@@ -689,6 +692,44 @@
       }
     }
 
+    async function deleteStoryFromModal(storyId) {
+      if (!storyId || !storyModalDeleteButton) return;
+      const authState = window.supAuth && typeof window.supAuth.getState === 'function' ? window.supAuth.getState() : null;
+      if (!authState?.isAdmin || !authState?.token) {
+        window.alert('Necesitas permisos de administrador para eliminar historias.');
+        return;
+      }
+      const confirmed = window.confirm('¿Eliminar esta historia? Esta acción no se puede deshacer.');
+      if (!confirmed) return;
+      storyModalDeleteButton.disabled = true;
+      storyModalDeleteButton.textContent = 'Eliminando…';
+      try {
+        const response = await fetch(`${STORIES_API_BASE}/v1/stories/${encodeURIComponent(storyId)}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${authState.token}`,
+          },
+        });
+        if (!response.ok) {
+          const error = await response.json().catch(() => null);
+          const message = error?.error || `No se pudo eliminar la historia (HTTP ${response.status}).`;
+          throw new Error(message);
+        }
+        closeStoryModal();
+        storiesState.stories = storiesState.stories.filter((item) => item.id !== storyId);
+        renderStories(storiesState.stories);
+        loadStories(true);
+        window.dispatchEvent(new CustomEvent('story-deleted', { detail: { storyId } }));
+      } catch (error) {
+        console.error('Error eliminando historia', error);
+        const message = error instanceof Error ? error.message : 'No se pudo eliminar la historia.';
+        window.alert(message);
+      } finally {
+        storyModalDeleteButton.disabled = false;
+        storyModalDeleteButton.textContent = '🗑 Eliminar';
+      }
+    }
+
     function openStoryCreateModal() {
       const authState = window.supAuth && typeof window.supAuth.getState === 'function' ? window.supAuth.getState() : null;
       const token = authState?.token;
@@ -712,6 +753,7 @@
       const story = storiesState.stories.find((item) => item.id === storyId);
       if (!story) return;
       currentModalStoryId = story.id;
+      currentModalStoryData = story;
       if (storyModalMedia) {
         storyModalMedia.innerHTML = '';
         const mediaUrl = safeMediaUrl(story.mediaUrl);
@@ -746,6 +788,19 @@
         storyModalMeta.style.display = bits.length ? 'flex' : 'none';
       }
       setStoryModalLikeState(story);
+      if (storyModalDeleteButton) {
+        const authState = window.supAuth && typeof window.supAuth.getState === 'function' ? window.supAuth.getState() : null;
+        const isAdmin = Boolean(authState?.isAdmin);
+        if (isAdmin) {
+          storyModalDeleteButton.style.display = 'inline-flex';
+          storyModalDeleteButton.disabled = false;
+          storyModalDeleteButton.dataset.storyId = story.id || '';
+          storyModalDeleteButton.textContent = '🗑 Eliminar';
+        } else {
+          storyModalDeleteButton.style.display = 'none';
+          storyModalDeleteButton.dataset.storyId = '';
+        }
+      }
       storyModal.style.display = 'flex';
     }
 
@@ -753,7 +808,12 @@
       if (!storyModal) return;
       storyModal.style.display = 'none';
       currentModalStoryId = null;
+      currentModalStoryData = null;
       setStoryModalLikeState(null);
+      if (storyModalDeleteButton) {
+        storyModalDeleteButton.style.display = 'none';
+        storyModalDeleteButton.dataset.storyId = '';
+      }
     }
 
     function setStoriesLoading(isLoading) {
@@ -821,6 +881,12 @@
       event.stopPropagation();
       const storyId = storyModalLikeButton.dataset.storyId;
       if (storyId) toggleStoryLike(storyId);
+    });
+    storyModalDeleteButton?.addEventListener('click', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!currentModalStoryId) return;
+      await deleteStoryFromModal(currentModalStoryId);
     });
     storyModal?.addEventListener('click', (event) => {
       if (event.target === storyModal) {

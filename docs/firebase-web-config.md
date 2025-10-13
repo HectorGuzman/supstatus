@@ -13,7 +13,7 @@ const firebaseConfig = {
   apiKey: 'AIzaSyDdk4ZjSGeyzO5pmlasJ672iF1BdhDtaCI',
   authDomain: 'supstatus-c1ab5.firebaseapp.com',
   projectId: 'supstatus-c1ab5',
-  storageBucket: 'supstatus-c1ab5.appspot.com',
+  storageBucket: 'supstatus-c1ab5.firebasestorage.app',
   messagingSenderId: '858880938649',
   appId: '1:858880938649:web:7340bdd7f957a078ac1e08',
 };

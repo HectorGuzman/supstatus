@@ -21,7 +21,7 @@ const firebaseConfig = {
   apiKey: 'AIzaSyDdk4ZjSGeyzO5pmlasJ672iF1BdhDtaCI',
   authDomain: 'supstatus-c1ab5.firebaseapp.com',
   projectId: 'supstatus-c1ab5',
-  storageBucket: 'supstatus-c1ab5.appspot.com',
+  storageBucket: 'supstatus-c1ab5.firebasestorage.app',
   messagingSenderId: '858880938649',
   appId: '1:858880938649:web:7340bdd7f957a078ac1e08',
 };
@@ -62,6 +62,8 @@ const storyLocationButton = document.getElementById('story-location-button');
 const storyLocationClearButton = document.getElementById('story-location-clear');
 const storyLocationStatus = document.getElementById('story-location-status');
 const storyLocationSuggestionsContainer = document.getElementById('story-location-suggestions');
+const userStoryList = document.getElementById('user-story-list');
+const userStoryCountLabel = document.getElementById('user-story-count');
 const avatarInput = document.getElementById('profile-avatar-input');
 const avatarPreview = document.getElementById('profile-avatar-preview');
 const avatarStatus = document.getElementById('profile-avatar-status');
@@ -137,6 +139,30 @@ function buildLocationSuggestions(lat, lon) {
   ];
 }
 
+function buildStoryHistoryExcerpt(text = '', maxLength = 120) {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  return clean.length > maxLength ? `${clean.slice(0, maxLength - 1)}…` : clean;
+}
+
+function buildStoryHistoryTitle(story) {
+  if (!story) return 'Historia SUP';
+  if (typeof story.title === 'string' && story.title.trim().length) return story.title.trim();
+  if (typeof story.spot === 'string' && story.spot.trim().length) return `Historia en ${story.spot.trim()}`;
+  return 'Historia SUP';
+}
+
+function storyStatusBadge(status) {
+  switch (status) {
+    case 'pending':
+      return '⏳ En revisión';
+    case 'archived':
+      return '🗃 Archivada';
+    default:
+      return null;
+  }
+}
+
 let currentUser = null;
 let currentToken = null;
 let currentProfileData = {};
@@ -154,6 +180,7 @@ let storySelectedSpot = '';
 let storyLocationSuggestions = [];
 let storyLocationLoading = false;
 let storyLocationCoords = null;
+const deletingStoryIds = new Set();
 
 function resetAvatarPreviewUrl() {
   if (avatarPreviewObjectUrl) {
@@ -423,6 +450,7 @@ async function requestStoryLocation() {
 }
 
 renderStoryLocationState();
+renderUserStoriesList();
 
 function revokeStoryMediaPreview() {
   if (storyMediaPreviewUrl) {
@@ -526,6 +554,90 @@ function updateStoryMetaSummary() {
   }
 }
 
+function renderUserStoriesList() {
+  if (!userStoryList) return;
+  userStoryList.innerHTML = '';
+  const total = currentUserStories.length;
+  if (userStoryCountLabel) userStoryCountLabel.textContent = String(total);
+  if (!total) {
+    userStoryList.innerHTML = '<p class="story-history-empty">Aún no has compartido historias.</p>';
+    return;
+  }
+
+  currentUserStories.forEach((story) => {
+    if (!story?.id) return;
+    const item = document.createElement('article');
+    item.className = 'story-history-item';
+    const title = buildStoryHistoryTitle(story);
+    const dateLabel = formatDateTime(story.updatedAt || story.publishedAt || story.createdAt);
+    const excerpt = buildStoryHistoryExcerpt(story.body || '');
+    const metaChips = [];
+    if (story.spot) {
+      metaChips.push(`📍 ${story.spot}`);
+    }
+    if (story.status) {
+      const statusLabel = storyStatusBadge(story.status);
+      if (statusLabel) {
+        metaChips.push(statusLabel);
+      }
+    }
+    const metaHtml = metaChips.length
+      ? `<div class="story-history-meta">${metaChips
+        .map((chip) => `<span class="story-history-chip">${escapeHtml(chip)}</span>`).join('')}</div>`
+      : '';
+    const excerptHtml = excerpt ? `<p>${escapeHtml(excerpt)}</p>` : '';
+    const dateHtml = dateLabel ? `<span class="story-history-date">${escapeHtml(dateLabel)}</span>` : '';
+
+    item.innerHTML = `
+      <div class="story-history-top">
+        <strong>${escapeHtml(title)}</strong>
+        ${dateHtml}
+      </div>
+      ${metaHtml}
+      ${excerptHtml}
+      <div class="story-history-actions">
+        <button type="button" class="story-history-delete" data-story-delete="${escapeHtml(story.id)}">🗑 Eliminar</button>
+      </div>
+    `;
+    userStoryList.appendChild(item);
+  });
+}
+
+async function handleStoryDelete(storyId) {
+  if (!currentUser || !currentToken) {
+    if (storyStatusLabel) storyStatusLabel.textContent = 'Inicia sesión para gestionar tus historias.';
+    storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 4000);
+    return;
+  }
+  if (!storyId || deletingStoryIds.has(storyId)) return;
+  const confirmation = window.confirm('¿Quieres eliminar esta historia? Esta acción no se puede deshacer.');
+  if (!confirmation) return;
+  deletingStoryIds.add(storyId);
+  clearStoryStatusMessage();
+  if (storyStatusLabel) storyStatusLabel.textContent = 'Eliminando historia…';
+  try {
+    await deleteStoryRequest(currentToken, storyId);
+    currentUserStories = currentUserStories.filter((story) => story.id !== storyId);
+    renderUserStoriesList();
+    updateStoryMetaSummary();
+    window.dispatchEvent(new CustomEvent('story-deleted', { detail: { storyId } }));
+    if (typeof loadStories === 'function') {
+      try {
+        loadStories(true);
+      } catch (error) {
+        console.warn('[stories] error refreshing stories after delete', error);
+      }
+    }
+    if (storyStatusLabel) storyStatusLabel.textContent = 'Historia eliminada correctamente.';
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No se pudo eliminar la historia.';
+    if (storyStatusLabel) storyStatusLabel.textContent = message;
+  } finally {
+    deletingStoryIds.delete(storyId);
+    storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 4000);
+  }
+}
+
 function getStoryPayload() {
   const body = storyBodyInput?.value?.trim() || '';
   const payload = { body };
@@ -566,7 +678,7 @@ function closeProfileModal() {
 window.closeProfileModal = closeProfileModal;
 
 const supAuthGlobal = window.supAuth || {};
-supAuthGlobal.getState = () => ({ token: currentToken, user: currentUser });
+supAuthGlobal.getState = () => ({ token: currentToken, user: currentUser, isAdmin: currentIsAdmin });
 supAuthGlobal.openAuthModal = openAuthModal;
 supAuthGlobal.subscribe = (callback) => {
   if (typeof callback !== 'function') return () => {};
@@ -576,7 +688,7 @@ supAuthGlobal.subscribe = (callback) => {
 window.supAuth = supAuthGlobal;
 
 function notifyAuthChange() {
-  const detail = { token: currentToken, user: currentUser };
+  const detail = { token: currentToken, user: currentUser, isAdmin: currentIsAdmin };
   authSubscribers.forEach((callback) => {
     try {
       callback(detail);
@@ -651,7 +763,15 @@ async function fetchUserStories(token) {
     },
   });
   if (!response.ok) {
-    throw new Error('No se pudieron obtener tus historias');
+    let detail = '';
+    try {
+      const errorBody = await response.json();
+      detail = typeof errorBody?.error === 'string' ? ` Detalle: ${errorBody.error}` : '';
+    } catch (_error) {
+      // ignore parse error
+    }
+    const message = `No se pudieron obtener tus historias. Código ${response.status}.${detail}`;
+    throw new Error(message.trim());
   }
   const data = await response.json();
   return Array.isArray(data.stories) ? data.stories : [];
@@ -675,18 +795,38 @@ async function saveStoryRequest(token, payload) {
   return data.story || null;
 }
 
+async function deleteStoryRequest(token, storyId) {
+  const response = await fetch(`${API_BASE_URL}/v1/stories/me/${encodeURIComponent(storyId)}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    const message = error?.error || 'No se pudo eliminar la historia';
+    throw new Error(message);
+  }
+  return true;
+}
+
 async function loadUserStories(token) {
   try {
     currentUserStories = await fetchUserStories(token);
     fillStoryForm(null);
     updateStoryMetaSummary();
+    renderUserStoriesList();
   } catch (error) {
     console.error('[stories] error fetching user story', error);
     currentUserStories = [];
     resetStoryForm();
     updateStoryMetaSummary();
-    if (storyStatusLabel) storyStatusLabel.textContent = 'No se pudieron cargar tus historias.';
+    if (storyStatusLabel) {
+      const message = error instanceof Error ? error.message : 'No se pudieron cargar tus historias.';
+      storyStatusLabel.textContent = message;
+    }
     storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 4000);
+    renderUserStoriesList();
   }
 }
 
@@ -705,6 +845,7 @@ function setAuthButtonLoggedOut() {
   fillProfileForm(null);
   resetStoryForm();
   updateStoryMetaSummary();
+  renderUserStoriesList();
   notifyAuthChange();
 }
 
@@ -919,6 +1060,16 @@ storyLocationSuggestionsContainer?.addEventListener('click', (event) => {
   selectStorySpot(decoded.trim());
 });
 
+userStoryList?.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-story-delete]');
+  if (!button) return;
+  event.preventDefault();
+  const storyId = button.getAttribute('data-story-delete');
+  if (storyId) {
+    handleStoryDelete(storyId);
+  }
+});
+
 storySaveButton?.addEventListener('click', async () => {
   if (!currentUser || !currentToken || isSavingStory || storyMediaUploading || storyLocationLoading) {
     if (storyMediaUploading && storyStatusLabel) {
@@ -944,6 +1095,7 @@ storySaveButton?.addEventListener('click', async () => {
     const story = await saveStoryRequest(currentToken, payload);
     if (story) {
       currentUserStories = [story, ...currentUserStories];
+      renderUserStoriesList();
     }
     fillStoryForm(null);
     updateStoryMetaSummary();
@@ -1204,5 +1356,16 @@ avatarInput?.addEventListener('change', async (event) => {
   } finally {
     isUploadingAvatar = false;
     avatarInput.value = '';
+  }
+});
+
+window.addEventListener('story-deleted', (event) => {
+  const storyId = event?.detail?.storyId;
+  if (!storyId) return;
+  const before = currentUserStories.length;
+  currentUserStories = currentUserStories.filter((story) => story.id !== storyId);
+  if (currentUserStories.length !== before) {
+    updateStoryMetaSummary();
+    renderUserStoriesList();
   }
 });

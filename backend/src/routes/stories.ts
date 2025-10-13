@@ -6,6 +6,8 @@ import { authenticate } from '../middleware/authenticate.js';
 import { env } from '../config/env.js';
 import {
   createUserStory,
+  deleteStoryAdmin,
+  deleteUserStory,
   listAllStories,
   listPublishedStories,
   listUserStories,
@@ -63,7 +65,15 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
     res.json({ stories });
   } catch (error) {
     console.error('[stories] error fetching user story', error);
-    res.status(500).json({ error: 'No se pudieron obtener tus historias.' });
+    const message = error instanceof Error ? error.message : 'No se pudieron obtener tus historias.';
+    const code = typeof (error as { code?: unknown })?.code === 'string' ? (error as { code: string }).code : undefined;
+    res.status(500).json({
+      error: message,
+      code,
+      hint: code === 'FAILED_PRECONDITION'
+        ? 'Revisa los índices de Firestore para la colección stories (autorUid + createdAt).'
+        : undefined,
+    });
   }
 });
 
@@ -108,6 +118,29 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
   }
 });
 
+router.delete('/me/:storyId', authenticate, async (req: Request, res: Response) => {
+  const decoded = decodedFromReq(req);
+  if (!decoded?.uid) {
+    return res.status(400).json({ error: 'UID no disponible en el token.' });
+  }
+  const { storyId } = req.params;
+  try {
+    const result = await deleteUserStory(storyId, decoded.uid);
+    if (!result.removed) {
+      if (result.reason === 'NOT_FOUND') {
+        return res.status(404).json({ error: 'Historia no encontrada.' });
+      }
+      if (result.reason === 'FORBIDDEN') {
+        return res.status(403).json({ error: 'No puedes eliminar esta historia.' });
+      }
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[stories] error deleting story', error);
+    res.status(500).json({ error: 'No se pudo eliminar la historia.' });
+  }
+});
+
 router.get('/admin', authenticate, async (req: Request, res: Response) => {
   const decoded = decodedFromReq(req);
   if (!isAdmin(decoded)) {
@@ -142,6 +175,24 @@ router.post('/:storyId/status', authenticate, async (req: Request, res: Response
   } catch (error) {
     console.error('[stories] error updating story status', error);
     res.status(400).json({ error: error instanceof Error ? error.message : 'No se pudo actualizar la historia.' });
+  }
+});
+
+router.delete('/:storyId', authenticate, async (req: Request, res: Response) => {
+  const decoded = decodedFromReq(req);
+  if (!isAdmin(decoded)) {
+    return res.status(403).json({ error: 'No autorizado.' });
+  }
+  const { storyId } = req.params;
+  try {
+    const result = await deleteStoryAdmin(storyId);
+    if (!result.removed) {
+      return res.status(404).json({ error: 'Historia no encontrada.' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[stories] admin delete error', error);
+    res.status(500).json({ error: 'No se pudo eliminar la historia.' });
   }
 });
 

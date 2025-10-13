@@ -1,0 +1,29 @@
+[
+  {
+    "origin": [
+      "http://localhost:8000",
+      "http://localhost:5173",
+      "https://supstatus.cl",
+      "https://www.supstatus.cl"
+    ],
+    "method": [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "HEAD",
+      "OPTIONS"
+    ],
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "x-goog-resumable",
+      "x-goog-meta-filename",
+      "x-goog-upload-command",
+      "x-goog-upload-protocol",
+      "x-goog-upload-content-type",
+      "x-goog-upload-header-content-length"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
