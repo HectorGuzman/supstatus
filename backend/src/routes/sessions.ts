@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { authenticate } from '../middleware/authenticate.js';
-import { createSession, listSessions, type SessionPayload } from '../services/firestore.js';
+import { createSession, deleteSession, listSessions, type SessionPayload } from '../services/firestore.js';
 
 const router = Router();
 
@@ -117,6 +117,24 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
   } catch (error) {
     console.error('[sessions] error creating session', error);
     res.status(500).json({ error: 'No se pudo guardar la remada.' });
+  }
+});
+
+router.delete('/me/:sessionId', authenticate, async (req: Request, res: Response) => {
+  const decoded = decodedFromReq(req);
+  if (!decoded?.uid) {
+    return res.status(400).json({ error: 'UID no disponible en el token.' });
+  }
+  const { sessionId } = req.params;
+  try {
+    const removed = await deleteSession(decoded.uid, sessionId);
+    if (!removed) {
+      return res.status(404).json({ error: 'Remada no encontrada.' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[sessions] error deleting session', error);
+    res.status(500).json({ error: 'No se pudo eliminar la remada.' });
   }
 });
 

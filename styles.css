@@ -1490,11 +1490,21 @@ main.layout {
   gap: 12px;
 }
 
+.session-wrapper {
+  background: rgba(6, 18, 31, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: clamp(18px, 4vw, 32px);
+  display: grid;
+  gap: 16px;
+  box-shadow: 0 18px 44px rgba(4, 9, 18, 0.4);
+}
+
 .session-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
 }
 
 .session-header h5 {
@@ -1512,7 +1522,7 @@ main.layout {
 }
 
 .session-open {
-  align-self: flex-start;
+  align-self: center;
 }
 
 .session-metrics {
@@ -1777,6 +1787,31 @@ main.layout {
 .session-detail-actions {
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
+}
+
+.session-detail-actions .session-detail-delete {
+  border: 1px solid rgba(255, 115, 161, 0.5);
+  background: rgba(255, 115, 161, 0.18);
+  color: var(--brand-pink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.session-detail-actions .session-detail-delete:hover {
+  background: rgba(255, 115, 161, 0.28);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(255, 115, 161, 0.28);
+}
+
+.session-detail-actions .session-detail-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .session-detail-status {

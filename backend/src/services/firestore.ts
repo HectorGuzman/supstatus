@@ -87,6 +87,16 @@ export async function listSessions(uid: string) {
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
+export async function deleteSession(uid: string, sessionId: string) {
+  const docRef = firestore.collection('users').doc(uid).collection('sessions').doc(sessionId);
+  const snapshot = await docRef.get();
+  if (!snapshot.exists) {
+    return false;
+  }
+  await docRef.delete();
+  return true;
+}
+
 export async function listAllProfiles() {
   const snapshot = await firestore.collection('users').orderBy('displayName', 'asc').get();
   return snapshot.docs.map((doc) => ({

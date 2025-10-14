@@ -97,6 +97,7 @@ const sessionDetailSummary = document.getElementById('session-detail-summary');
 const sessionDetailNotes = document.getElementById('session-detail-notes');
 const sessionDetailStatus = document.getElementById('session-detail-status');
 const sessionDetailShareButton = document.getElementById('session-detail-share');
+const sessionDetailDeleteButton = document.getElementById('session-detail-delete');
 const sessionDetailCanvas = document.getElementById('session-detail-canvas');
 const sessionDetailMapHint = document.getElementById('session-detail-map-hint');
 const avatarInput = document.getElementById('profile-avatar-input');
@@ -246,7 +247,7 @@ let storyLocationCoords = null;
 const deletingStoryIds = new Set();
 let isSavingSession = false;
 let sessionStatusTimeout = null;
-let sessionActiveTab = 'manual';
+let sessionActiveTab = 'tracking';
 let isTrackingSession = false;
 let trackingWatchId = null;
 let trackingIntervalId = null;
@@ -855,11 +856,50 @@ async function shareSessionAsStory(session) {
   if (originalShareText && sessionDetailShareButton) sessionDetailShareButton.textContent = originalShareText;
 }
 
+async function handleSessionDelete(session) {
+  if (!currentUser || !currentToken || !session?.id) {
+    window.supAuth?.openAuthModal?.();
+    return;
+  }
+  const confirmed = window.confirm('¿Eliminar esta remada? Esta acción no se puede deshacer.');
+  if (!confirmed) return;
+  const originalText = sessionDetailDeleteButton?.textContent;
+  sessionDetailDeleteButton?.setAttribute('disabled', 'true');
+  if (sessionDetailDeleteButton) sessionDetailDeleteButton.textContent = 'Eliminando…';
+  if (sessionDetailStatus) sessionDetailStatus.textContent = 'Eliminando remada…';
+  try {
+    await deleteSessionRequest(currentToken, session.id);
+    currentUserSessions = currentUserSessions.filter((item) => item.id !== session.id);
+    renderSessionList();
+    closeSessionDetail();
+    if (sessionStatusLabel) {
+      sessionStatusLabel.textContent = 'Remada eliminada ✓';
+      sessionStatusTimeout = window.setTimeout(() => clearSessionStatusMessage(), 3000);
+    }
+  } catch (error) {
+    console.error('[sessions] delete error', error);
+    const message = error instanceof Error ? error.message : 'No se pudo eliminar la remada.';
+    if (sessionDetailStatus) sessionDetailStatus.textContent = message;
+  } finally {
+    sessionDetailDeleteButton?.removeAttribute('disabled');
+    if (originalText && sessionDetailDeleteButton) sessionDetailDeleteButton.textContent = originalText;
+  }
+}
+
 function openSessionDetail(sessionId) {
   const session = currentUserSessions.find((item) => item.id === sessionId);
   if (!session || !sessionDetailModal) return;
   activeSessionDetail = session;
   renderSessionDetail(session);
+  if (sessionDetailShareButton) {
+    sessionDetailShareButton.disabled = false;
+    sessionDetailShareButton.textContent = 'Compartir como historia';
+  }
+  if (sessionDetailDeleteButton) {
+    sessionDetailDeleteButton.style.display = 'inline-flex';
+    sessionDetailDeleteButton.disabled = false;
+    sessionDetailDeleteButton.textContent = '🗑 Eliminar remada';
+  }
   sessionDetailModal.style.display = 'flex';
 }
 
@@ -867,6 +907,7 @@ function closeSessionDetail() {
   if (sessionDetailModal) sessionDetailModal.style.display = 'none';
   activeSessionDetail = null;
   if (sessionDetailStatus) sessionDetailStatus.textContent = '';
+  if (sessionDetailDeleteButton) sessionDetailDeleteButton.style.display = 'none';
 }
 
 function renderSessionDetail(session) {
@@ -1001,7 +1042,7 @@ function showSessionTab(tab) {
   });
 }
 
-function openSessionModal(tab = 'manual') {
+function openSessionModal(tab = 'tracking') {
   resetSessionForm();
   showSessionTab(tab);
   if (sessionModal) sessionModal.style.display = 'flex';
@@ -1025,7 +1066,7 @@ function resetSessionForm() {
   if (sessionNotesInput) sessionNotesInput.value = '';
   resetSessionTracking();
   clearSessionStatusMessage();
-  showSessionTab('manual');
+  showSessionTab('tracking');
 }
 
 function updateSessionModalStatus(message) {
@@ -1292,8 +1333,8 @@ function notifyAuthChange() {
     }
   });
   window.dispatchEvent(new CustomEvent('sup-auth-changed', { detail }));
-  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = currentUser && currentIsAdmin ? 'inline-flex' : 'none';
-  if (sessionSection) sessionSection.style.display = currentUser && currentIsAdmin ? 'grid' : 'none';
+  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = currentUser ? 'inline-flex' : 'none';
+  if (sessionSection) sessionSection.style.display = currentUser ? 'grid' : 'none';
 }
 
 notifyAuthChange();
@@ -1407,6 +1448,21 @@ async function deleteStoryRequest(token, storyId) {
   return true;
 }
 
+async function deleteSessionRequest(token, sessionId) {
+  const response = await fetch(`${API_BASE_URL}/v1/sessions/me/${encodeURIComponent(sessionId)}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const error = await response.json().catch(() => null);
+    const message = error?.error || 'No se pudo eliminar la remada';
+    throw new Error(message);
+  }
+  return true;
+}
+
 async function fetchUserSessions(token) {
   const response = await fetch(`${API_BASE_URL}/v1/sessions/me`, {
     method: 'GET',
@@ -1505,8 +1561,8 @@ function setAuthButtonLoggedIn(displayName) {
   const friendlyName = displayName || 'remador/a';
   if (greetingLabel) greetingLabel.textContent = `🌊 ¡Hola, ${friendlyName}! ¿Listo para remar?`;
   if (profileLinkButton) profileLinkButton.style.display = 'flex';
-  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = currentIsAdmin ? 'inline-flex' : 'none';
-  if (sessionSection) sessionSection.style.display = currentIsAdmin ? 'grid' : 'none';
+  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = 'inline-flex';
+  if (sessionSection) sessionSection.style.display = 'grid';
   if (currentProfileData) {
     setHeaderAvatar(currentProfileData.avatarUrl || '');
   }
@@ -1735,7 +1791,7 @@ sessionOpenButton?.addEventListener('click', () => {
     window.supAuth?.openAuthModal?.();
     return;
   }
-  openSessionModal('manual');
+  openSessionModal('tracking');
 });
 
 sessionGlobalOpenButton?.addEventListener('click', () => {
@@ -1743,7 +1799,7 @@ sessionGlobalOpenButton?.addEventListener('click', () => {
     window.supAuth?.openAuthModal?.();
     return;
   }
-  openSessionModal('manual');
+  openSessionModal('tracking');
 });
 
 sessionTabButtons.forEach((button) => {
@@ -1793,6 +1849,11 @@ sessionDetailModal?.addEventListener('click', (event) => {
 sessionDetailShareButton?.addEventListener('click', async () => {
   if (!activeSessionDetail) return;
   await shareSessionAsStory(activeSessionDetail);
+});
+
+sessionDetailDeleteButton?.addEventListener('click', async () => {
+  if (!activeSessionDetail) return;
+  await handleSessionDelete(activeSessionDetail);
 });
 
 storySaveButton?.addEventListener('click', async () => {
