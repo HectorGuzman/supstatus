@@ -18,6 +18,7 @@ export interface SessionPayload {
   durationMin?: number;
   distanceKm?: number;
   conditionsNote?: string;
+  trackPoints?: Array<{ lat: number; lon: number; timestamp?: number }>;
 }
 
 export async function getUserProfile(uid: string) {
@@ -49,12 +50,33 @@ export async function upsertUserProfile(uid: string, data: UserProfilePayload) {
 export async function createSession(uid: string, payload: SessionPayload) {
   const sessionsRef = firestore.collection('users').doc(uid).collection('sessions');
   const now = admin.firestore.Timestamp.now();
-  const docRef = await sessionsRef.add({
-    ...payload,
+  const trackPoints = Array.isArray(payload.trackPoints)
+    ? payload.trackPoints
+        .filter((point) =>
+          typeof point?.lat === 'number'
+          && typeof point?.lon === 'number'
+          && Number.isFinite(point.lat)
+          && Number.isFinite(point.lon),
+        )
+        .slice(0, 500)
+        .map((point) => ({
+          lat: point.lat,
+          lon: point.lon,
+          timestamp: typeof point.timestamp === 'number' ? point.timestamp : Date.now(),
+        }))
+    : undefined;
+  const data: Record<string, unknown> = {
     startedAt: payload.startedAt ? admin.firestore.Timestamp.fromDate(payload.startedAt) : now,
     createdAt: now,
     updatedAt: now,
-  });
+  };
+  if (typeof payload.title === 'string') data.title = payload.title.trim();
+  if (typeof payload.spot === 'string') data.spot = payload.spot.trim();
+  if (typeof payload.durationMin === 'number') data.durationMin = payload.durationMin;
+  if (typeof payload.distanceKm === 'number') data.distanceKm = payload.distanceKm;
+  if (typeof payload.conditionsNote === 'string') data.conditionsNote = payload.conditionsNote.trim();
+  if (trackPoints && trackPoints.length) data.trackPoints = trackPoints;
+  const docRef = await sessionsRef.add(data);
   const snapshot = await docRef.get();
   return { id: docRef.id, ...snapshot.data() };
 }

@@ -24,6 +24,7 @@
         <img id="auth-header-avatar" class="top-avatar" src="logosupstatus.png" alt="Avatar SUP" />
         <span class="top-avatar-label">Mi perfil</span>
       </button>
+      <button class="session-global-button" id="session-global-open" style="display: none;">🚀 Registrar remada</button>
       <button class="ghost story-create-trigger" data-story-open>✨ Compartir historia</button>
       <button class="ghost" id="auth-button">🔐 Iniciar sesión</button>
     </div>
@@ -268,8 +269,20 @@
           </div>
           <div class="story-history-list" id="user-story-list"></div>
         </div>
+        <div class="session-section" id="session-section" style="display: none;">
+          <div class="session-header">
+            <div>
+              <h5>Mis remadas</h5>
+              <p class="session-rank" id="session-rank">Sin remadas registradas.</p>
+            </div>
+            <button type="button" class="ghost session-open" id="session-open-modal">➕ Registrar remada</button>
+          </div>
+          <div class="session-metrics" id="session-metrics">0 km · 0 sesiones · 0 h</div>
+        <div class="session-list" id="session-list"></div>
+        <p class="session-status" id="session-status"></p>
       </div>
     </div>
+  </div>
   </div>
 
   <div id="story-modal" class="modal-overlay" style="display: none;">
@@ -292,6 +305,87 @@
           <p class="story-modal-text" id="story-modal-text"></p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <div id="session-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content session-modal">
+      <button type="button" class="cerrar-modal" id="session-modal-close">✕</button>
+      <h4 class="modal-title">Registrar remada</h4>
+      <p class="session-modal-hint">Registra tus remadas manualmente o inicia un seguimiento en vivo desde tu teléfono.</p>
+      <div class="session-tabs">
+        <button type="button" data-session-tab="manual" class="active">📝 Registro manual</button>
+        <button type="button" data-session-tab="tracking">📍 Seguimiento</button>
+      </div>
+      <div class="session-panel" data-session-panel="manual">
+        <label>
+          Fecha y hora de inicio
+          <input type="datetime-local" id="session-start">
+        </label>
+        <label>
+          Spot o lugar
+          <input type="text" id="session-spot" placeholder="Ej: Bahía tranquila, Lago X">
+        </label>
+        <div class="session-form-row">
+          <label>
+            Distancia (km)
+            <input type="number" id="session-distance" min="0" step="0.01" placeholder="Ej: 4.5">
+          </label>
+          <label>
+            Duración (min)
+            <input type="number" id="session-duration" min="0" step="1" placeholder="Ej: 75">
+          </label>
+        </div>
+        <label>
+          Notas
+          <textarea id="session-notes" rows="3" placeholder="Condiciones, sensaciones, equipo, etc."></textarea>
+        </label>
+      </div>
+      <div class="session-panel" data-session-panel="tracking" style="display: none;">
+        <div class="session-tracking-indicator" id="session-tracking-status">Listo para iniciar seguimiento.</div>
+        <div class="session-tracking-metrics">
+          <div>
+            <span class="label">Distancia</span>
+            <span class="value" id="session-tracking-distance">0.00 km</span>
+          </div>
+          <div>
+            <span class="label">Duración</span>
+            <span class="value" id="session-tracking-duration">00:00:00</span>
+          </div>
+          <div>
+            <span class="label">Puntos</span>
+            <span class="value" id="session-tracking-points">0</span>
+          </div>
+        </div>
+        <div class="session-tracking-actions">
+          <button type="button" class="primary" id="session-tracking-start">▶️ Iniciar seguimiento</button>
+          <button type="button" class="ghost" id="session-tracking-stop" disabled>⏹ Detener</button>
+          <button type="button" class="ghost" id="session-tracking-reset" disabled>↺ Reiniciar</button>
+        </div>
+        <p class="session-tracking-hint">Mantén el teléfono seguro sobre la tabla. El seguimiento usa tu GPS para estimar distancia y tiempo.</p>
+      </div>
+      <div class="session-modal-footer">
+        <button type="button" class="ghost" id="session-reset">Cancelar</button>
+        <button type="button" class="primary" id="session-save">Guardar remada</button>
+      </div>
+      <p class="session-modal-status" id="session-modal-status"></p>
+    </div>
+  </div>
+
+  <div id="session-detail-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content session-detail-modal">
+      <button type="button" class="cerrar-modal" id="session-detail-close">✕</button>
+      <h4 class="modal-title" id="session-detail-title">Detalle de la remada</h4>
+      <div class="session-detail-summary" id="session-detail-summary"></div>
+      <div class="session-detail-map-wrapper">
+        <canvas id="session-detail-canvas" width="360" height="240"></canvas>
+        <p class="session-detail-map-hint" id="session-detail-map-hint"></p>
+      </div>
+      <p class="session-detail-notes" id="session-detail-notes"></p>
+      <div class="session-detail-actions">
+        <button type="button" class="ghost" id="session-detail-share">Compartir como historia</button>
+      </div>
+      <p class="session-detail-status" id="session-detail-status"></p>
     </div>
   </div>
 
@@ -477,21 +571,47 @@
       solContainer.innerHTML = `<strong>🌅 Sol:</strong> ${formatoHora(sunrise)} · ${formatoHora(sunset)}`;
     }
 
+    function normalizarTipoMarea(tipo) {
+      if (!tipo) return '';
+      const normalized = tipo.toString().trim().toLowerCase();
+      if (normalized.includes('alta')) return 'alta';
+      if (normalized.includes('subiendo')) return 'subiendo';
+      if (normalized.includes('baja')) return 'baja';
+      if (normalized.includes('bajando')) return 'bajando';
+      if (normalized.includes('media')) return 'media';
+      return normalized || '';
+    }
+
     function mostrarHorariosMarea(data) {
       const mareaContainer = document.getElementById("horarios-marea");
       if (!mareaContainer) return;
-      if (!data.mareas || data.mareas.length === 0) {
-        mareaContainer.innerHTML = `<span class="marea-pill marea-pill--empty">🌀 Sin mareas disponibles</span>`;
-        return;
+      let listado = Array.isArray(data.mareas) ? data.mareas : [];
+
+      if (!listado.length) {
+        const pronosticos = []
+          .concat(Array.isArray(data.hoy) ? data.hoy : [])
+          .concat(Array.isArray(data["mañana"]) ? data["mañana"] : []);
+        listado = pronosticos
+          .filter((item) => item && item.marea && item.hora)
+          .map((item) => ({
+            tipo: normalizarTipoMarea(item.marea),
+            hora: item.hora,
+            origen: 'pronostico',
+          }));
       }
 
-      const iconos = { alta: "🌊⬆️", baja: "🌊⬇️" };
-      const chips = data.mareas
+      const iconos = { alta: "🌊⬆️", baja: "🌊⬇️", subiendo: "🌊↗️", bajando: "🌊↘️", media: "🌊" };
+      const chips = listado
+        .filter((m) => m && m.tipo && m.hora)
         .slice(0, 6)
-        .map(m => `<span class="marea-pill">${iconos[m.tipo] || "🌊"} ${m.tipo} ${m.hora}</span>`)
+        .map((m) => `<span class="marea-pill">${iconos[m.tipo] || "🌊"} ${m.tipo} ${m.hora}</span>`)
         .join("");
 
-      mareaContainer.innerHTML = chips;
+      if (chips) {
+        mareaContainer.innerHTML = chips;
+      } else {
+        mareaContainer.innerHTML = `<span class="marea-pill marea-pill--empty">🌀 Sin mareas disponibles</span>`;
+      }
     }
 
     const STORIES_API_BASE = window.location.hostname === 'localhost'

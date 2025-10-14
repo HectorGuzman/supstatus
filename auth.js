@@ -64,6 +64,41 @@ const storyLocationStatus = document.getElementById('story-location-status');
 const storyLocationSuggestionsContainer = document.getElementById('story-location-suggestions');
 const userStoryList = document.getElementById('user-story-list');
 const userStoryCountLabel = document.getElementById('user-story-count');
+const sessionOpenButton = document.getElementById('session-open-modal');
+const sessionGlobalOpenButton = document.getElementById('session-global-open');
+const sessionSection = document.getElementById('session-section');
+const sessionMetricsLabel = document.getElementById('session-metrics');
+const sessionRankLabel = document.getElementById('session-rank');
+const sessionListElement = document.getElementById('session-list');
+const sessionStatusLabel = document.getElementById('session-status');
+const sessionModal = document.getElementById('session-modal');
+const sessionModalCloseButton = document.getElementById('session-modal-close');
+const sessionSaveButton = document.getElementById('session-save');
+const sessionResetButton = document.getElementById('session-reset');
+const sessionModalStatus = document.getElementById('session-modal-status');
+const sessionTabButtons = Array.from(document.querySelectorAll('[data-session-tab]'));
+const sessionTabPanels = Array.from(document.querySelectorAll('[data-session-panel]'));
+const sessionStartInput = document.getElementById('session-start');
+const sessionSpotInput = document.getElementById('session-spot');
+const sessionDistanceInput = document.getElementById('session-distance');
+const sessionDurationInput = document.getElementById('session-duration');
+const sessionNotesInput = document.getElementById('session-notes');
+const sessionTrackingStatus = document.getElementById('session-tracking-status');
+const sessionTrackingDistanceLabel = document.getElementById('session-tracking-distance');
+const sessionTrackingDurationLabel = document.getElementById('session-tracking-duration');
+const sessionTrackingPointsLabel = document.getElementById('session-tracking-points');
+const sessionTrackingStartButton = document.getElementById('session-tracking-start');
+const sessionTrackingStopButton = document.getElementById('session-tracking-stop');
+const sessionTrackingResetButton = document.getElementById('session-tracking-reset');
+const sessionDetailModal = document.getElementById('session-detail-modal');
+const sessionDetailCloseButton = document.getElementById('session-detail-close');
+const sessionDetailTitle = document.getElementById('session-detail-title');
+const sessionDetailSummary = document.getElementById('session-detail-summary');
+const sessionDetailNotes = document.getElementById('session-detail-notes');
+const sessionDetailStatus = document.getElementById('session-detail-status');
+const sessionDetailShareButton = document.getElementById('session-detail-share');
+const sessionDetailCanvas = document.getElementById('session-detail-canvas');
+const sessionDetailMapHint = document.getElementById('session-detail-map-hint');
 const avatarInput = document.getElementById('profile-avatar-input');
 const avatarPreview = document.getElementById('profile-avatar-preview');
 const avatarStatus = document.getElementById('profile-avatar-status');
@@ -163,6 +198,33 @@ function storyStatusBadge(status) {
   }
 }
 
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // km
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function formatDurationMinutes(minutes) {
+  if (!Number.isFinite(minutes)) return '0 min';
+  const totalMinutes = Math.max(0, minutes);
+  if (totalMinutes < 60) return `${Math.round(totalMinutes)} min`;
+  const hours = Math.floor(totalMinutes / 60);
+  const remainingMinutes = Math.round(totalMinutes % 60);
+  return `${hours} h ${remainingMinutes} min`;
+}
+
+function formatDurationClock(ms) {
+  const totalMs = Math.max(0, ms);
+  const totalSeconds = Math.floor(totalMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600).toString().padStart(2, '0');
+  const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0');
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+}
+
 let currentUser = null;
 let currentToken = null;
 let currentProfileData = {};
@@ -171,6 +233,7 @@ let isSaving = false;
 let avatarPreviewObjectUrl = null;
 let isUploadingAvatar = false;
 let currentUserStories = [];
+let currentUserSessions = [];
 let isSavingStory = false;
 let storyStatusTimeout = null;
 let currentStoryMediaUrl = '';
@@ -181,6 +244,16 @@ let storyLocationSuggestions = [];
 let storyLocationLoading = false;
 let storyLocationCoords = null;
 const deletingStoryIds = new Set();
+let isSavingSession = false;
+let sessionStatusTimeout = null;
+let sessionActiveTab = 'manual';
+let isTrackingSession = false;
+let trackingWatchId = null;
+let trackingIntervalId = null;
+let trackingStartTime = null;
+let trackingDistanceKm = 0;
+let trackingPoints = [];
+let activeSessionDetail = null;
 
 function resetAvatarPreviewUrl() {
   if (avatarPreviewObjectUrl) {
@@ -507,6 +580,19 @@ function clearStoryStatusMessage() {
   }
 }
 
+function clearSessionStatusMessage() {
+  if (sessionStatusTimeout) {
+    window.clearTimeout(sessionStatusTimeout);
+    sessionStatusTimeout = null;
+  }
+  if (sessionStatusLabel) {
+    sessionStatusLabel.textContent = '';
+  }
+  if (sessionModalStatus) {
+    sessionModalStatus.textContent = '';
+  }
+}
+
 function fillStoryForm(story = null) {
   storySelectedSpot = story?.spot || '';
   storyLocationSuggestions = [];
@@ -638,6 +724,515 @@ async function handleStoryDelete(storyId) {
   }
 }
 
+function computeSessionRank(totalKm) {
+  if (totalKm >= 200) return '🌟 Leyenda SUP (200+ km)';
+  if (totalKm >= 100) return '✨ Explorador avanzado (100+ km)';
+  if (totalKm >= 50) return '⭐ Explorador SUP (50+ km)';
+  if (totalKm >= 20) return '🔥 Remador constante (20+ km)';
+  if (totalKm > 0) return '🚀 Primeras remadas (1+ km)';
+  return 'Sin remadas registradas.';
+}
+
+function renderSessionMetrics() {
+  if (!sessionMetricsLabel) return;
+  const totalSessions = currentUserSessions.length;
+  const totalDistance = currentUserSessions.reduce((acc, session) => acc + (Number(session.distanceKm) || 0), 0);
+  const totalDuration = currentUserSessions.reduce((acc, session) => acc + (Number(session.durationMin) || 0), 0);
+  const distanceLabel = `${totalDistance.toFixed(2)} km`;
+  const durationLabel = formatDurationMinutes(totalDuration);
+  sessionMetricsLabel.textContent = `${distanceLabel} · ${totalSessions} sesiones · ${durationLabel}`;
+  if (sessionRankLabel) {
+    sessionRankLabel.textContent = computeSessionRank(totalDistance);
+  }
+}
+
+function renderSessionList() {
+  if (!sessionListElement) return;
+  sessionListElement.innerHTML = '';
+  renderSessionMetrics();
+  if (!currentUserSessions.length) {
+    sessionListElement.innerHTML = '<p class="session-status">Aún no registras remadas.</p>';
+    return;
+  }
+  currentUserSessions
+    .map((session) => {
+      const startedAt = session.startedAt || session.createdAt;
+      const startedDate = startedAt ? new Date(startedAt) : null;
+      const sortKey = startedDate && !Number.isNaN(startedDate.getTime()) ? startedDate.getTime() : 0;
+      return { session, sortKey };
+    })
+    .sort((a, b) => b.sortKey - a.sortKey)
+    .forEach(({ session }) => {
+      const item = document.createElement('article');
+      item.className = 'session-item';
+      const startedDate = session.startedAt ? formatDateTime(session.startedAt) : session.createdAt ? formatDateTime(session.createdAt) : '';
+      const hasStartedLabel = startedDate && startedDate !== 'N/A';
+      const distance = Number(session.distanceKm) || 0;
+      const duration = Number(session.durationMin) || 0;
+      const distanceLabel = `${distance.toFixed(2)} km`;
+      const durationLabel = formatDurationMinutes(duration);
+      const spot = session.spot ? `📍 ${session.spot}` : '';
+      const notes = session.conditionsNote ? `<p>${escapeHtml(session.conditionsNote)}</p>` : '';
+    item.innerHTML = `
+      <div class="session-item-top">
+        <strong>${escapeHtml(session.title || session.spot || 'Remada SUP')}</strong>
+        ${hasStartedLabel ? `<span>${escapeHtml(startedDate)}</span>` : ''}
+      </div>
+      <span>${escapeHtml(distanceLabel)} · ${escapeHtml(durationLabel)}</span>
+      ${spot ? `<span>${escapeHtml(spot)}</span>` : ''}
+      ${notes}
+      <div class="session-item-actions">
+        <button type="button" class="session-item-view" data-session-id="${escapeHtml(session.id || '')}">👀 Ver detalle</button>
+      </div>
+    `;
+      sessionListElement.appendChild(item);
+    });
+}
+
+
+async function shareSessionAsStory(session) {
+  if (!currentUser || !currentToken) {
+    window.supAuth?.openAuthModal?.();
+    return;
+  }
+  sessionDetailShareButton?.setAttribute('disabled', 'true');
+  const originalShareText = sessionDetailShareButton?.textContent;
+  if (sessionDetailShareButton) sessionDetailShareButton.textContent = 'Publicando…';
+  if (sessionDetailStatus) sessionDetailStatus.textContent = 'Creando historia a partir de tu remada…';
+  try {
+    const distance = Number(session.distanceKm) || 0;
+    const duration = Number(session.durationMin) || 0;
+    const startedAt = session.startedAt || session.createdAt;
+    const startedLabel = startedAt ? formatDateTime(startedAt) : '';
+    const summaryParts = [];
+    if (distance) summaryParts.push(`${distance.toFixed(2)} km`);
+    if (duration) summaryParts.push(formatDurationMinutes(duration));
+    const bodyLines = [];
+    if (summaryParts.length) {
+      bodyLines.push(`Remada de ${summaryParts.join(' · ')}`);
+    }
+    if (session.spot) {
+      bodyLines.push(`Spot: ${session.spot}`);
+    }
+    if (startedLabel && startedLabel !== 'N/A') {
+      bodyLines.push(`Fecha: ${startedLabel}`);
+    }
+    if (session.conditionsNote) {
+      bodyLines.push('Notas: ' + session.conditionsNote);
+    }
+    if (!bodyLines.length) {
+      bodyLines.push('Compartiendo mi remada SUP 🏄');
+    }
+    const mediaUrl = generateSessionImage(session);
+    const payload = {
+      body: bodyLines.join('\n'),
+      spot: session.spot || undefined,
+      mediaUrl: mediaUrl || undefined,
+      bestConditions: summaryParts.length ? summaryParts.join(' · ') : undefined,
+    };
+    const story = await saveStoryRequest(currentToken, payload);
+    if (story) {
+      currentUserStories = [story, ...currentUserStories];
+      renderUserStoriesList();
+      updateStoryMetaSummary();
+      loadStories(true);
+      window.dispatchEvent(new CustomEvent('story-saved'));
+      if (storyStatusLabel) {
+        storyStatusLabel.textContent = 'Historia creada a partir de tu remada.';
+        storyStatusTimeout = window.setTimeout(() => clearStoryStatusMessage(), 4000);
+      }
+      if (sessionDetailStatus) sessionDetailStatus.textContent = 'Historia publicada. ¡Gracias por compartir!';
+      closeSessionDetail();
+    } else if (sessionDetailStatus) {
+      sessionDetailStatus.textContent = 'No se pudo crear la historia.';
+    }
+  } catch (error) {
+    console.error('[sessions] share error', error);
+    const message = error instanceof Error ? error.message : 'No se pudo crear la historia.';
+    if (sessionDetailStatus) sessionDetailStatus.textContent = message;
+  }
+  sessionDetailShareButton?.removeAttribute('disabled');
+  if (originalShareText && sessionDetailShareButton) sessionDetailShareButton.textContent = originalShareText;
+}
+
+function openSessionDetail(sessionId) {
+  const session = currentUserSessions.find((item) => item.id === sessionId);
+  if (!session || !sessionDetailModal) return;
+  activeSessionDetail = session;
+  renderSessionDetail(session);
+  sessionDetailModal.style.display = 'flex';
+}
+
+function closeSessionDetail() {
+  if (sessionDetailModal) sessionDetailModal.style.display = 'none';
+  activeSessionDetail = null;
+  if (sessionDetailStatus) sessionDetailStatus.textContent = '';
+}
+
+function renderSessionDetail(session) {
+  if (!session) return;
+  if (sessionDetailTitle) {
+    sessionDetailTitle.textContent = session.title || session.spot || 'Detalle de remada';
+  }
+  if (sessionDetailSummary) {
+    const distance = Number(session.distanceKm) || 0;
+    const duration = Number(session.durationMin) || 0;
+    const summaryParts = [];
+    if (session.spot) summaryParts.push(`📍 ${session.spot}`);
+    if (distance) summaryParts.push(`🚶‍♂️ ${distance.toFixed(2)} km`);
+    if (duration) summaryParts.push(`⏱ ${formatDurationMinutes(duration)}`);
+    const startedAt = session.startedAt || session.createdAt;
+    if (startedAt) {
+      const label = formatDateTime(startedAt);
+      if (label && label !== 'N/A') summaryParts.push(`🗓 ${label}`);
+    }
+    sessionDetailSummary.innerHTML = summaryParts.map((part) => `<span>${escapeHtml(part)}</span>`).join('');
+  }
+  if (sessionDetailNotes) {
+    sessionDetailNotes.textContent = session.conditionsNote || 'Sin notas adicionales.';
+  }
+  drawSessionCanvasPreview(session);
+  if (sessionDetailStatus) sessionDetailStatus.textContent = '';
+}
+
+function drawSessionCanvasPreview(session) {
+  if (!sessionDetailCanvas) return;
+  const ctx = sessionDetailCanvas.getContext('2d');
+  if (!ctx) return;
+  renderSessionArtwork(ctx, sessionDetailCanvas.width, sessionDetailCanvas.height, session);
+  if (sessionDetailMapHint) {
+    if (Array.isArray(session.trackPoints) && session.trackPoints.length > 1) {
+      sessionDetailMapHint.textContent = 'Ruta estimada según tu seguimiento en vivo.';
+    } else {
+      sessionDetailMapHint.textContent = 'Registro manual (imagen generada automáticamente).';
+    }
+  }
+}
+
+function renderSessionArtwork(ctx, width, height, session) {
+  ctx.clearRect(0, 0, width, height);
+  const gradient = ctx.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, '#081d36');
+  gradient.addColorStop(1, '#150b31');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, width, height);
+
+  const track = Array.isArray(session.trackPoints) ? session.trackPoints : [];
+  if (track.length > 1) {
+    const lats = track.map((p) => p.lat);
+    const lons = track.map((p) => p.lon);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLon = Math.min(...lons);
+    const maxLon = Math.max(...lons);
+    const padding = 24;
+    const spanLat = Math.max(maxLat - minLat, 0.0001);
+    const spanLon = Math.max(maxLon - minLon, 0.0001);
+    ctx.strokeStyle = 'rgba(38, 198, 218, 0.92)';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    track.forEach((point, index) => {
+      const x = padding + ((point.lon - minLon) / spanLon) * (width - padding * 2);
+      const y = height - padding - ((point.lat - minLat) / spanLat) * (height - padding * 2);
+      if (index === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    const drawMarker = (point, color) => {
+      const x = padding + ((point.lon - minLon) / spanLon) * (width - padding * 2);
+      const y = height - padding - ((point.lat - minLat) / spanLat) * (height - padding * 2);
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+    };
+    drawMarker(track[0], 'rgba(255, 197, 66, 0.95)');
+    drawMarker(track[track.length - 1], 'rgba(255, 115, 161, 0.95)');
+  } else {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.fillRect(width / 2 - 40, height / 2 - 40, 80, 80);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(width / 2, height / 2, 44, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.68)';
+    ctx.font = '26px Poppins, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🏄', width / 2, height / 2 + 12);
+  }
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+  ctx.font = 'bold 20px Poppins, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText((session.spot || 'Remada SUP').slice(0, 24), 16, 36);
+  const distance = Number(session.distanceKm) || 0;
+  const duration = Number(session.durationMin) || 0;
+  ctx.font = '14px Poppins, sans-serif';
+  ctx.fillText(`${distance.toFixed(2)} km · ${formatDurationMinutes(duration)}`, 16, 58);
+}
+
+function generateSessionImage(session) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 720;
+  canvas.height = 480;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  renderSessionArtwork(ctx, canvas.width, canvas.height, session);
+  try {
+    return canvas.toDataURL('image/png', 0.92);
+  } catch (error) {
+    console.warn('[sessions] unable to export canvas', error);
+    return null;
+  }
+}
+
+function showSessionTab(tab) {
+  sessionActiveTab = tab;
+  sessionTabButtons.forEach((button) => {
+    const isActive = button.getAttribute('data-session-tab') === tab;
+    button.classList.toggle('active', isActive);
+  });
+  sessionTabPanels.forEach((panel) => {
+    const isActive = panel.getAttribute('data-session-panel') === tab;
+    panel.style.display = isActive ? 'grid' : 'none';
+  });
+}
+
+function openSessionModal(tab = 'manual') {
+  resetSessionForm();
+  showSessionTab(tab);
+  if (sessionModal) sessionModal.style.display = 'flex';
+}
+
+function closeSessionModal() {
+  if (sessionModal) sessionModal.style.display = 'none';
+  resetSessionTracking();
+  clearSessionStatusMessage();
+}
+
+function resetSessionForm() {
+  if (sessionStartInput) {
+    const now = new Date();
+    const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    sessionStartInput.value = localISO;
+  }
+  if (sessionSpotInput) sessionSpotInput.value = storySelectedSpot || '';
+  if (sessionDistanceInput) sessionDistanceInput.value = '';
+  if (sessionDurationInput) sessionDurationInput.value = '';
+  if (sessionNotesInput) sessionNotesInput.value = '';
+  resetSessionTracking();
+  clearSessionStatusMessage();
+  showSessionTab('manual');
+}
+
+function updateSessionModalStatus(message) {
+  if (sessionModalStatus) sessionModalStatus.textContent = message;
+}
+
+async function saveSessionFromModal() {
+  if (!currentUser || !currentToken || isSavingSession) {
+    window.supAuth?.openAuthModal?.();
+    return;
+  }
+  clearSessionStatusMessage();
+  updateSessionModalStatus('Guardando remada…');
+  isSavingSession = true;
+  sessionSaveButton?.setAttribute('disabled', 'true');
+  sessionResetButton?.setAttribute('disabled', 'true');
+  try {
+    const payload = buildSessionPayload();
+    const session = await saveSessionRequest(currentToken, payload);
+    if (session) {
+      currentUserSessions = [session, ...currentUserSessions];
+      renderSessionList();
+    } else {
+      await loadUserSessions(currentToken);
+    }
+    updateSessionModalStatus('Remada guardada ✓');
+    sessionStatusTimeout = window.setTimeout(() => clearSessionStatusMessage(), 3000);
+    closeSessionModal();
+    if (session?.id) {
+      window.setTimeout(() => {
+        openSessionDetail(session.id);
+        if (sessionDetailStatus) sessionDetailStatus.textContent = 'Tu remada está lista. Puedes compartirla como historia.';
+      }, 200);
+    }
+    if (sessionStatusLabel) {
+      sessionStatusLabel.textContent = 'Remada guardada ✓';
+      sessionStatusTimeout = window.setTimeout(() => clearSessionStatusMessage(), 4000);
+    }
+  } catch (error) {
+    console.error('[sessions] save error', error);
+    const message = error instanceof Error ? error.message : 'No se pudo guardar la remada.';
+    updateSessionModalStatus(message);
+    sessionStatusTimeout = window.setTimeout(() => clearSessionStatusMessage(), 5000);
+  } finally {
+    isSavingSession = false;
+    sessionSaveButton?.removeAttribute('disabled');
+    sessionResetButton?.removeAttribute('disabled');
+  }
+}
+
+function buildSessionPayload() {
+  const payload = {};
+  if (sessionActiveTab === 'tracking') {
+    if (isTrackingSession) {
+      stopSessionTracking();
+    }
+    if (!trackingPoints.length || trackingDistanceKm <= 0) {
+      throw new Error('Aún no has registrado suficientes datos de seguimiento.');
+    }
+    const durationMs = trackingStartTime ? Date.now() - trackingStartTime : 0;
+    const durationMin = durationMs / 60000;
+    payload.distanceKm = Number(trackingDistanceKm.toFixed(3));
+    payload.durationMin = Number(durationMin.toFixed(2));
+    payload.trackPoints = trackingPoints.slice(0, 500);
+    payload.startedAt = trackingStartTime ? new Date(trackingStartTime).toISOString() : new Date().toISOString();
+    if (sessionSpotInput && sessionSpotInput.value.trim()) {
+      payload.spot = sessionSpotInput.value.trim();
+    }
+    if (sessionNotesInput && sessionNotesInput.value.trim()) {
+      payload.conditionsNote = sessionNotesInput.value.trim();
+    }
+  } else {
+    const spot = sessionSpotInput?.value.trim();
+    const distance = Number(sessionDistanceInput?.value || 0);
+    const duration = Number(sessionDurationInput?.value || 0);
+    const notes = sessionNotesInput?.value.trim();
+    const startValue = sessionStartInput?.value;
+    if (!distance && !duration) {
+      throw new Error('Ingresa al menos distancia o duración.');
+    }
+    if (spot) payload.spot = spot;
+    if (distance > 0) payload.distanceKm = Number(distance.toFixed(3));
+    if (duration > 0) payload.durationMin = Number(duration.toFixed(2));
+    if (notes) payload.conditionsNote = notes;
+    if (startValue) {
+      const startDate = new Date(startValue);
+      if (!Number.isNaN(startDate.getTime())) {
+        payload.startedAt = startDate.toISOString();
+      }
+    }
+  }
+  return payload;
+}
+
+function resetSessionTracking() {
+  if (trackingWatchId) {
+    navigator.geolocation.clearWatch(trackingWatchId);
+    trackingWatchId = null;
+  }
+  if (trackingIntervalId) {
+    window.clearInterval(trackingIntervalId);
+    trackingIntervalId = null;
+  }
+  isTrackingSession = false;
+  trackingStartTime = null;
+  trackingDistanceKm = 0;
+  trackingPoints = [];
+  updateTrackingUI();
+  sessionTrackingStopButton?.setAttribute('disabled', 'true');
+  sessionTrackingResetButton?.setAttribute('disabled', 'true');
+  if (sessionTrackingStartButton) {
+    sessionTrackingStartButton.disabled = false;
+    sessionTrackingStartButton.textContent = '▶️ Iniciar seguimiento';
+  }
+  if (sessionTrackingStatus) sessionTrackingStatus.textContent = 'Listo para iniciar seguimiento.';
+}
+
+function updateTrackingUI() {
+  if (sessionTrackingDistanceLabel) {
+    sessionTrackingDistanceLabel.textContent = `${trackingDistanceKm.toFixed(2)} km`;
+  }
+  if (sessionTrackingDurationLabel) {
+    const durationMs = trackingStartTime ? Date.now() - trackingStartTime : 0;
+    sessionTrackingDurationLabel.textContent = formatDurationClock(durationMs);
+  }
+  if (sessionTrackingPointsLabel) {
+    sessionTrackingPointsLabel.textContent = String(trackingPoints.length);
+  }
+}
+
+async function startSessionTracking() {
+  if (isTrackingSession) return;
+  if (!('geolocation' in navigator)) {
+    updateSessionModalStatus('Tu navegador no soporta geolocalización.');
+    return;
+  }
+  const canStart = await ensureLocationPermissionAvailable();
+  if (!canStart) {
+    updateSessionModalStatus('No pudimos acceder a la ubicación. Revisa permisos y vuelve a intentarlo.');
+    return;
+  }
+  resetSessionTracking();
+  trackingStartTime = Date.now();
+  isTrackingSession = true;
+  if (sessionTrackingStatus) sessionTrackingStatus.textContent = 'Seguimiento en curso…';
+  if (sessionTrackingStartButton) {
+    sessionTrackingStartButton.disabled = true;
+    sessionTrackingStartButton.textContent = 'Grabando…';
+  }
+  sessionTrackingStopButton?.removeAttribute('disabled');
+  sessionTrackingResetButton?.removeAttribute('disabled');
+  trackingPoints = [];
+  trackingDistanceKm = 0;
+  updateTrackingUI();
+
+  trackingIntervalId = window.setInterval(updateTrackingUI, 1000);
+
+  trackingWatchId = navigator.geolocation.watchPosition((position) => {
+    const { latitude, longitude } = position.coords;
+    const timestamp = position.timestamp || Date.now();
+    const lastPoint = trackingPoints[trackingPoints.length - 1];
+    if (lastPoint) {
+      const delta = haversineDistance(lastPoint.lat, lastPoint.lon, latitude, longitude);
+      if (Number.isFinite(delta) && delta < 2) {
+        trackingDistanceKm += delta;
+      }
+    }
+    trackingPoints.push({ lat: latitude, lon: longitude, timestamp });
+    updateTrackingUI();
+  }, (error) => {
+    console.warn('[sessions] tracking error', error);
+    updateSessionModalStatus('Error obteniendo ubicación. Revisa permisos GPS.');
+    stopSessionTracking();
+  }, {
+    enableHighAccuracy: true,
+    maximumAge: 1000,
+    timeout: 12000,
+  });
+}
+
+function stopSessionTracking() {
+  if (!isTrackingSession) return;
+  if (trackingWatchId) {
+    navigator.geolocation.clearWatch(trackingWatchId);
+    trackingWatchId = null;
+  }
+  if (trackingIntervalId) {
+    window.clearInterval(trackingIntervalId);
+    trackingIntervalId = null;
+  }
+  isTrackingSession = false;
+  if (sessionTrackingStatus) sessionTrackingStatus.textContent = 'Seguimiento detenido. Puedes ajustar los datos antes de guardar.';
+  if (sessionTrackingStartButton) {
+    sessionTrackingStartButton.disabled = false;
+    sessionTrackingStartButton.textContent = '▶️ Iniciar seguimiento';
+  }
+  sessionTrackingStopButton?.setAttribute('disabled', 'true');
+  updateTrackingUI();
+  const totalMinutes = trackingStartTime ? (Date.now() - trackingStartTime) / 60000 : 0;
+  if (sessionDistanceInput && trackingDistanceKm > 0) {
+    sessionDistanceInput.value = trackingDistanceKm.toFixed(2);
+  }
+  if (sessionDurationInput && totalMinutes > 0) {
+    sessionDurationInput.value = Math.round(totalMinutes).toString();
+  }
+}
+
 function getStoryPayload() {
   const body = storyBodyInput?.value?.trim() || '';
   const payload = { body };
@@ -697,6 +1292,8 @@ function notifyAuthChange() {
     }
   });
   window.dispatchEvent(new CustomEvent('sup-auth-changed', { detail }));
+  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = currentUser && currentIsAdmin ? 'inline-flex' : 'none';
+  if (sessionSection) sessionSection.style.display = currentUser && currentIsAdmin ? 'grid' : 'none';
 }
 
 notifyAuthChange();
@@ -810,6 +1407,40 @@ async function deleteStoryRequest(token, storyId) {
   return true;
 }
 
+async function fetchUserSessions(token) {
+  const response = await fetch(`${API_BASE_URL}/v1/sessions/me`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    const message = detail?.error || 'No se pudieron obtener tus remadas.';
+    throw new Error(message);
+  }
+  const data = await response.json();
+  return Array.isArray(data.sessions) ? data.sessions : [];
+}
+
+async function saveSessionRequest(token, payload) {
+  const response = await fetch(`${API_BASE_URL}/v1/sessions/me`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const detail = await response.json().catch(() => null);
+    const message = detail?.error || 'No se pudo guardar la remada.';
+    throw new Error(message);
+  }
+  const data = await response.json();
+  return data.session || null;
+}
+
 async function loadUserStories(token) {
   try {
     currentUserStories = await fetchUserStories(token);
@@ -830,22 +1461,41 @@ async function loadUserStories(token) {
   }
 }
 
+async function loadUserSessions(token) {
+  try {
+    currentUserSessions = await fetchUserSessions(token);
+    renderSessionList();
+    clearSessionStatusMessage();
+  } catch (error) {
+    console.error('[sessions] error fetching sessions', error);
+    currentUserSessions = [];
+    renderSessionList();
+    const message = error instanceof Error ? error.message : 'No se pudieron cargar tus remadas.';
+    if (sessionStatusLabel) sessionStatusLabel.textContent = message;
+    sessionStatusTimeout = window.setTimeout(() => clearSessionStatusMessage(), 4000);
+  }
+}
+
 function setAuthButtonLoggedOut() {
   authButton.textContent = '🔐 Iniciar sesión';
   authButton.onclick = openAuthModal;
   if (greetingLabel) greetingLabel.textContent = defaultGreeting;
   if (profileLinkButton) profileLinkButton.style.display = 'none';
+  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = 'none';
+  if (sessionSection) sessionSection.style.display = 'none';
   syncAvatarFromProfile(null);
   if (avatarStatus) avatarStatus.textContent = '';
   closeProfileModal();
   currentProfileData = {};
   currentUserStories = [];
+  currentUserSessions = [];
   currentIsAdmin = false;
   updateAdminVisibility();
   fillProfileForm(null);
   resetStoryForm();
   updateStoryMetaSummary();
   renderUserStoriesList();
+  renderSessionList();
   notifyAuthChange();
 }
 
@@ -855,6 +1505,8 @@ function setAuthButtonLoggedIn(displayName) {
   const friendlyName = displayName || 'remador/a';
   if (greetingLabel) greetingLabel.textContent = `🌊 ¡Hola, ${friendlyName}! ¿Listo para remar?`;
   if (profileLinkButton) profileLinkButton.style.display = 'flex';
+  if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = currentIsAdmin ? 'inline-flex' : 'none';
+  if (sessionSection) sessionSection.style.display = currentIsAdmin ? 'grid' : 'none';
   if (currentProfileData) {
     setHeaderAvatar(currentProfileData.avatarUrl || '');
   }
@@ -1068,6 +1720,79 @@ userStoryList?.addEventListener('click', (event) => {
   if (storyId) {
     handleStoryDelete(storyId);
   }
+});
+
+sessionListElement?.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-session-id]');
+  if (!button) return;
+  event.preventDefault();
+  const sessionId = button.getAttribute('data-session-id');
+  if (sessionId) openSessionDetail(sessionId);
+});
+
+sessionOpenButton?.addEventListener('click', () => {
+  if (!currentUser || !currentToken) {
+    window.supAuth?.openAuthModal?.();
+    return;
+  }
+  openSessionModal('manual');
+});
+
+sessionGlobalOpenButton?.addEventListener('click', () => {
+  if (!currentUser || !currentToken) {
+    window.supAuth?.openAuthModal?.();
+    return;
+  }
+  openSessionModal('manual');
+});
+
+sessionTabButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const tab = button.getAttribute('data-session-tab');
+    if (tab) showSessionTab(tab);
+  });
+});
+
+sessionModalCloseButton?.addEventListener('click', closeSessionModal);
+sessionModal?.addEventListener('click', (event) => {
+  if (event.target === sessionModal) {
+    closeSessionModal();
+  }
+});
+
+sessionResetButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  resetSessionForm();
+  closeSessionModal();
+});
+
+sessionSaveButton?.addEventListener('click', async (event) => {
+  event.preventDefault();
+  await saveSessionFromModal();
+});
+
+sessionTrackingStartButton?.addEventListener('click', async () => {
+  await startSessionTracking();
+});
+
+sessionTrackingStopButton?.addEventListener('click', () => {
+  stopSessionTracking();
+});
+
+sessionTrackingResetButton?.addEventListener('click', () => {
+  resetSessionTracking();
+});
+
+sessionDetailCloseButton?.addEventListener('click', closeSessionDetail);
+sessionDetailModal?.addEventListener('click', (event) => {
+  if (event.target === sessionDetailModal) {
+    closeSessionDetail();
+  }
+});
+
+sessionDetailShareButton?.addEventListener('click', async () => {
+  if (!activeSessionDetail) return;
+  await shareSessionAsStory(activeSessionDetail);
 });
 
 storySaveButton?.addEventListener('click', async () => {
@@ -1289,6 +2014,7 @@ onAuthStateChanged(auth, async (user) => {
     fillProfileForm(user, profile);
     notifyAuthChange();
     await loadUserStories(currentToken);
+    await loadUserSessions(currentToken);
   } catch (error) {
     console.error(error);
     statusLabel.textContent = 'No se pudo cargar tu perfil.';
@@ -1297,6 +2023,7 @@ onAuthStateChanged(auth, async (user) => {
 
 renderStoryLocationState();
 updateStoryMetaSummary();
+renderSessionList();
 
 profileLinkButton?.addEventListener('click', () => {
   if (!currentUser) return;
