@@ -31,6 +31,24 @@
   </header>
 
   <main class="layout">
+    <section class="stories-section container" id="stories-section">
+      <div class="stories-wrapper">
+        <div class="stories-header">
+          <div class="stories-heading">
+            <span class="stories-title">Historias SUP</span>
+            <span class="stories-subtitle">Momentos recientes de la comunidad.</span>
+          </div>
+          <span class="stories-activity" id="stories-activity" aria-live="polite">Actualizando…</span>
+        </div>
+        <div class="stories-rail-container">
+          <div class="stories-empty" id="stories-empty" style="display: block;">
+            <p>📘 Aún no hay historias destacadas. ¡Comparte la tuya desde tu perfil!</p>
+          </div>
+          <div class="stories-rail" id="stories-rail" role="list"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="hero container">
       <div class="hero-copy">
         <img src="Logos/SUP_Experience_Variables(horizontal)_Hor_Base.png" alt="SUP Status logo" class="hero-logo">
@@ -103,23 +121,6 @@
       </div>
     </section>
 
-    <section class="stories-section container" id="stories-section">
-      <div class="stories-wrapper">
-        <div class="stories-header">
-          <div>
-            <h2 class="section-title">Historias SUP</h2>
-            <p class="stories-subtitle">Descubre cómo la comunidad vive el SUP y encuentra inspiración para tu próxima remada.</p>
-          </div>
-          <button class="ghost" id="stories-refresh-button" aria-label="Actualizar historias">🔄 Actualizar</button>
-        </div>
-        <div class="stories-content" id="stories-content">
-          <div class="stories-empty" id="stories-empty">
-            <p>📘 Aún no hay historias destacadas. ¡Comparte la tuya desde tu perfil!</p>
-          </div>
-          <div class="stories-grid" id="stories-grid"></div>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="container">
@@ -291,22 +292,35 @@
   <div id="story-modal" class="modal-overlay" style="display: none;">
     <div class="modal-content story-modal">
       <button type="button" class="cerrar-modal" id="story-modal-close">✕</button>
-      <div class="story-modal-body">
-        <div class="story-modal-media" id="story-modal-media" aria-hidden="true"></div>
-        <div class="story-modal-copy">
-          <span class="story-modal-tag" id="story-modal-featured" style="display: none;">⭐ Destacada</span>
-          <h3 id="story-modal-title"></h3>
-          <p class="story-modal-author" id="story-modal-author"></p>
-          <div class="story-modal-meta" id="story-modal-meta"></div>
-          <div class="story-modal-actions">
-            <button type="button" class="story-like-btn" id="story-modal-like-btn" aria-pressed="false">
-              <span class="like-icon">❤️</span>
-              <span class="like-count" id="story-modal-like-count">0</span>
-            </button>
-            <button type="button" class="story-modal-delete-btn" id="story-modal-delete-btn" style="display: none;">🗑 Eliminar</button>
+      <div class="story-modal-track" id="story-modal-track" aria-hidden="true"></div>
+      <div class="story-modal-shell">
+        <button type="button" class="story-modal-nav story-modal-nav--prev" id="story-modal-prev" aria-label="Historia anterior">‹</button>
+        <div class="story-modal-body">
+          <div class="story-modal-media" id="story-modal-media" aria-hidden="true"></div>
+          <div class="story-modal-copy">
+            <div class="story-modal-header">
+              <div class="story-modal-author-chip">
+                <div class="story-modal-avatar" id="story-modal-avatar" aria-hidden="true"></div>
+                <div class="story-modal-author-text">
+                  <p class="story-modal-author" id="story-modal-author"></p>
+                  <p class="story-modal-author-meta" id="story-modal-author-meta"></p>
+                </div>
+              </div>
+              <span class="story-modal-tag" id="story-modal-featured" style="display: none;">⭐ Destacada</span>
+            </div>
+            <h3 id="story-modal-title"></h3>
+            <div class="story-modal-meta" id="story-modal-meta"></div>
+            <div class="story-modal-actions">
+              <button type="button" class="story-like-btn" id="story-modal-like-btn" aria-pressed="false">
+                <span class="like-icon">❤️</span>
+                <span class="like-count" id="story-modal-like-count">0</span>
+              </button>
+              <button type="button" class="story-modal-delete-btn" id="story-modal-delete-btn" style="display: none;">🗑 Eliminar</button>
+            </div>
+            <p class="story-modal-text" id="story-modal-text"></p>
           </div>
-          <p class="story-modal-text" id="story-modal-text"></p>
         </div>
+        <button type="button" class="story-modal-nav story-modal-nav--next" id="story-modal-next" aria-label="Siguiente historia">›</button>
       </div>
     </div>
   </div>
@@ -622,25 +636,40 @@
       ? 'http://localhost:8080'
       : 'https://sup-experience-backend-mhhf2ac76q-ue.a.run.app';
     const storiesState = { stories: [], loading: false, pendingLikes: new Set() };
-    const storiesGrid = document.getElementById('stories-grid');
+    const storiesRail = document.getElementById('stories-rail');
     const storiesEmpty = document.getElementById('stories-empty');
-    const storiesRefreshButton = document.getElementById('stories-refresh-button');
+    const storiesActivityLabel = document.getElementById('stories-activity');
     const storyModal = document.getElementById('story-modal');
     const storyModalClose = document.getElementById('story-modal-close');
+    const storyModalPrevButton = document.getElementById('story-modal-prev');
+    const storyModalNextButton = document.getElementById('story-modal-next');
+    const storyModalTrack = document.getElementById('story-modal-track');
+    const storyModalAvatar = document.getElementById('story-modal-avatar');
     const storyCreateModal = document.getElementById('story-create-modal');
     const storyCreateButtons = Array.from(document.querySelectorAll('[data-story-open]'));
     const storyCreateCloseButton = document.getElementById('story-create-close');
     const storyModalMedia = document.getElementById('story-modal-media');
     const storyModalTitle = document.getElementById('story-modal-title');
     const storyModalAuthor = document.getElementById('story-modal-author');
+    const storyModalAuthorMeta = document.getElementById('story-modal-author-meta');
     const storyModalMeta = document.getElementById('story-modal-meta');
     const storyModalText = document.getElementById('story-modal-text');
     const storyModalFeatured = document.getElementById('story-modal-featured');
     const storyModalLikeButton = document.getElementById('story-modal-like-btn');
     const storyModalLikeCount = document.getElementById('story-modal-like-count');
     const storyModalDeleteButton = document.getElementById('story-modal-delete-btn');
+    const storyModalBody = document.querySelector('#story-modal .story-modal-body');
     let currentModalStoryId = null;
     let currentModalStoryData = null;
+    let currentModalStoryIndex = -1;
+    let storyModalTrackBars = [];
+    let storyAutoAdvanceFrame = null;
+    let storyAutoAdvanceStart = 0;
+    let storyAutoAdvanceProgress = 0;
+    let storyAutoAdvancePaused = false;
+    let storiesRefreshInterval = null;
+    const STORY_AUTO_ADVANCE_MS = 8000;
+    const STORIES_REFRESH_INTERVAL_MS = 5000;
 
     function escapeHtml(value = '') {
       return value
@@ -681,9 +710,56 @@
       return Number.isNaN(date.getTime()) ? 0 : date.getTime();
     }
 
+    function getSortedStories() {
+      const stories = Array.isArray(storiesState.stories) ? storiesState.stories : [];
+      return [...stories].sort((a, b) => {
+        if (Boolean(a.featured) !== Boolean(b.featured)) {
+          return b.featured ? 1 : -1;
+        }
+        return storyTimestamp(b) - storyTimestamp(a);
+      });
+    }
+
+    function getStoryDisplayName(story) {
+      if (!story) return 'Remador SUP';
+      if (typeof story.authorName === 'string' && story.authorName.trim().length) {
+        return story.authorName.trim();
+      }
+      if (typeof story.authorEmail === 'string' && story.authorEmail.includes('@')) {
+        return story.authorEmail.split('@')[0];
+      }
+      return 'Remador SUP';
+    }
+
+    function getStoryInitials(name) {
+      if (typeof name !== 'string' || !name.trim()) return 'SUP';
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return 'SUP';
+      const first = parts[0][0] || '';
+      const second = parts.length > 1 ? parts[1][0] || '' : '';
+      const letters = `${first}${second}`.trim();
+      return letters ? letters.toUpperCase() : (first || 'S').toUpperCase();
+    }
+
+    function getStoryAvatarUrl(story) {
+      if (!story || typeof story !== 'object') return '';
+      const candidates = [
+        story.authorAvatarUrl,
+        story.authorAvatar,
+        story.avatarUrl,
+        story.authorPhotoUrl,
+        story.authorPhoto,
+        story.authorImageUrl,
+        story.mediaAvatarUrl,
+        story.mediaUrl,
+      ];
+      const value = candidates.find((item) => typeof item === 'string' && item.trim().length);
+      return value ? safeMediaUrl(value.trim()) : '';
+    }
+
     function renderStories(stories) {
-      if (!storiesGrid) return;
-      storiesGrid.innerHTML = '';
+      if (!storiesRail) return;
+      storiesRail.innerHTML = '';
       if (!stories || !stories.length) {
         if (storiesEmpty) {
           storiesEmpty.style.display = 'block';
@@ -692,53 +768,47 @@
         return;
       }
       if (storiesEmpty) storiesEmpty.style.display = 'none';
-      const sorted = [...stories].sort((a, b) => {
-        if (Boolean(a.featured) !== Boolean(b.featured)) {
-          return b.featured ? 1 : -1;
-        }
-        return storyTimestamp(b) - storyTimestamp(a);
-      });
-      sorted.forEach((story) => {
-        const card = document.createElement('article');
-        card.className = 'story-card';
-        const excerpt = buildExcerpt(story.body || '');
+      const sorted = getSortedStories();
+      sorted.forEach((story, index) => {
+        const bubble = document.createElement('button');
+        bubble.type = 'button';
+        bubble.className = 'story-bubble';
+        if (story.featured) bubble.classList.add('story-bubble--featured');
+        if (story.id === currentModalStoryId) bubble.classList.add('is-active');
+        const displayName = getStoryDisplayName(story);
+        const avatarUrl = getStoryAvatarUrl(story);
+        const initials = getStoryInitials(displayName);
         const dateLabel = formatStoryDate(story.publishedAt || story.updatedAt || story.createdAt);
-        const mediaUrl = safeMediaUrl(story.mediaUrl);
-        const likes = Number.isFinite(story.likes) ? story.likes : 0;
-        const isLiked = Boolean(story.liked);
-        const isLoadingLike = storiesState.pendingLikes.has(story.id);
-        card.innerHTML = `
-          <div class="story-card-media">
-            ${mediaUrl ? `<img src="${escapeHtml(mediaUrl)}" alt="Historia SUP" loading="lazy">` : '<span>🌊</span>'}
-          </div>
-          <div class="story-card-body">
-            <span class="story-card-author">${escapeHtml(story.authorName || 'Remador SUP')}</span>
-            <h3 class="story-card-title">${escapeHtml(story.title || 'Historia SUP')}</h3>
-            <p class="story-card-excerpt">${escapeHtml(excerpt || 'Descubre cómo viven el SUP en distintos spots.')}</p>
-            <div class="story-card-tags">
-              ${story.spot ? `<span class="story-card-tag">📍 ${escapeHtml(story.spot)}</span>` : ''}
-              ${story.bestConditions ? `<span class="story-card-tag">⚓ ${escapeHtml(story.bestConditions)}</span>` : ''}
-            </div>
-            <div class="story-card-footer">
-              <div class="story-card-meta">
-                ${dateLabel ? `<span>${escapeHtml(dateLabel)}</span>` : ''}
-                ${story.featured ? '<span class="story-card-featured">⭐ Destacada</span>' : ''}
-              </div>
-              <button type="button" class="story-like-btn${isLiked ? ' liked' : ''}${isLoadingLike ? ' loading' : ''}" data-story-id="${story.id}" aria-pressed="${isLiked}" ${isLoadingLike ? 'disabled' : ''}>
-                <span class="like-icon">❤️</span>
-                <span class="like-count">${likes}</span>
-              </button>
-            </div>
-          </div>
+        bubble.dataset.storyId = story.id || '';
+        bubble.dataset.storyIndex = index >= 0 ? String(index) : '';
+        bubble.setAttribute('aria-label', `Historia de ${displayName}`);
+        bubble.setAttribute('role', 'listitem');
+        bubble.innerHTML = `
+          <span class="story-bubble-ring">
+            ${avatarUrl
+              ? `<img class="story-bubble-avatar" src="${escapeHtml(avatarUrl)}" alt="Avatar de ${escapeHtml(displayName)}" loading="lazy">`
+              : `<span class="story-bubble-initial">${escapeHtml(initials)}</span>`}
+          </span>
+          <span class="story-bubble-name">${escapeHtml(displayName)}</span>
+          ${story.featured ? '<span class="story-bubble-meta">⭐ Destacada</span>' : (dateLabel ? `<span class="story-bubble-meta">${escapeHtml(dateLabel)}</span>` : '')}
         `;
-        card.addEventListener('click', () => openStoryModal(story.id));
-        const likeButton = card.querySelector('.story-like-btn');
-        likeButton?.addEventListener('click', (event) => {
-          event.stopPropagation();
-          const storyId = likeButton.dataset.storyId;
-          if (storyId) toggleStoryLike(storyId);
-        });
-      storiesGrid.appendChild(card);
+        bubble.addEventListener('click', () => openStoryModalByIndex(index >= 0 ? index : 0));
+        storiesRail.appendChild(bubble);
+      });
+      updateStoryRailActiveState();
+    }
+
+    function updateStoryRailActiveState() {
+      if (!storiesRail) return;
+      Array.from(storiesRail.children).forEach((node) => {
+        if (!(node instanceof HTMLElement)) return;
+        const isActive = currentModalStoryId && node.dataset.storyId === currentModalStoryId;
+        node.classList.toggle('is-active', Boolean(isActive));
+        if (isActive) {
+          node.setAttribute('aria-current', 'true');
+        } else {
+          node.removeAttribute('aria-current');
+        }
       });
     }
 
@@ -873,19 +943,72 @@
       }
     }
 
-    function openStoryModal(storyId) {
-      if (!storyModal) return;
-      const story = storiesState.stories.find((item) => item.id === storyId);
+    function renderStoryModalTrack(total, activeIndex) {
+      if (!storyModalTrack) return;
+      storyModalTrack.innerHTML = '';
+      storyModalTrackBars = [];
+      if (!total || total <= 1) {
+        storyModalTrack.classList.remove('is-visible');
+        return;
+      }
+      storyModalTrack.classList.add('is-visible');
+      for (let i = 0; i < total; i += 1) {
+        const wrapper = document.createElement('span');
+        wrapper.className = 'story-modal-track-bar';
+        if (i < activeIndex) wrapper.classList.add('is-complete');
+        const fill = document.createElement('span');
+        fill.style.width = i < activeIndex ? '100%' : '0%';
+        wrapper.appendChild(fill);
+        storyModalTrack.appendChild(wrapper);
+        storyModalTrackBars.push(fill);
+      }
+    }
+
+    function updateStoryModalNav(total) {
+      const hasMultiple = total > 1;
+      if (storyModalPrevButton) {
+        storyModalPrevButton.disabled = currentModalStoryIndex <= 0;
+        storyModalPrevButton.style.visibility = hasMultiple ? 'visible' : 'hidden';
+      }
+      if (storyModalNextButton) {
+        storyModalNextButton.disabled = currentModalStoryIndex >= total - 1;
+        storyModalNextButton.style.visibility = hasMultiple ? 'visible' : 'hidden';
+      }
+    }
+
+    function updateStoryTrackProgress(progress) {
+      if (!storyModalTrackBars.length) return;
+      const clamped = Math.max(0, Math.min(1, progress));
+      storyModalTrackBars.forEach((fill, index) => {
+        if (!(fill instanceof HTMLElement)) return;
+        if (index < currentModalStoryIndex) {
+          fill.style.width = '100%';
+          fill.parentElement?.classList.add('is-complete');
+        } else if (index > currentModalStoryIndex) {
+          fill.style.width = '0%';
+          fill.parentElement?.classList.remove('is-complete');
+        } else {
+          fill.style.width = `${(clamped * 100).toFixed(2)}%`;
+          if (clamped >= 1) {
+            fill.parentElement?.classList.add('is-complete');
+          } else {
+            fill.parentElement?.classList.remove('is-complete');
+          }
+        }
+      });
+    }
+
+    function populateStoryModal(story) {
       if (!story) return;
-      currentModalStoryId = story.id;
-      currentModalStoryData = story;
+      const displayName = getStoryDisplayName(story);
+      const avatarUrl = getStoryAvatarUrl(story);
       if (storyModalMedia) {
         storyModalMedia.innerHTML = '';
         const mediaUrl = safeMediaUrl(story.mediaUrl);
         if (mediaUrl) {
           const img = document.createElement('img');
           img.src = mediaUrl;
-          img.alt = `Historia de ${story.authorName || 'la comunidad SUP'}`;
+          img.alt = `Historia de ${displayName}`;
           img.loading = 'lazy';
           storyModalMedia.appendChild(img);
           storyModalMedia.style.display = 'block';
@@ -895,22 +1018,47 @@
           storyModalMedia.setAttribute('aria-hidden', 'true');
         }
       }
-      if (storyModalTitle) storyModalTitle.textContent = story.title || 'Historia SUP';
-      if (storyModalAuthor) storyModalAuthor.textContent = story.authorName
-        ? `Por ${story.authorName}`
-        : 'Historia de la comunidad SUP';
-      if (storyModalText) storyModalText.textContent = story.body || '';
+      if (storyModalTitle) {
+        storyModalTitle.textContent = story.title || displayName || 'Historia SUP';
+      }
+      if (storyModalAuthor) {
+        storyModalAuthor.textContent = displayName;
+      }
+      if (storyModalAuthorMeta) {
+        const dateLabel = formatStoryDate(story.publishedAt || story.updatedAt || story.createdAt);
+        if (dateLabel) {
+          storyModalAuthorMeta.textContent = `Publicado el ${dateLabel}`;
+          storyModalAuthorMeta.style.display = 'block';
+        } else {
+          storyModalAuthorMeta.textContent = '';
+          storyModalAuthorMeta.style.display = 'none';
+        }
+      }
+      if (storyModalAvatar) {
+        storyModalAvatar.innerHTML = '';
+        storyModalAvatar.setAttribute('aria-hidden', 'true');
+        if (avatarUrl) {
+          const img = document.createElement('img');
+          img.src = avatarUrl;
+          img.alt = '';
+          img.loading = 'lazy';
+          storyModalAvatar.appendChild(img);
+        } else {
+          storyModalAvatar.textContent = getStoryInitials(displayName);
+        }
+      }
       if (storyModalFeatured) {
         storyModalFeatured.style.display = story.featured ? 'inline-flex' : 'none';
       }
       if (storyModalMeta) {
-        const bits = [];
-        if (story.spot) bits.push(`📍 ${story.spot}`);
-        if (story.bestConditions) bits.push(`⚓ ${story.bestConditions}`);
-        const dateLabel = formatStoryDate(story.publishedAt || story.updatedAt || story.createdAt);
-        if (dateLabel) bits.push(`🗓 ${dateLabel}`);
-        storyModalMeta.innerHTML = bits.map((bit) => `<span>${escapeHtml(bit)}</span>`).join('');
-        storyModalMeta.style.display = bits.length ? 'flex' : 'none';
+        const chips = [];
+        if (story.spot) chips.push(`📍 ${story.spot}`);
+        if (story.bestConditions) chips.push(`⚓ ${story.bestConditions}`);
+        storyModalMeta.innerHTML = chips.map((bit) => `<span>${escapeHtml(bit)}</span>`).join('');
+        storyModalMeta.style.display = chips.length ? 'flex' : 'none';
+      }
+      if (storyModalText) {
+        storyModalText.textContent = story.body || '';
       }
       setStoryModalLikeState(story);
       if (storyModalDeleteButton) {
@@ -926,14 +1074,130 @@
           storyModalDeleteButton.dataset.storyId = '';
         }
       }
+    }
+
+    function stopStoryAutoAdvance() {
+      if (storyAutoAdvanceFrame !== null) {
+        cancelAnimationFrame(storyAutoAdvanceFrame);
+        storyAutoAdvanceFrame = null;
+      }
+    }
+
+    function startStoryAutoAdvance(resetProgress = false) {
+      stopStoryAutoAdvance();
+      const sorted = getSortedStories();
+      if (!storyModal || storyModal.style.display !== 'flex' || sorted.length <= 1) return;
+      if (resetProgress) {
+        storyAutoAdvanceProgress = 0;
+        updateStoryTrackProgress(0);
+      }
+      storyAutoAdvancePaused = false;
+      const now = performance.now();
+      storyAutoAdvanceStart = now - storyAutoAdvanceProgress * STORY_AUTO_ADVANCE_MS;
+      storyAutoAdvanceFrame = requestAnimationFrame(storyAutoAdvanceStep);
+    }
+
+    function storyAutoAdvanceStep(timestamp) {
+      if (storyAutoAdvancePaused) return;
+      if (!storyAutoAdvanceStart) storyAutoAdvanceStart = timestamp;
+      const elapsed = timestamp - storyAutoAdvanceStart;
+      const progress = Math.min(1, elapsed / STORY_AUTO_ADVANCE_MS);
+      storyAutoAdvanceProgress = progress;
+      updateStoryTrackProgress(progress);
+      if (progress >= 1) {
+        storyAutoAdvanceFrame = null;
+        showNextStory(true);
+      } else {
+        storyAutoAdvanceFrame = requestAnimationFrame(storyAutoAdvanceStep);
+      }
+    }
+
+    function pauseStoryAutoAdvance() {
+      storyAutoAdvancePaused = true;
+      stopStoryAutoAdvance();
+    }
+
+    function resumeStoryAutoAdvance() {
+      const sorted = getSortedStories();
+      storyAutoAdvancePaused = false;
+      if (!sorted.length || sorted.length <= 1) return;
+      startStoryAutoAdvance();
+    }
+
+    function openStoryModalByIndex(index) {
+      if (!storyModal) return;
+      const sorted = getSortedStories();
+      if (!sorted.length) return;
+      const safeIndex = Math.max(0, Math.min(index, sorted.length - 1));
+      const story = sorted[safeIndex];
+      if (!story) return;
+      currentModalStoryIndex = safeIndex;
+      currentModalStoryId = story.id || null;
+      currentModalStoryData = story;
+      storyAutoAdvanceProgress = 0;
+      populateStoryModal(story);
+      updateStoryModalNav(sorted.length);
+      renderStoryModalTrack(sorted.length, safeIndex);
+      updateStoryRailActiveState();
+      if (storiesRail) {
+        const activeBubble = Array.from(storiesRail.children).find((node) => node instanceof HTMLElement && node.dataset.storyId === currentModalStoryId);
+        if (activeBubble instanceof HTMLElement) {
+          activeBubble.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
       storyModal.style.display = 'flex';
+      if (sorted.length > 1) {
+        startStoryAutoAdvance(true);
+      } else {
+        stopStoryAutoAdvance();
+        updateStoryTrackProgress(1);
+      }
+    }
+
+    function openStoryModalById(storyId) {
+      const sorted = getSortedStories();
+      const index = sorted.findIndex((item) => item.id === storyId);
+      if (index >= 0) {
+        openStoryModalByIndex(index);
+      }
+    }
+
+    function showNextStory(auto = false) {
+      const sorted = getSortedStories();
+      if (!sorted.length) return;
+      if (currentModalStoryIndex + 1 >= sorted.length) {
+        if (auto) {
+          closeStoryModal();
+        } else {
+          updateStoryTrackProgress(1);
+        }
+        return;
+      }
+      openStoryModalByIndex(currentModalStoryIndex + 1);
+    }
+
+    function showPreviousStory() {
+      const sorted = getSortedStories();
+      if (!sorted.length || currentModalStoryIndex <= 0) return;
+      openStoryModalByIndex(currentModalStoryIndex - 1);
     }
 
     function closeStoryModal() {
       if (!storyModal) return;
       storyModal.style.display = 'none';
+      stopStoryAutoAdvance();
+      storyAutoAdvancePaused = false;
+      storyAutoAdvanceProgress = 0;
+      storyModalTrackBars = [];
+      if (storyModalTrack) {
+        storyModalTrack.classList.remove('is-visible');
+        storyModalTrack.innerHTML = '';
+      }
       currentModalStoryId = null;
       currentModalStoryData = null;
+      currentModalStoryIndex = -1;
+      updateStoryRailActiveState();
+      updateStoryModalNav(0);
       setStoryModalLikeState(null);
       if (storyModalDeleteButton) {
         storyModalDeleteButton.style.display = 'none';
@@ -943,9 +1207,17 @@
 
     function setStoriesLoading(isLoading) {
       storiesState.loading = isLoading;
-      if (storiesRefreshButton) {
-        storiesRefreshButton.disabled = isLoading;
-        storiesRefreshButton.textContent = isLoading ? '⏳ Cargando…' : '🔄 Actualizar';
+      if (storiesRail) {
+        storiesRail.setAttribute('aria-busy', String(isLoading));
+      }
+      if (storiesActivityLabel) {
+        if (isLoading) {
+          storiesActivityLabel.dataset.state = 'loading';
+          storiesActivityLabel.textContent = 'Actualizando…';
+        } else if (storiesActivityLabel.dataset.state !== 'error') {
+          storiesActivityLabel.dataset.state = 'ready';
+          storiesActivityLabel.textContent = 'Historias al día';
+        }
       }
       if (isLoading && storiesEmpty) {
         storiesEmpty.style.display = 'block';
@@ -954,7 +1226,7 @@
     }
 
     function loadStories(force = false) {
-      if (!storiesGrid || storiesState.loading) return;
+      if (!storiesRail || storiesState.loading) return;
       setStoriesLoading(true);
       const url = new URL(`${STORIES_API_BASE}/v1/stories`);
       if (force) {
@@ -975,6 +1247,10 @@
         .then((data) => {
           storiesState.stories = Array.isArray(data.stories) ? data.stories : [];
           renderStories(storiesState.stories);
+          if (storiesActivityLabel) {
+            storiesActivityLabel.dataset.state = 'ready';
+            storiesActivityLabel.textContent = 'Historias al día';
+          }
         })
         .catch((error) => {
           console.error('Error cargando historias', error);
@@ -982,13 +1258,16 @@
             storiesEmpty.style.display = 'block';
             storiesEmpty.innerHTML = '<p>⚠️ No pudimos cargar las historias. Intenta nuevamente más tarde.</p>';
           }
+          if (storiesActivityLabel) {
+            storiesActivityLabel.dataset.state = 'error';
+            storiesActivityLabel.textContent = 'Reintentaremos en segundos…';
+          }
         })
         .finally(() => {
           setStoriesLoading(false);
         });
     }
 
-    storiesRefreshButton?.addEventListener('click', () => loadStories(true));
     window.addEventListener('sup-auth-changed', () => loadStories(true));
     storyCreateButtons.forEach((button) => {
       button.addEventListener('click', (event) => {
@@ -1001,6 +1280,16 @@
       closeStoryCreateModal();
     });
     storyModalClose?.addEventListener('click', closeStoryModal);
+    storyModalPrevButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showPreviousStory();
+    });
+    storyModalNextButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showNextStory();
+    });
     storyModalLikeButton?.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -1018,12 +1307,70 @@
         closeStoryModal();
       }
     });
+    storyModalBody?.addEventListener('pointerdown', () => pauseStoryAutoAdvance());
+    storyModalBody?.addEventListener('pointerup', () => resumeStoryAutoAdvance());
+    storyModalBody?.addEventListener('pointercancel', () => resumeStoryAutoAdvance());
+    storyModalBody?.addEventListener('pointerleave', () => resumeStoryAutoAdvance());
+    storyModalBody?.addEventListener('click', (event) => {
+      if (!storyModal || storyModal.style.display !== 'flex') return;
+      if (event.defaultPrevented) return;
+      const interactive = event.target instanceof Element
+        ? event.target.closest('button, a, input, textarea, label')
+        : null;
+      if (interactive) return;
+      const rect = storyModalBody.getBoundingClientRect();
+      const clickX = event.clientX - rect.left;
+      if (Number.isNaN(clickX)) return;
+      if (clickX < rect.width / 2) {
+        showPreviousStory();
+      } else {
+        showNextStory();
+      }
+    });
     storyCreateModal?.addEventListener('click', (event) => {
       if (event.target === storyCreateModal) {
         closeStoryCreateModal();
       }
     });
     window.addEventListener('story-saved', closeStoryCreateModal);
+    window.addEventListener('keydown', (event) => {
+      if (!storyModal || storyModal.style.display !== 'flex') return;
+      const activeElement = document.activeElement;
+      if (activeElement && ['INPUT', 'TEXTAREA'].includes(activeElement.tagName)) return;
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        showNextStory();
+      } else if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        showPreviousStory();
+      } else if (event.key === 'Escape') {
+        closeStoryModal();
+      }
+    });
+
+    function startStoriesAutoRefresh() {
+      if (storiesRefreshInterval !== null) return;
+      storiesRefreshInterval = window.setInterval(() => {
+        if (document.hidden || storiesState.loading) return;
+        loadStories(true);
+      }, STORIES_REFRESH_INTERVAL_MS);
+    }
+
+    function stopStoriesAutoRefresh() {
+      if (storiesRefreshInterval !== null) {
+        clearInterval(storiesRefreshInterval);
+        storiesRefreshInterval = null;
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        stopStoriesAutoRefresh();
+      } else {
+        loadStories(true);
+        startStoriesAutoRefresh();
+      }
+    });
 
     if (localStorage.getItem("modoOscuro") === "true") {
       document.body.classList.add("oscuro");
@@ -1096,6 +1443,7 @@
     });
 
     loadStories();
+    startStoriesAutoRefresh();
 
     fetch(`data.json?cb=${Date.now()}`, { cache: "no-store" })
       .then(res => res.json())
