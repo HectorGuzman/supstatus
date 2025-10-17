@@ -45,9 +45,13 @@ const practiceFocusInput = document.getElementById('profile-practiceFocus');
 const saveButton = document.getElementById('profile-save');
 const statusLabel = document.getElementById('profile-status');
 const greetingLabel = document.getElementById('auth-greeting');
-const adminSection = document.getElementById('admin-section');
 const adminProfileList = document.getElementById('admin-profile-list');
 const adminMetrics = document.getElementById('admin-metrics');
+const adminExperienceList = document.getElementById('admin-experience-distribution');
+const adminDisciplineList = document.getElementById('admin-discipline-distribution');
+const adminModal = document.getElementById('admin-profiles-modal');
+const adminModalCloseButton = document.getElementById('admin-profiles-close');
+const adminModalOpenButton = document.getElementById('profile-admin-open');
 const storyBodyInput = document.getElementById('story-body');
 const storyMediaFileInput = document.getElementById('story-media-input');
 const storyMediaRemoveButton = document.getElementById('story-media-remove');
@@ -1604,15 +1608,44 @@ function escapeHtml(value = '') {
     .replace(/'/g, '&#39;');
 }
 
+function openAdminProfilesModal() {
+  if (!currentIsAdmin || !adminModal) return;
+  adminModal.style.display = 'flex';
+  if (adminProfileList) {
+    adminProfileList.innerHTML = '<p class="admin-hint">Cargando perfiles…</p>';
+  }
+  if (adminMetrics) {
+    adminMetrics.innerHTML = '';
+  }
+  if (adminExperienceList) {
+    adminExperienceList.innerHTML = '<li><span>Cargando…</span><span>…</span></li>';
+  }
+  if (adminDisciplineList) {
+    adminDisciplineList.innerHTML = '<li><span>Cargando…</span><span>…</span></li>';
+  }
+  loadAdminProfiles();
+}
+
+function closeAdminProfilesModal() {
+  if (!adminModal) return;
+  adminModal.style.display = 'none';
+}
+
+function isAdminModalOpen() {
+  if (!adminModal) return false;
+  return adminModal.style.display === 'flex';
+}
+
 function updateAdminVisibility() {
-  if (!adminSection) return;
-  if (currentIsAdmin) {
-    adminSection.style.display = 'grid';
-    loadAdminProfiles();
-  } else {
-    adminSection.style.display = 'none';
+  if (adminModalOpenButton) {
+    adminModalOpenButton.style.display = currentIsAdmin ? 'inline-flex' : 'none';
+  }
+  if (!currentIsAdmin) {
+    closeAdminProfilesModal();
     if (adminProfileList) adminProfileList.innerHTML = '';
     if (adminMetrics) adminMetrics.innerHTML = '';
+    if (adminExperienceList) adminExperienceList.innerHTML = '';
+    if (adminDisciplineList) adminDisciplineList.innerHTML = '';
   }
 }
 
@@ -1629,7 +1662,38 @@ async function loadAdminProfiles() {
     renderAdminProfiles(Array.isArray(data.profiles) ? data.profiles : []);
   } catch (error) {
     console.error('[admin] error cargando perfiles', error);
+    if (adminProfileList) {
+      adminProfileList.innerHTML = '<p class="admin-hint">Error cargando perfiles.</p>';
+    }
+    if (adminMetrics) {
+      adminMetrics.innerHTML = '';
+    }
+    renderAdminDistribution(adminExperienceList, [], 'Error al cargar datos');
+    renderAdminDistribution(adminDisciplineList, [], 'Error al cargar datos');
   }
+}
+
+function buildSortedCounts(values) {
+  const counts = new Map();
+  values.forEach((value) => {
+    if (!value) return;
+    counts.set(value, (counts.get(value) || 0) + 1);
+  });
+  return Array.from(counts.entries()).sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return a[0].localeCompare(b[0]);
+  });
+}
+
+function renderAdminDistribution(listElement, entries, emptyLabel) {
+  if (!listElement) return;
+  if (!entries.length) {
+    listElement.innerHTML = `<li><span>${escapeHtml(emptyLabel)}</span><span>—</span></li>`;
+    return;
+  }
+  listElement.innerHTML = entries
+    .map(([label, count]) => `<li><span>${escapeHtml(label)}</span><span>${count}</span></li>`)
+    .join('');
 }
 
 function renderAdminProfiles(profiles) {
@@ -1638,6 +1702,10 @@ function renderAdminProfiles(profiles) {
   const withAvatar = profiles.filter((profile) => Boolean(profile.avatarUrl)).length;
   const withBio = profiles.filter((profile) => Boolean(profile.bio)).length;
   const withGoals = profiles.filter((profile) => Boolean(profile.goals)).length;
+  const withExperience = profiles.filter((profile) => Boolean(profile.experienceLevel)).length;
+  const withDiscipline = profiles.filter((profile) => Boolean(profile.favoriteDiscipline)).length;
+  const withPractice = profiles.filter((profile) => Boolean(profile.practiceFocus)).length;
+  const withBoard = profiles.filter((profile) => Boolean(profile.boardSetup)).length;
   let latestUpdated = null;
   profiles.forEach((profile) => {
     const updatedIso = profile?._meta?.updatedAt;
@@ -1650,29 +1718,38 @@ function renderAdminProfiles(profiles) {
   });
   if (adminMetrics) {
     const latestUpdatedLabel = latestUpdated ? formatDateTime(latestUpdated.toISOString()) : 'N/A';
-    adminMetrics.innerHTML = `
-      <div class="admin-metric-chip">
-        <span class="admin-metric-label">Usuarios</span>
-        <strong>${total}</strong>
-      </div>
-      <div class="admin-metric-chip">
-        <span class="admin-metric-label">Con avatar</span>
-        <strong>${withAvatar}</strong>
-      </div>
-      <div class="admin-metric-chip">
-        <span class="admin-metric-label">Con bio</span>
-        <strong>${withBio}</strong>
-      </div>
-      <div class="admin-metric-chip">
-        <span class="admin-metric-label">Con objetivos</span>
-        <strong>${withGoals}</strong>
-      </div>
-      <div class="admin-metric-chip">
-        <span class="admin-metric-label">Último cambio</span>
-        <strong>${escapeHtml(latestUpdatedLabel)}</strong>
-      </div>
-    `;
+    const metrics = [
+      { label: 'Usuarios', value: total },
+      { label: 'Con avatar', value: withAvatar },
+      { label: 'Con bio', value: withBio },
+      { label: 'Con objetivos', value: withGoals },
+      { label: 'Con nivel', value: withExperience },
+      { label: 'Modalidad favorita', value: withDiscipline },
+      { label: 'Con rutina', value: withPractice },
+      { label: 'Con equipo', value: withBoard },
+      { label: 'Último cambio', value: escapeHtml(latestUpdatedLabel) },
+    ];
+    adminMetrics.innerHTML = metrics
+      .map((metric) => `
+        <div class="admin-metric-chip">
+          <span class="admin-metric-label">${metric.label}</span>
+          <strong>${metric.value}</strong>
+        </div>
+      `)
+      .join('');
   }
+  const experienceEntries = buildSortedCounts(
+    profiles
+      .map((profile) => (typeof profile.experienceLevel === 'string' ? profile.experienceLevel.trim() : ''))
+      .filter(Boolean),
+  );
+  const disciplineEntries = buildSortedCounts(
+    profiles
+      .map((profile) => (typeof profile.favoriteDiscipline === 'string' ? profile.favoriteDiscipline.trim() : ''))
+      .filter(Boolean),
+  );
+  renderAdminDistribution(adminExperienceList, experienceEntries, 'Sin niveles registrados');
+  renderAdminDistribution(adminDisciplineList, disciplineEntries, 'Sin modalidades registradas');
   if (!profiles.length) {
     adminProfileList.innerHTML = '<p class="admin-hint">Sin perfiles registrados.</p>';
     return;
@@ -1723,7 +1800,7 @@ saveButton?.addEventListener('click', async () => {
     currentProfileData = profile;
     currentIsAdmin = Boolean(isAdmin);
     updateAdminVisibility();
-    if (currentIsAdmin) loadAdminProfiles();
+    if (currentIsAdmin && isAdminModalOpen()) loadAdminProfiles();
     fillProfileForm(currentUser, profile);
   } catch (error) {
     console.error(error);
@@ -2069,7 +2146,7 @@ onAuthStateChanged(auth, async (user) => {
     currentProfileData = profile;
     currentIsAdmin = Boolean(isAdmin);
     updateAdminVisibility();
-    if (currentIsAdmin) loadAdminProfiles();
+    if (currentIsAdmin && isAdminModalOpen()) loadAdminProfiles();
     const nameToShow = profile.displayName || user.displayName || '';
     setAuthButtonLoggedIn(nameToShow);
     fillProfileForm(user, profile);
@@ -2091,8 +2168,30 @@ profileLinkButton?.addEventListener('click', () => {
   fillProfileForm(currentUser, currentProfileData || {});
   fillStoryForm(null);
   updateAdminVisibility();
-  if (currentIsAdmin) loadAdminProfiles();
+  if (currentIsAdmin && isAdminModalOpen()) loadAdminProfiles();
   if (profileModal) profileModal.style.display = 'flex';
+});
+
+adminModalOpenButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  openAdminProfilesModal();
+});
+
+adminModalCloseButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  closeAdminProfilesModal();
+});
+
+adminModal?.addEventListener('click', (event) => {
+  if (event.target === adminModal) {
+    closeAdminProfilesModal();
+  }
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    closeAdminProfilesModal();
+  }
 });
 
 avatarInput?.addEventListener('change', async (event) => {
