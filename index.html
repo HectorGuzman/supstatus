@@ -38,7 +38,6 @@
             <span class="stories-title">Historias SUP</span>
             <span class="stories-subtitle">Momentos recientes de la comunidad.</span>
           </div>
-          <span class="stories-activity" id="stories-activity" aria-live="polite">Actualizando…</span>
         </div>
         <div class="stories-rail-container">
           <div class="stories-empty" id="stories-empty" style="display: block;">
@@ -669,7 +668,7 @@
     let storyAutoAdvancePaused = false;
     let storiesRefreshInterval = null;
     const STORY_AUTO_ADVANCE_MS = 8000;
-    const STORIES_REFRESH_INTERVAL_MS = 5000;
+    const STORIES_REFRESH_INTERVAL_MS = 10000;
 
     function escapeHtml(value = '') {
       return value

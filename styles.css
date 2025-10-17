@@ -1359,14 +1359,6 @@ main.layout {
   text-transform: uppercase;
 }
 
-.stories-activity {
-  font-size: 0.75rem;
-  color: rgba(242, 246, 255, 0.45);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
 .stories-rail-container {
   position: relative;
   display: grid;
