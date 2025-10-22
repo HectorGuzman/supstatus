@@ -19,6 +19,7 @@ export interface SessionPayload {
   distanceKm?: number;
   conditionsNote?: string;
   trackPoints?: Array<{ lat: number; lon: number; timestamp?: number }>;
+  mediaUrl?: string;
 }
 
 export async function getUserProfile(uid: string) {
@@ -75,6 +76,7 @@ export async function createSession(uid: string, payload: SessionPayload) {
   if (typeof payload.durationMin === 'number') data.durationMin = payload.durationMin;
   if (typeof payload.distanceKm === 'number') data.distanceKm = payload.distanceKm;
   if (typeof payload.conditionsNote === 'string') data.conditionsNote = payload.conditionsNote.trim();
+  if (typeof payload.mediaUrl === 'string') data.mediaUrl = payload.mediaUrl.trim();
   if (trackPoints && trackPoints.length) data.trackPoints = trackPoints;
   const docRef = await sessionsRef.add(data);
   const snapshot = await docRef.get();

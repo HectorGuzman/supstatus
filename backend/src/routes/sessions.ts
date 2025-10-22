@@ -60,6 +60,7 @@ function serializeSession(doc: Record<string, unknown> & { id?: string }) {
     distanceKm: doc.distanceKm ?? null,
     durationMin: doc.durationMin ?? null,
     conditionsNote: doc.conditionsNote || null,
+    mediaUrl: typeof doc['mediaUrl'] === 'string' ? (doc['mediaUrl'] as string) : null,
     trackPoints: Array.isArray(doc.trackPoints) ? doc.trackPoints : undefined,
     startedAt: toIso(doc.startedAt),
     createdAt: toIso(doc.createdAt),
@@ -93,6 +94,7 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
   const notes = sanitizeString(body.conditionsNote || body.notes);
   const startedAtRaw = sanitizeString(body.startedAt);
   const trackPoints = sanitizeTrackPoints(body.trackPoints || body.track);
+  const mediaUrl = sanitizeString(body.mediaUrl || body.photoUrl);
   if (!distanceKm && !durationMin && !trackPoints) {
     return res.status(400).json({ error: 'Registra al menos distancia, duración o un seguimiento.' });
   }
@@ -109,6 +111,9 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
   }
   if (trackPoints) {
     payload.trackPoints = trackPoints;
+  }
+  if (mediaUrl) {
+    payload.mediaUrl = mediaUrl;
   }
 
   try {
