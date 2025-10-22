@@ -45,6 +45,7 @@ const practiceFocusInput = document.getElementById('profile-practiceFocus');
 const saveButton = document.getElementById('profile-save');
 const statusLabel = document.getElementById('profile-status');
 const greetingLabel = document.getElementById('auth-greeting');
+const profileSignOutButton = document.getElementById('profile-signout');
 const adminProfileList = document.getElementById('admin-profile-list');
 const adminMetrics = document.getElementById('admin-metrics');
 const adminExperienceList = document.getElementById('admin-experience-distribution');
@@ -94,10 +95,16 @@ const sessionTrackingPointsLabel = document.getElementById('session-tracking-poi
 const sessionTrackingStartButton = document.getElementById('session-tracking-start');
 const sessionTrackingStopButton = document.getElementById('session-tracking-stop');
 const sessionTrackingResetButton = document.getElementById('session-tracking-reset');
+const sessionMediaInput = document.getElementById('session-media-input');
+const sessionMediaRemoveButton = document.getElementById('session-media-remove');
+const sessionMediaStatus = document.getElementById('session-media-status');
+const sessionMediaPreviewWrapper = document.getElementById('session-media-preview-wrapper');
+const sessionMediaPreview = document.getElementById('session-media-preview');
 const sessionDetailModal = document.getElementById('session-detail-modal');
 const sessionDetailCloseButton = document.getElementById('session-detail-close');
 const sessionDetailTitle = document.getElementById('session-detail-title');
 const sessionDetailSummary = document.getElementById('session-detail-summary');
+const sessionDetailMedia = document.getElementById('session-detail-media');
 const sessionDetailNotes = document.getElementById('session-detail-notes');
 const sessionDetailStatus = document.getElementById('session-detail-status');
 const sessionDetailShareButton = document.getElementById('session-detail-share');
@@ -244,6 +251,9 @@ let storyStatusTimeout = null;
 let currentStoryMediaUrl = '';
 let storyMediaUploading = false;
 let storyMediaPreviewUrl = null;
+let currentSessionMediaUrl = '';
+let sessionMediaUploading = false;
+let sessionMediaPreviewUrl = null;
 let storySelectedSpot = '';
 let storyLocationSuggestions = [];
 let storyLocationLoading = false;
@@ -259,6 +269,7 @@ let trackingStartTime = null;
 let trackingDistanceKm = 0;
 let trackingPoints = [];
 let activeSessionDetail = null;
+let wakeLockSentinel = null;
 
 function resetAvatarPreviewUrl() {
   if (avatarPreviewObjectUrl) {
@@ -318,20 +329,21 @@ function canvasToBlob(canvas, type, quality) {
   });
 }
 
-async function prepareImageForUpload(file) {
+async function prepareImageForUpload(file, options = {}) {
+  const { onStatus } = options;
   try {
     let workingFile = file;
     const heicConverter = globalThis.heic2any;
     const isHeic = /\.hei[cf]$/i.test(file.name || '') || file.type === 'image/heic' || file.type === 'image/heif';
     let convertedFromHeic = false;
     if (heicConverter && isHeic) {
-      if (storyMediaStatus) storyMediaStatus.textContent = 'Convirtiendo HEIC…';
+      onStatus?.('Convirtiendo HEIC…');
       const convertedBlob = await heicConverter({ blob: file, toType: 'image/jpeg', quality: STORY_MEDIA_DEFAULT_QUALITY });
       workingFile = new File([convertedBlob], `${(file.name?.split?.('.')?.[0] || 'story')}.jpg`, { type: 'image/jpeg' });
       convertedFromHeic = true;
     } else if (isHeic) {
       console.warn('[stories] Navegador sin soporte para heic2any.');
-      if (storyMediaStatus) storyMediaStatus.textContent = 'Tu navegador no puede convertir HEIC. Usa formato JPG o ajusta la cámara.';
+      onStatus?.('Tu navegador no puede convertir HEIC. Usa formato JPG o ajusta la cámara.');
       return file;
     }
 
@@ -370,6 +382,7 @@ async function prepareImageForUpload(file) {
     return workingFile;
   } catch (error) {
     console.warn('[stories] No se pudo optimizar la imagen, usando original.', error);
+    onStatus?.('');
     return file;
   }
 }
@@ -575,6 +588,40 @@ function clearStoryMediaSelection() {
   if (storyMediaFileInput) storyMediaFileInput.value = '';
 }
 
+function revokeSessionMediaPreview() {
+  if (sessionMediaPreviewUrl) {
+    URL.revokeObjectURL(sessionMediaPreviewUrl);
+    sessionMediaPreviewUrl = null;
+  }
+}
+
+function setSessionMediaPreview(url) {
+  if (!sessionMediaPreviewWrapper || !sessionMediaPreview) return;
+  if (url) {
+    sessionMediaPreview.src = url;
+    sessionMediaPreviewWrapper.style.display = 'block';
+  } else {
+    sessionMediaPreview.src = '';
+    sessionMediaPreviewWrapper.style.display = 'none';
+  }
+}
+
+function updateSessionMediaUI(url) {
+  currentSessionMediaUrl = url || '';
+  revokeSessionMediaPreview();
+  setSessionMediaPreview(currentSessionMediaUrl);
+  if (sessionMediaRemoveButton) {
+    sessionMediaRemoveButton.disabled = !currentSessionMediaUrl;
+  }
+}
+
+function clearSessionMediaSelection() {
+  updateSessionMediaUI('');
+  if (sessionMediaStatus) sessionMediaStatus.textContent = '';
+  if (sessionMediaInput) sessionMediaInput.value = '';
+  sessionMediaRemoveButton?.setAttribute('disabled', 'true');
+}
+
 function clearStoryStatusMessage() {
   if (storyStatusTimeout) {
     window.clearTimeout(storyStatusTimeout);
@@ -778,18 +825,22 @@ function renderSessionList() {
       const durationLabel = formatDurationMinutes(duration);
       const spot = session.spot ? `📍 ${session.spot}` : '';
       const notes = session.conditionsNote ? `<p>${escapeHtml(session.conditionsNote)}</p>` : '';
-    item.innerHTML = `
-      <div class="session-item-top">
-        <strong>${escapeHtml(session.title || session.spot || 'Remada SUP')}</strong>
-        ${hasStartedLabel ? `<span>${escapeHtml(startedDate)}</span>` : ''}
-      </div>
-      <span>${escapeHtml(distanceLabel)} · ${escapeHtml(durationLabel)}</span>
-      ${spot ? `<span>${escapeHtml(spot)}</span>` : ''}
-      ${notes}
-      <div class="session-item-actions">
-        <button type="button" class="session-item-view" data-session-id="${escapeHtml(session.id || '')}">👀 Ver detalle</button>
-      </div>
-    `;
+      const mediaHtml = session.mediaUrl
+        ? `<div class="session-item-media"><img src="${escapeHtml(session.mediaUrl)}" alt="Foto de la remada"></div>`
+        : '';
+      item.innerHTML = `
+        ${mediaHtml}
+        <div class="session-item-top">
+          <strong>${escapeHtml(session.title || session.spot || 'Remada SUP')}</strong>
+          ${hasStartedLabel ? `<span>${escapeHtml(startedDate)}</span>` : ''}
+        </div>
+        <span>${escapeHtml(distanceLabel)} · ${escapeHtml(durationLabel)}</span>
+        ${spot ? `<span>${escapeHtml(spot)}</span>` : ''}
+        ${notes}
+        <div class="session-item-actions">
+          <button type="button" class="session-item-view" data-session-id="${escapeHtml(session.id || '')}">👀 Ver detalle</button>
+        </div>
+      `;
       sessionListElement.appendChild(item);
     });
 }
@@ -828,7 +879,7 @@ async function shareSessionAsStory(session) {
     if (!bodyLines.length) {
       bodyLines.push('Compartiendo mi remada SUP 🏄');
     }
-    const mediaUrl = generateSessionImage(session);
+    const mediaUrl = session.mediaUrl || generateSessionImage(session);
     const payload = {
       body: bodyLines.join('\n'),
       spot: session.spot || undefined,
@@ -912,10 +963,26 @@ function closeSessionDetail() {
   activeSessionDetail = null;
   if (sessionDetailStatus) sessionDetailStatus.textContent = '';
   if (sessionDetailDeleteButton) sessionDetailDeleteButton.style.display = 'none';
+  if (sessionDetailMedia) {
+    sessionDetailMedia.innerHTML = '';
+    sessionDetailMedia.style.display = 'none';
+    sessionDetailMedia.setAttribute('aria-hidden', 'true');
+  }
 }
 
 function renderSessionDetail(session) {
   if (!session) return;
+  if (sessionDetailMedia) {
+    if (session.mediaUrl) {
+      sessionDetailMedia.innerHTML = `<img src="${escapeHtml(session.mediaUrl)}" alt="Foto de la remada">`;
+      sessionDetailMedia.style.display = 'block';
+      sessionDetailMedia.setAttribute('aria-hidden', 'false');
+    } else {
+      sessionDetailMedia.innerHTML = '';
+      sessionDetailMedia.style.display = 'none';
+      sessionDetailMedia.setAttribute('aria-hidden', 'true');
+    }
+  }
   if (sessionDetailTitle) {
     sessionDetailTitle.textContent = session.title || session.spot || 'Detalle de remada';
   }
@@ -945,9 +1012,12 @@ function drawSessionCanvasPreview(session) {
   const ctx = sessionDetailCanvas.getContext('2d');
   if (!ctx) return;
   renderSessionArtwork(ctx, sessionDetailCanvas.width, sessionDetailCanvas.height, session);
+  const hasTrack = Array.isArray(session.trackPoints) && session.trackPoints.length > 1;
   if (sessionDetailMapHint) {
-    if (Array.isArray(session.trackPoints) && session.trackPoints.length > 1) {
+    if (hasTrack) {
       sessionDetailMapHint.textContent = 'Ruta estimada según tu seguimiento en vivo.';
+    } else if (session.mediaUrl) {
+      sessionDetailMapHint.textContent = 'Imagen generada automáticamente como resumen visual.';
     } else {
       sessionDetailMapHint.textContent = 'Registro manual (imagen generada automáticamente).';
     }
@@ -1055,6 +1125,13 @@ function openSessionModal(tab = 'tracking') {
 function closeSessionModal() {
   if (sessionModal) sessionModal.style.display = 'none';
   resetSessionTracking();
+  if (wakeLockSentinel) {
+    wakeLockSentinel.release().catch((error) => {
+      console.warn('[sessions] error liberando wake lock', error);
+    });
+    wakeLockSentinel = null;
+  }
+  clearSessionMediaSelection();
   clearSessionStatusMessage();
 }
 
@@ -1068,6 +1145,7 @@ function resetSessionForm() {
   if (sessionDistanceInput) sessionDistanceInput.value = '';
   if (sessionDurationInput) sessionDurationInput.value = '';
   if (sessionNotesInput) sessionNotesInput.value = '';
+  clearSessionMediaSelection();
   resetSessionTracking();
   clearSessionStatusMessage();
   showSessionTab('tracking');
@@ -1080,6 +1158,11 @@ function updateSessionModalStatus(message) {
 async function saveSessionFromModal() {
   if (!currentUser || !currentToken || isSavingSession) {
     window.supAuth?.openAuthModal?.();
+    return;
+  }
+  if (sessionMediaUploading) {
+    updateSessionModalStatus('Espera a que la foto termine de subir.');
+    sessionStatusTimeout = window.setTimeout(() => clearSessionStatusMessage(), 3000);
     return;
   }
   clearSessionStatusMessage();
@@ -1162,6 +1245,9 @@ function buildSessionPayload() {
       }
     }
   }
+  if (currentSessionMediaUrl) {
+    payload.mediaUrl = currentSessionMediaUrl;
+  }
   return payload;
 }
 
@@ -1225,6 +1311,21 @@ async function startSessionTracking() {
   trackingPoints = [];
   trackingDistanceKm = 0;
   updateTrackingUI();
+  if (sessionTrackingStatus) {
+    sessionTrackingStatus.textContent += ' Mantén la pantalla encendida para no perder datos.';
+  }
+
+  if ('wakeLock' in navigator && typeof navigator.wakeLock?.request === 'function') {
+    try {
+      wakeLockSentinel = await navigator.wakeLock.request('screen');
+      wakeLockSentinel.addEventListener('release', () => {
+        console.log('[sessions] wake lock liberado');
+      });
+      console.log('[sessions] wake lock activado');
+    } catch (error) {
+      console.warn('[sessions] no se pudo activar el wake lock', error);
+    }
+  }
 
   trackingIntervalId = window.setInterval(updateTrackingUI, 1000);
 
@@ -1260,6 +1361,12 @@ function stopSessionTracking() {
   if (trackingIntervalId) {
     window.clearInterval(trackingIntervalId);
     trackingIntervalId = null;
+  }
+  if (wakeLockSentinel) {
+    wakeLockSentinel.release().catch((error) => {
+      console.warn('[sessions] error liberando wake lock', error);
+    });
+    wakeLockSentinel = null;
   }
   isTrackingSession = false;
   if (sessionTrackingStatus) sessionTrackingStatus.textContent = 'Seguimiento detenido. Puedes ajustar los datos antes de guardar.';
@@ -1537,8 +1644,14 @@ async function loadUserSessions(token) {
 }
 
 function setAuthButtonLoggedOut() {
-  authButton.textContent = '🔐 Iniciar sesión';
-  authButton.onclick = openAuthModal;
+  if (authButton) {
+    authButton.textContent = '🔐 Iniciar sesión';
+    authButton.onclick = openAuthModal;
+    authButton.style.display = 'inline-flex';
+  }
+  if (profileSignOutButton) {
+    profileSignOutButton.style.display = 'none';
+  }
   if (greetingLabel) greetingLabel.textContent = defaultGreeting;
   if (profileLinkButton) profileLinkButton.style.display = 'none';
   if (sessionGlobalOpenButton) sessionGlobalOpenButton.style.display = 'none';
@@ -1553,6 +1666,7 @@ function setAuthButtonLoggedOut() {
   updateAdminVisibility();
   fillProfileForm(null);
   resetStoryForm();
+  clearSessionMediaSelection();
   updateStoryMetaSummary();
   renderUserStoriesList();
   renderSessionList();
@@ -1560,8 +1674,14 @@ function setAuthButtonLoggedOut() {
 }
 
 function setAuthButtonLoggedIn(displayName) {
-  authButton.textContent = '🚪 Cerrar sesión';
-  authButton.onclick = () => signOut(auth);
+  if (authButton) {
+    authButton.textContent = '🚪 Cerrar sesión';
+    authButton.onclick = () => signOut(auth);
+    authButton.style.display = 'none';
+  }
+  if (profileSignOutButton) {
+    profileSignOutButton.style.display = 'inline-flex';
+  }
   const friendlyName = displayName || 'remador/a';
   if (greetingLabel) greetingLabel.textContent = `🌊 ¡Hola, ${friendlyName}! ¿Listo para remar?`;
   if (profileLinkButton) profileLinkButton.style.display = 'flex';
@@ -1916,6 +2036,90 @@ sessionTrackingResetButton?.addEventListener('click', () => {
   resetSessionTracking();
 });
 
+sessionMediaInput?.addEventListener('change', async (event) => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  if (!currentUser || !currentToken) {
+    if (sessionMediaStatus) sessionMediaStatus.textContent = 'Inicia sesión para subir una foto.';
+    sessionMediaInput.value = '';
+    return;
+  }
+  if (!file.type.startsWith('image/')) {
+    if (sessionMediaStatus) sessionMediaStatus.textContent = 'Selecciona un archivo de imagen válido.';
+    sessionMediaInput.value = '';
+    return;
+  }
+  if (file.size > STORY_MEDIA_MAX_SIZE * 6) {
+    if (sessionMediaStatus) sessionMediaStatus.textContent = 'La imagen es muy pesada. Prueba con una versión más liviana.';
+    sessionMediaInput.value = '';
+    return;
+  }
+  if (sessionMediaUploading) {
+    sessionMediaInput.value = '';
+    return;
+  }
+
+  const setSessionStatus = (message) => {
+    if (sessionMediaStatus) sessionMediaStatus.textContent = message || '';
+  };
+
+  const previousUrl = currentSessionMediaUrl || '';
+  sessionMediaUploading = true;
+  setSessionStatus('Preparando foto…');
+  sessionMediaInput.disabled = true;
+  sessionMediaRemoveButton?.setAttribute('disabled', 'true');
+
+  let processedFile = file;
+  try {
+    processedFile = await prepareImageForUpload(file, { onStatus: setSessionStatus });
+  } catch (error) {
+    console.warn('[sessions] Error optimizando imagen', error);
+  }
+
+  revokeSessionMediaPreview();
+  sessionMediaPreviewUrl = URL.createObjectURL(processedFile);
+  setSessionMediaPreview(sessionMediaPreviewUrl);
+
+  const nameFromFile = (processedFile.name || file.name || '').split('.').pop();
+  const baseExtension = typeof nameFromFile === 'string' && nameFromFile.length ? nameFromFile.toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+  const inferredExtension = baseExtension || (processedFile.type === 'image/png' ? 'png' : 'jpg');
+  const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const storagePath = `sessions/${currentUser.uid}/media/${uniqueSuffix}.${inferredExtension}`;
+  const fileRef = storageRef(storage, storagePath);
+  try {
+    setSessionStatus('Subiendo foto…');
+    await uploadBytes(fileRef, processedFile, {
+      contentType: processedFile.type || file.type || 'image/jpeg',
+      cacheControl: 'public,max-age=3600',
+    });
+    const downloadUrl = await getDownloadURL(fileRef);
+    updateSessionMediaUI(downloadUrl);
+    setSessionStatus(processedFile === file ? 'Foto lista ✓' : 'Foto optimizada ✓');
+  } catch (error) {
+    console.error('[sessions] media upload error', error);
+    updateSessionMediaUI(previousUrl);
+    setSessionStatus(buildReadableUploadError(error, 'No se pudo subir la foto de la remada.'));
+  } finally {
+    sessionMediaUploading = false;
+    sessionMediaInput.disabled = false;
+    sessionMediaInput.value = '';
+    if (currentSessionMediaUrl) {
+      sessionMediaRemoveButton?.removeAttribute('disabled');
+    } else {
+      sessionMediaRemoveButton?.setAttribute('disabled', 'true');
+      revokeSessionMediaPreview();
+      setSessionMediaPreview('');
+    }
+  }
+});
+
+sessionMediaRemoveButton?.addEventListener('click', (event) => {
+  event.preventDefault();
+  if (sessionMediaUploading) return;
+  clearSessionMediaSelection();
+  if (sessionMediaStatus) sessionMediaStatus.textContent = 'Foto quitada.';
+});
+
 sessionDetailCloseButton?.addEventListener('click', closeSessionDetail);
 sessionDetailModal?.addEventListener('click', (event) => {
   if (event.target === sessionDetailModal) {
@@ -2001,16 +2205,19 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
     return;
   }
 
+  const setStoryMediaStatus = (message) => {
+    if (storyMediaStatus) storyMediaStatus.textContent = message || '';
+  };
   const previousUrl = currentStoryMediaUrl || '';
   storyMediaUploading = true;
-  if (storyMediaStatus) storyMediaStatus.textContent = 'Preparando foto…';
+  setStoryMediaStatus('Preparando foto…');
   storyMediaFileInput.disabled = true;
   storyMediaRemoveButton?.setAttribute('disabled', 'true');
   revokeStoryMediaPreview();
 
   let processedFile = file;
   try {
-    processedFile = await prepareImageForUpload(file);
+    processedFile = await prepareImageForUpload(file, { onStatus: setStoryMediaStatus });
   } catch (error) {
     console.warn('[stories] Error optimizando imagen', error);
   }
@@ -2025,18 +2232,18 @@ storyMediaFileInput?.addEventListener('change', async (event) => {
   const storagePath = `stories/${currentUser.uid}/media/${uniqueSuffix}.${inferredExtension}`;
   const fileRef = storageRef(storage, storagePath);
   try {
-    if (storyMediaStatus) storyMediaStatus.textContent = 'Subiendo foto…';
+    setStoryMediaStatus('Subiendo foto…');
     await uploadBytes(fileRef, processedFile, {
       contentType: processedFile.type || file.type || 'image/jpeg',
       cacheControl: 'public,max-age=3600',
     });
     const downloadUrl = await getDownloadURL(fileRef);
     updateStoryMediaUI(downloadUrl);
-    if (storyMediaStatus) storyMediaStatus.textContent = processedFile === file ? 'Foto lista ✓' : 'Foto optimizada ✓';
+    setStoryMediaStatus(processedFile === file ? 'Foto lista ✓' : 'Foto optimizada ✓');
   } catch (error) {
     console.error(error);
     updateStoryMediaUI(previousUrl);
-    if (storyMediaStatus) storyMediaStatus.textContent = buildReadableUploadError(error);
+    setStoryMediaStatus(buildReadableUploadError(error));
   } finally {
     storyMediaUploading = false;
     storyMediaFileInput.disabled = false;
@@ -2170,6 +2377,21 @@ profileLinkButton?.addEventListener('click', () => {
   updateAdminVisibility();
   if (currentIsAdmin && isAdminModalOpen()) loadAdminProfiles();
   if (profileModal) profileModal.style.display = 'flex';
+});
+
+profileSignOutButton?.addEventListener('click', async (event) => {
+  event.preventDefault();
+  if (profileSignOutButton.disabled) return;
+  try {
+    profileSignOutButton.disabled = true;
+    profileSignOutButton.textContent = 'Cerrando…';
+    await signOut(auth);
+  } catch (error) {
+    console.error('[auth] error signing out', error);
+  } finally {
+    profileSignOutButton.disabled = false;
+    profileSignOutButton.textContent = 'Cerrar sesión';
+  }
 });
 
 adminModalOpenButton?.addEventListener('click', (event) => {

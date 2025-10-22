@@ -534,6 +534,21 @@ h1 {
   margin: 8px 0 4px;
 }
 
+.profile-close-button {
+  margin-left: auto;
+}
+
+.profile-signout-button {
+  border-color: rgba(255, 115, 161, 0.4);
+  color: var(--brand-pink);
+}
+
+.profile-signout-button:hover,
+.profile-signout-button:focus-visible {
+  border-color: rgba(255, 115, 161, 0.65);
+  background: rgba(255, 115, 161, 0.12);
+}
+
 .admin-modal {
   max-width: min(720px, 94vw);
   width: min(720px, 94vw);
@@ -1643,7 +1658,21 @@ main.layout {
   border-radius: 16px;
   padding: 12px 14px;
   display: grid;
-  gap: 6px;
+  gap: 10px;
+}
+
+.session-item-media {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(6, 18, 31, 0.85);
+}
+
+.session-item-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
 }
 
 .session-item strong {
@@ -1765,6 +1794,11 @@ main.layout {
   resize: vertical;
 }
 
+.session-panel[data-session-panel="manual"] {
+  display: grid;
+  gap: 14px;
+}
+
 .session-form-row {
   display: grid;
   gap: 10px;
@@ -1816,6 +1850,76 @@ main.layout {
   color: var(--text-muted);
 }
 
+.session-media {
+  display: grid;
+  gap: 10px;
+  background: rgba(6, 18, 31, 0.55);
+  border: 1px dashed rgba(38, 198, 218, 0.28);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.session-media-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.session-media-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: rgba(38, 198, 218, 0.85);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.session-media-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.session-media-upload span {
+  border: 1px solid rgba(38, 198, 218, 0.35);
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: rgba(38, 198, 218, 0.15);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.session-media-upload span:hover {
+  background: rgba(38, 198, 218, 0.25);
+  transform: translateY(-1px);
+}
+
+.session-media-preview-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(38, 198, 218, 0.25);
+  background: rgba(6, 18, 31, 0.8);
+}
+
+.session-media-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.session-media-status {
+  font-size: 0.78rem;
+  color: rgba(242, 246, 255, 0.68);
+}
+
 .session-modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -1833,6 +1937,20 @@ main.layout {
   max-width: 540px;
   display: grid;
   gap: 16px;
+}
+
+.session-detail-media {
+  display: none;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(6, 18, 31, 0.85);
+}
+
+.session-detail-media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
 }
 
 .session-detail-summary {
