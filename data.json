@@ -2,92 +2,24 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "6.6 km/h",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 193,
-      "oleaje": "1.8 m",
+      "viento": "3.3 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 6,
+      "oleaje": "1.94 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17.0°C",
-      "condiciones": "Con viento suave del Sur y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "16.4°C",
+      "condiciones": "Tranquilo y seguro para principiantes.",
       "nivel": "Principiante"
     },
     {
       "hora": "09:00",
-      "viento": "3.9 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 214,
-      "oleaje": "1.88 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "17.0°C",
-      "condiciones": "Con viento ligero del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "12:00",
-      "viento": "9.3 km/h",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 254,
+      "viento": "7.3 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 349,
       "oleaje": "1.84 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17.7°C",
-      "condiciones": "Con viento moderado del Oeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "15:00",
-      "viento": "13.0 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 246,
-      "oleaje": "1.96 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "17.9°C",
-      "condiciones": "Con viento moderado del Suroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "18:00",
-      "viento": "12.1 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 243,
-      "oleaje": "2.24 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "18.1°C",
-      "condiciones": "Con viento moderado del Suroeste y oleaje alto del Suroeste, es un momento adecuado para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "21:00",
-      "viento": "9.4 km/h",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 230,
-      "oleaje": "2.3 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "18.2°C",
-      "condiciones": "Con viento moderado del Suroeste y oleaje alto del Suroeste, es un momento adecuado para principiantes.",
-      "nivel": "Principiante"
-    }
-  ],
-  "mañana": [
-    {
-      "hora": "06:00",
-      "viento": "1.8 km/h",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 11,
-      "oleaje": "1.92 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "17.3°C",
-      "condiciones": "Con viento muy suave del Norte y oleaje moderado del Suroeste, es un excelente momento para principiantes.",
-      "nivel": "Principiante"
-    },
-    {
-      "hora": "09:00",
-      "viento": "6.2 km/h",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 353,
-      "oleaje": "1.84 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "17.0°C",
-      "condiciones": "Con viento ligero del Norte y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "16.6°C",
+      "condiciones": "Condiciones adecuadas para practicar SUP, ideal para todos los niveles.",
       "nivel": "Principiante"
     },
     {
@@ -95,46 +27,114 @@
       "viento": "9.4 km/h",
       "direccionViento": "Noroeste",
       "direccionVientoGrados": 320,
-      "oleaje": "1.88 m",
+      "oleaje": "1.84 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17.7°C",
-      "condiciones": "Con viento moderado del Noroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "17.0°C",
+      "condiciones": "Buen momento para remar, algo de viento pero manejable.",
       "nivel": "Principiante"
     },
     {
       "hora": "15:00",
-      "viento": "9.3 km/h",
+      "viento": "10.9 km/h",
       "direccionViento": "Noroeste",
-      "direccionVientoGrados": 298,
-      "oleaje": "1.84 m",
+      "direccionVientoGrados": 304,
+      "oleaje": "1.82 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "18.4°C",
-      "condiciones": "Con viento moderado del Noroeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
-      "nivel": "Principiante"
+      "temperatura": "17.8°C",
+      "condiciones": "Condiciones moderadas, recomendado para niveles intermedios.",
+      "nivel": "Intermedio"
     },
     {
       "hora": "18:00",
-      "viento": "7.5 km/h",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 287,
-      "oleaje": "1.84 m",
+      "viento": "6.6 km/h",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 299,
+      "oleaje": "1.8 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "18.9°C",
-      "condiciones": "Con viento ligero del Oeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "18.0°C",
+      "condiciones": "Viento suave, perfecto para una sesión relajada de SUP.",
       "nivel": "Principiante"
     },
     {
       "hora": "21:00",
-      "viento": "5.4 km/h",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 278,
-      "oleaje": "1.8 m",
+      "viento": "4.7 km/h",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 293,
+      "oleaje": "1.78 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "18.0°C",
-      "condiciones": "Con viento suave del Oeste y oleaje moderado del Suroeste, es un buen momento para principiantes.",
+      "temperatura": "17.9°C",
+      "condiciones": "Condiciones tranquilas, ideal para disfrutar del mar al atardecer.",
+      "nivel": "Principiante"
+    }
+  ],
+  "mañana": [
+    {
+      "hora": "06:00",
+      "viento": "9.7 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 345,
+      "oleaje": "1.62 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "17.4°C",
+      "condiciones": "Viento moderado, recomendado para niveles intermedios.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "09:00",
+      "viento": "10.6 km/h",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 350,
+      "oleaje": "1.58 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "17.8°C",
+      "condiciones": "Condiciones desafiantes, apto para niveles intermedios y avanzados.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "12:00",
+      "viento": "2.1 km/h",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 301,
+      "oleaje": "1.56 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "18.2°C",
+      "condiciones": "Viento suave, perfecto para principiantes.",
+      "nivel": "Principiante"
+    },
+    {
+      "hora": "15:00",
+      "viento": "5.5 km/h",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 247,
+      "oleaje": "1.54 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "18.7°C",
+      "condiciones": "Condiciones adecuadas para SUP, recomendado para todos los niveles.",
+      "nivel": "Principiante"
+    },
+    {
+      "hora": "18:00",
+      "viento": "9.2 km/h",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 231,
+      "oleaje": "1.48 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "18.5°C",
+      "condiciones": "Viento moderado, ideal para niveles intermedios.",
+      "nivel": "Intermedio"
+    },
+    {
+      "hora": "21:00",
+      "viento": "6.6 km/h",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 229,
+      "oleaje": "1.42 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "17.9°C",
+      "condiciones": "Condiciones tranquilas, recomendado para todos los niveles.",
       "nivel": "Principiante"
     }
   ],
   "mareas": [],
-  "generado": "2025-12-15 04:22:07"
+  "generado": "2025-12-16 04:20:49"
 }
