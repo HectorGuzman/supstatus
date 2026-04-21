@@ -2,17 +2,139 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "5 km/h",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 45,
-      "oleaje": "0.3 m",
+      "viento": "2.4 km/h",
+      "oleaje": "1.54 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
-      "nivel": "Principiante"
+      "temperatura": "14.5°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 207,
+      "nivel": "Principiante",
+      "condiciones": "El viento es suave, pero el oleaje es alto, no recomendado para principiantes."
+    },
+    {
+      "hora": "09:00",
+      "viento": "1.8 km/h",
+      "oleaje": "1.44 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.5°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 323,
+      "nivel": "Principiante",
+      "condiciones": "Condiciones tranquilas, pero el oleaje sigue siendo un desafío."
+    },
+    {
+      "hora": "12:00",
+      "viento": "7.2 km/h",
+      "oleaje": "1.36 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.9°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 264,
+      "nivel": "Principiante",
+      "condiciones": "Viento moderado, el oleaje es manejable, ideal para principiantes."
+    },
+    {
+      "hora": "15:00",
+      "viento": "9.5 km/h",
+      "oleaje": "1.34 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.9°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 245,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones adecuadas para intermedios, el viento y oleaje son favorables."
+    },
+    {
+      "hora": "18:00",
+      "viento": "7.0 km/h",
+      "oleaje": "1.36 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.9°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 235,
+      "nivel": "Principiante",
+      "condiciones": "Viento suave y oleaje moderado, buena opción para principiantes."
+    },
+    {
+      "hora": "21:00",
+      "viento": "6.1 km/h",
+      "oleaje": "1.36 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.9°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 225,
+      "nivel": "Principiante",
+      "condiciones": "Condiciones nocturnas tranquilas, pero el oleaje sigue siendo un factor."
     }
   ],
-  "mañana": [],
+  "mañana": [
+    {
+      "hora": "06:00",
+      "viento": "7.3 km/h",
+      "oleaje": "1.5 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.5°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 191,
+      "nivel": "Principiante",
+      "condiciones": "El oleaje es alto, no recomendado para principiantes."
+    },
+    {
+      "hora": "09:00",
+      "viento": "6.8 km/h",
+      "oleaje": "1.48 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.1°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 205,
+      "nivel": "Principiante",
+      "condiciones": "El viento es suave, pero el oleaje es un poco complicado."
+    },
+    {
+      "hora": "12:00",
+      "viento": "7.6 km/h",
+      "oleaje": "1.46 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.8°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 262,
+      "nivel": "Principiante",
+      "condiciones": "Condiciones favorables para principiantes, el oleaje es manejable."
+    },
+    {
+      "hora": "15:00",
+      "viento": "7.2 km/h",
+      "oleaje": "1.5 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "15.1°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 267,
+      "nivel": "Principiante",
+      "condiciones": "El viento es adecuado, pero el oleaje puede ser un poco desafiante."
+    },
+    {
+      "hora": "18:00",
+      "viento": "1.1 km/h",
+      "oleaje": "1.58 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "15.2°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 288,
+      "nivel": "Principiante",
+      "condiciones": "Viento casi nulo, pero el oleaje es alto, no recomendable."
+    },
+    {
+      "hora": "21:00",
+      "viento": "3.3 km/h",
+      "oleaje": "1.6 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "15.1°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 221,
+      "nivel": "Principiante",
+      "condiciones": "Condiciones tranquilas, pero el oleaje es alto, cuidado."
+    }
+  ],
   "mareas": [],
-  "generado": "2026-04-21 15:44:32"
+  "generado": "2026-04-21 15:50:30"
 }
