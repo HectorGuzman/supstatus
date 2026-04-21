@@ -24,25 +24,37 @@ def direccion_cardinal(grados):
     return dirs[int((grados + 22.5) % 360 / 45)]
 
 
+def get_with_retry(url, retries=3, timeout=30):
+    import time
+    for attempt in range(retries):
+        try:
+            return requests.get(url, timeout=timeout)
+        except requests.exceptions.Timeout:
+            if attempt < retries - 1:
+                wait = 5 * (attempt + 1)
+                print(f"  ⏱️  Timeout, reintentando en {wait}s... ({attempt+1}/{retries})")
+                time.sleep(wait)
+            else:
+                raise
+
+
 def obtener_datos_openmeteo(lat, lon):
     hoy = datetime.now().date().isoformat()
     manana = (datetime.now().date() + timedelta(days=1)).isoformat()
 
     print(f"  📡 Open-Meteo marine ({lat}, {lon})...")
-    r_marine = requests.get(
+    r_marine = get_with_retry(
         f"https://marine-api.open-meteo.com/v1/marine"
         f"?latitude={lat}&longitude={lon}"
-        f"&hourly=wave_height,wave_direction&timezone=auto&forecast_days=2",
-        timeout=15
+        f"&hourly=wave_height,wave_direction&timezone=auto&forecast_days=2"
     )
     data_marine = r_marine.json()
 
     print(f"  🌬️ Open-Meteo forecast ({lat}, {lon})...")
-    r_forecast = requests.get(
+    r_forecast = get_with_retry(
         f"https://api.open-meteo.com/v1/forecast"
         f"?latitude={lat}&longitude={lon}"
-        f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m&timezone=auto&forecast_days=2",
-        timeout=15
+        f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m&timezone=auto&forecast_days=2"
     )
     data_forecast = r_forecast.json()
 

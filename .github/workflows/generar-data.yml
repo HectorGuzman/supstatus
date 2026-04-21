@@ -44,6 +44,12 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
+      - name: Reintentar spots fallidos
+        if: ${{ failure() && github.event.inputs.spot == '' }}
+        run: python obtener_desde_chatgpt.py
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
       - name: Verificar cambios
         id: git-check
         run: |
