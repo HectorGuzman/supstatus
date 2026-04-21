@@ -6,6 +6,24 @@
     "lng": -71.365225
   },
   {
+    "id": "skate_park_coquimbo",
+    "nombre": "Skatepark 465 - Coquimbo",
+    "lat": -29.956647,
+    "lng": -71.309344
+  }, 
+  {
+    "id": "guanaqueros",
+    "nombre": "Guanaqueros",
+    "lat": -30.188132,
+    "lng": -71.425521
+  },
+  {
+    "id": "tongoy",
+    "nombre": "Tongoy",
+    "lat": -30.252165,
+    "lng": -71.491705
+  },
+  {
     "id": "vina",
     "nombre": "Viña del Mar",
     "lat": -33.0243,
