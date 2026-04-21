@@ -1,10 +1,14 @@
-
-name: Generar data.json diaria
+name: Generar data de spots
 
 on:
   schedule:
-    - cron: '0 7 * * *'  # todos los días a 3 o 4 de la mañana horario Chileno  
+    - cron: '0 7 * * *'  # 3-4 AM hora Chile
   workflow_dispatch:
+    inputs:
+      spot:
+        description: 'ID del spot a regenerar (vacío = todos)'
+        required: false
+        default: ''
 
 jobs:
   build:
@@ -18,7 +22,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
+
       - name: Instalar dependencias
         run: pip install openai requests pytz
 
@@ -28,28 +32,30 @@ jobs:
           git config user.email "github-actions@users.noreply.github.com"
           git pull origin main --rebase
 
-      - name: Ejecutar script de generación
+      - name: Generar data (todos los spots)
+        if: ${{ github.event.inputs.spot == '' }}
         run: python obtener_desde_chatgpt.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          WORLDTIDES_API_KEY: ${{ secrets.WORLDTIDES_API_KEY }}
-          
-      - name: Verificar si hubo cambios en data.json
+
+      - name: Generar data (spot específico)
+        if: ${{ github.event.inputs.spot != '' }}
+        run: python obtener_desde_chatgpt.py --spot ${{ github.event.inputs.spot }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Verificar cambios
         id: git-check
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git add data.json
+          git add data-*.json
           if git diff --cached --quiet; then
-            echo "No hay cambios en data.json"
             echo "skip_commit=true" >> $GITHUB_ENV
           else
-            echo "Cambios detectados"
             echo "skip_commit=false" >> $GITHUB_ENV
           fi
 
-      - name: Commit y push si hay cambios
+      - name: Commit y push
         if: env.skip_commit == 'false'
         run: |
-          git commit -m "🔄 Actualización diaria de data.json"
+          git commit -m "🔄 Actualización diaria de spots"
           git push

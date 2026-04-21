@@ -6,6 +6,7 @@ import { ensureFirebase } from './config/firebase.js';
 import profileRouter from './routes/profile.js';
 import storiesRouter from './routes/stories.js';
 import sessionsRouter from './routes/sessions.js';
+import usersRouter from './routes/users.js';
 
 ensureFirebase();
 
@@ -33,5 +34,6 @@ app.get('/v1/ping', (_req, res) => {
 app.use('/v1/profile', profileRouter);
 app.use('/v1/stories', storiesRouter);
 app.use('/v1/sessions', sessionsRouter);
+app.use('/v1/users', usersRouter);
 
 export default app;

@@ -1,0 +1,78 @@
+{
+  "expo": {
+    "name": "SUP Status",
+    "slug": "sup-status",
+    "version": "1.0.0",
+    "scheme": "supstatus",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#040e1e"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.supvision.app",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.858880938649-n2f6birup74e0ifbj2ukbfq6f9ufh4rh"
+            ]
+          }
+        ],
+        "NSLocationWhenInUseUsageDescription": "Necesitamos tu ubicación para el seguimiento GPS de tus sesiones.",
+        "NSLocationAlwaysUsageDescription": "Necesitamos tu ubicación para el seguimiento GPS de tus sesiones.",
+        "NSPhotoLibraryUsageDescription": "Para subir fotos a tus historias.",
+        "NSCameraUsageDescription": "Para tomar fotos para tus historias.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.supvision.app",
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#040e1e"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [{ "scheme": "com.googleusercontent.apps.858880938649-kbs4juqljh9rpr3iat6mn8e1qmpd0v08" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Necesitamos tu ubicación para el seguimiento GPS de tus sesiones."
+        }
+      ],
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "56126d1c-c127-4db5-bae1-273607526e02"
+      }
+    },
+    "owner": "supstatus"
+  }
+}

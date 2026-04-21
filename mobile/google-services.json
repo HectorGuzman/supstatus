@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "858880938649",
+    "project_id": "supstatus-c1ab5",
+    "storage_bucket": "supstatus-c1ab5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:858880938649:android:dd8c1e33d075753bac1e08",
+        "android_client_info": {
+          "package_name": "com.supvision.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "858880938649-kbs4juqljh9rpr3iat6mn8e1qmpd0v08.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.supvision.app",
+            "certificate_hash": "53b87bf9a32d7913f9940ec82d3a223895b5331f"
+          }
+        },
+        {
+          "client_id": "858880938649-utqitsb4jilha33u7146enc6kk57uudh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzitRTMn0agZgtrjMhrpr1SiZ6jsCf600"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "858880938649-utqitsb4jilha33u7146enc6kk57uudh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "858880938649-n2f6birup74e0ifbj2ukbfq6f9ufh4rh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.supvision.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

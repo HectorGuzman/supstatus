@@ -33,10 +33,20 @@ export interface StoryRecord {
   status: StoryStatus;
   featured: boolean;
   likes: number;
+  commentCount: number;
   publishedAt: string | null;
   createdAt: string | null;
   updatedAt: string | null;
   liked?: boolean;
+}
+
+export interface CommentRecord {
+  id: string;
+  authorUid: string;
+  authorName?: string;
+  authorAvatar?: string;
+  text: string;
+  createdAt: string | null;
 }
 
 interface AuthorMeta {
@@ -73,6 +83,7 @@ function serializeStoryDoc(doc: DocumentSnapshot, currentUid?: string | null): S
     status: (data.status as StoryStatus) || 'pending',
     featured: Boolean(data.featured),
     likes,
+    commentCount: typeof data.commentCount === 'number' ? data.commentCount : 0,
     publishedAt: toISOString(data.publishedAt),
     createdAt: toISOString(data.createdAt),
     updatedAt: toISOString(data.updatedAt),
@@ -170,16 +181,29 @@ export async function listUserStories(uid: string, limit = 10) {
   }
 }
 
-export async function listPublishedStories(limit = 20, currentUid?: string | null) {
-  const snapshot = await storiesCollection
+export async function listPublishedStories(limit = 20, currentUid?: string | null, afterDocId?: string | null) {
+  let query = storiesCollection
     .where('status', '==', 'published')
     .orderBy('publishedAt', 'desc')
-    .limit(limit)
-    .get();
+    .limit(limit + 1);
 
-  return snapshot.docs
+  if (afterDocId) {
+    const cursorDoc = await storiesCollection.doc(afterDocId).get();
+    if (cursorDoc.exists) {
+      query = query.startAfter(cursorDoc) as typeof query;
+    }
+  }
+
+  const snapshot = await query.get();
+  const hasMore = snapshot.docs.length > limit;
+  const docs = snapshot.docs.slice(0, limit);
+  const nextCursor = hasMore ? docs[docs.length - 1].id : null;
+
+  const stories = docs
     .map((doc) => serializeStoryDoc(doc, currentUid))
     .filter((story): story is StoryRecord => story !== null);
+
+  return { stories, nextCursor, hasMore };
 }
 
 export async function listAllStories(status?: StoryStatus) {
@@ -242,6 +266,76 @@ export async function deleteStoryAdmin(storyId: string) {
     return { removed: false, reason: 'NOT_FOUND' as const };
   }
   await docRef.delete();
+  return { removed: true as const };
+}
+
+export async function listComments(storyId: string, limit = 50): Promise<CommentRecord[]> {
+  const snapshot = await storiesCollection
+    .doc(storyId)
+    .collection('comments')
+    .orderBy('createdAt', 'asc')
+    .limit(limit)
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      authorUid: data.authorUid,
+      authorName: data.authorName,
+      authorAvatar: data.authorAvatar,
+      text: data.text,
+      createdAt: toISOString(data.createdAt),
+    };
+  });
+}
+
+export async function addComment(storyId: string, uid: string, authorName: string, text: string, authorAvatar?: string): Promise<CommentRecord> {
+  const storyRef = storiesCollection.doc(storyId);
+  const storySnap = await storyRef.get();
+  if (!storySnap.exists) throw new Error('NOT_FOUND');
+
+  const commentRef = storyRef.collection('comments').doc();
+  const now = admin.firestore.FieldValue.serverTimestamp();
+
+  await commentRef.set({
+    authorUid: uid,
+    authorName: authorName || null,
+    authorAvatar: authorAvatar || null,
+    text: text.trim(),
+    createdAt: now,
+  });
+
+  await storyRef.set(
+    { commentCount: admin.firestore.FieldValue.increment(1), updatedAt: now },
+    { merge: true },
+  );
+
+  const snap = await commentRef.get();
+  const data = snap.data()!;
+  return {
+    id: snap.id,
+    authorUid: data.authorUid,
+    authorName: data.authorName,
+    authorAvatar: data.authorAvatar,
+    text: data.text,
+    createdAt: toISOString(data.createdAt),
+  };
+}
+
+export async function deleteComment(storyId: string, commentId: string, uid: string) {
+  const storyRef = storiesCollection.doc(storyId);
+  const commentRef = storyRef.collection('comments').doc(commentId);
+  const snap = await commentRef.get();
+  if (!snap.exists) return { removed: false, reason: 'NOT_FOUND' as const };
+  const data = snap.data()!;
+  if (data.authorUid !== uid) return { removed: false, reason: 'FORBIDDEN' as const };
+
+  await commentRef.delete();
+  const now = admin.firestore.FieldValue.serverTimestamp();
+  await storyRef.set(
+    { commentCount: admin.firestore.FieldValue.increment(-1), updatedAt: now },
+    { merge: true },
+  );
   return { removed: true as const };
 }
 

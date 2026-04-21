@@ -1,0 +1,237 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#091d33"/>
+      <stop offset="100%" stop-color="#020b17"/>
+    </radialGradient>
+    <radialGradient id="compassBg" cx="50%" cy="58%" r="65%">
+      <stop offset="0%" stop-color="#0b2642"/>
+      <stop offset="100%" stop-color="#040f1c"/>
+    </radialGradient>
+    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="30%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="shaftGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0c3d6b"/>
+      <stop offset="50%" stop-color="#5db8e8"/>
+      <stop offset="100%" stop-color="#0c3d6b"/>
+    </linearGradient>
+    <linearGradient id="gripGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0a3258"/>
+      <stop offset="50%" stop-color="#1e6fa8"/>
+      <stop offset="100%" stop-color="#0a3258"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="supGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7dd3fc"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0c4a7a" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#042040"/>
+    </linearGradient>
+    <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#7dd3fc" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.3"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="bladeGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="26" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="ringGlow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="9" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="compassClip">
+      <circle cx="512" cy="440" r="264"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="218" fill="url(#bg)"/>
+
+  <!-- Ambient outer glow -->
+  <circle cx="512" cy="512" r="320" fill="rgba(14,165,233,0.05)" filter="url(#bladeGlow)"/>
+  <!-- Shift all compass content to true center (512,512) instead of (512,440) -->
+  <g transform="translate(0, 72)">
+
+  <!-- Compass face -->
+  <circle cx="512" cy="440" r="264" fill="url(#compassBg)"/>
+
+  <!-- 8-point compass rose star (subtle background decoration) -->
+  <g clip-path="url(#compassClip)" opacity="0.055" fill="#38bdf8">
+    <path d="M 512 176 L 527 436 L 512 704 L 497 436 Z"/>
+    <path d="M 248 440 L 508 425 L 776 440 L 508 455 Z"/>
+    <path d="M 327 257 L 516 441 L 697 623 L 508 439 Z"/>
+    <path d="M 697 257 L 508 441 L 327 623 L 516 439 Z"/>
+  </g>
+
+  <!-- Water in lower half of compass -->
+  <path d="M 248 440
+           C 318 395 412 488 512 440
+           C 612 392 706 488 776 440
+           L 776 704 L 248 704 Z"
+        fill="url(#waterGrad)" clip-path="url(#compassClip)"/>
+
+  <!-- Water shimmer lines -->
+  <g clip-path="url(#compassClip)" opacity="0.13">
+    <line x1="286" y1="487" x2="438" y2="487" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="302" y1="524" x2="490" y2="524" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="554" y1="492" x2="712" y2="492" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="538" y1="528" x2="702" y2="528" stroke="#7dd3fc" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="294" y1="567" x2="464" y2="567" stroke="#7dd3fc" stroke-width="1" stroke-linecap="round"/>
+    <line x1="556" y1="571" x2="716" y2="571" stroke="#7dd3fc" stroke-width="1" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wave line -->
+  <path d="M 248 440 C 318 395 412 488 512 440 C 612 392 706 488 776 440"
+        stroke="url(#waveGrad)" stroke-width="4" fill="none" stroke-linecap="round"
+        clip-path="url(#compassClip)"/>
+  <path d="M 248 440 C 318 395 412 488 512 440 C 612 392 706 488 776 440"
+        stroke="#38bdf8" stroke-width="18" fill="none" opacity="0.11"
+        clip-path="url(#compassClip)" filter="url(#glow)"/>
+
+  <!-- Tick marks around compass (at 15° intervals) -->
+  <g transform="translate(512, 440)">
+    <!-- 0° N — major -->
+    <line x1="0" y1="-244" x2="0" y2="-260" stroke="#7dd3fc" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- 15° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(15)"/>
+    <!-- 30° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(30)"/>
+    <!-- 45° NE — semi-major -->
+    <line x1="0" y1="-248" x2="0" y2="-260" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" transform="rotate(45)"/>
+    <!-- 60° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(60)"/>
+    <!-- 75° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(75)"/>
+    <!-- 90° E — major -->
+    <line x1="0" y1="-244" x2="0" y2="-260" stroke="#7dd3fc" stroke-width="3.5" stroke-linecap="round" transform="rotate(90)"/>
+    <!-- 105° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(105)"/>
+    <!-- 120° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(120)"/>
+    <!-- 135° SE — semi-major -->
+    <line x1="0" y1="-248" x2="0" y2="-260" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" transform="rotate(135)"/>
+    <!-- 150° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(150)"/>
+    <!-- 165° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(165)"/>
+    <!-- 180° S — major -->
+    <line x1="0" y1="-244" x2="0" y2="-260" stroke="#7dd3fc" stroke-width="3.5" stroke-linecap="round" transform="rotate(180)"/>
+    <!-- 195° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(195)"/>
+    <!-- 210° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(210)"/>
+    <!-- 225° SO — semi-major -->
+    <line x1="0" y1="-248" x2="0" y2="-260" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" transform="rotate(225)"/>
+    <!-- 240° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(240)"/>
+    <!-- 255° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(255)"/>
+    <!-- 270° O — major -->
+    <line x1="0" y1="-244" x2="0" y2="-260" stroke="#7dd3fc" stroke-width="3.5" stroke-linecap="round" transform="rotate(270)"/>
+    <!-- 285° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(285)"/>
+    <!-- 300° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(300)"/>
+    <!-- 315° NO — semi-major -->
+    <line x1="0" y1="-248" x2="0" y2="-260" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" transform="rotate(315)"/>
+    <!-- 330° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(330)"/>
+    <!-- 345° minor -->
+    <line x1="0" y1="-252" x2="0" y2="-260" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" transform="rotate(345)"/>
+  </g>
+
+  <!-- Cardinal labels — placed on compass face at R≈215 from center -->
+  <!-- N (512, 440-215=225) — bright, primary color -->
+  <text x="512" y="234" text-anchor="middle"
+        font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif"
+        font-size="30" font-weight="800" fill="#38bdf8" opacity="0.95">N</text>
+  <!-- E (512+215=727, 440) -->
+  <text x="728" y="449" text-anchor="middle"
+        font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif"
+        font-size="26" font-weight="700" fill="#7dd3fc" opacity="0.6">E</text>
+  <!-- S (512, 440+215=655) -->
+  <text x="512" y="664" text-anchor="middle"
+        font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif"
+        font-size="26" font-weight="700" fill="#7dd3fc" opacity="0.6">S</text>
+  <!-- O (512-215=297, 440) -->
+  <text x="296" y="449" text-anchor="middle"
+        font-family="'SF Pro Display','Helvetica Neue',Arial,sans-serif"
+        font-size="26" font-weight="700" fill="#7dd3fc" opacity="0.6">O</text>
+
+  <!-- ── PADDLE NEEDLE (tilted -12° for dynamic feel) ── -->
+  <g transform="translate(512, 440) rotate(-12)">
+
+    <!-- Blade ambient glow -->
+    <ellipse cx="0" cy="-222" rx="40" ry="62" fill="#38bdf8" opacity="0.1" filter="url(#bladeGlow)"/>
+
+    <!-- Paddle blade — teardrop pointing up (North end) -->
+    <path d="M 0 -292
+             C 28 -268 40 -234 40 -210
+             C 40 -185 22 -172 0 -172
+             C -22 -172 -40 -185 -40 -210
+             C -40 -234 -28 -268 0 -292 Z"
+          fill="url(#bladeGrad)" opacity="0.96"/>
+
+    <!-- Blade highlight (left edge) -->
+    <path d="M -14 -284 C -28 -262 -32 -232 -28 -210"
+          stroke="rgba(255,255,255,0.42)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+    <!-- Blade center spine -->
+    <line x1="0" y1="-289" x2="0" y2="-174"
+          stroke="rgba(255,255,255,0.16)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Paddle shaft -->
+    <rect x="-7" y="-172" width="14" height="398" rx="7" fill="url(#shaftGrad)"/>
+
+    <!-- Shaft highlight -->
+    <rect x="-4" y="-170" width="3.5" height="392" rx="2" fill="rgba(255,255,255,0.13)"/>
+
+    <!-- T-grip (South end of paddle) -->
+    <!-- Vertical grip nub -->
+    <rect x="-8" y="202" width="16" height="30" rx="7" fill="url(#shaftGrad)"/>
+    <!-- Horizontal bar -->
+    <rect x="-32" y="213" width="64" height="16" rx="8" fill="url(#gripGrad)"/>
+    <!-- Bar highlight -->
+    <rect x="-30" y="213" width="28" height="16" rx="7" fill="rgba(93,184,232,0.38)"/>
+    <!-- End dot glow -->
+    <ellipse cx="0" cy="232" rx="11" ry="9" fill="rgba(56,189,248,0.35)"/>
+
+  </g>
+
+  <!-- ── CENTER MEDALLION ── -->
+  <!-- Outer ring -->
+  <circle cx="512" cy="440" r="26" fill="#061826" stroke="#38bdf8" stroke-width="2.5"/>
+  <!-- Inner fill hint -->
+  <circle cx="512" cy="440" r="26" fill="rgba(56,189,248,0.07)"/>
+  <!-- Center dot -->
+  <circle cx="512" cy="440" r="9" fill="#38bdf8"/>
+  <!-- Inner ring accent -->
+  <circle cx="512" cy="440" r="16" fill="transparent" stroke="rgba(125,211,252,0.45)" stroke-width="1.5"/>
+  <!-- Center glow -->
+  <circle cx="512" cy="440" r="14" fill="rgba(56,189,248,0.25)" filter="url(#glow)"/>
+
+  <!-- Compass ring glow -->
+  <circle cx="512" cy="440" r="270" stroke="#0ea5e9" stroke-width="26"
+          fill="none" opacity="0.16" filter="url(#ringGlow)"/>
+
+  <!-- Compass ring border (drawn on top — frames the needle) -->
+  <circle cx="512" cy="440" r="268" stroke="url(#ringGrad)" stroke-width="5.5" fill="none"/>
+  <!-- Inner rim line -->
+  <circle cx="512" cy="440" r="262" stroke="rgba(125,211,252,0.16)" stroke-width="1.5" fill="none"/>
+
+  </g><!-- end center-shift group -->
+</svg>

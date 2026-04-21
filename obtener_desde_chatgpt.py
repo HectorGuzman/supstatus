@@ -1,113 +1,90 @@
+"""
+Genera data-{id}.json para cada spot definido en spots-config.json.
+Usa Open-Meteo (viento + oleaje) y OpenAI para interpretar las condiciones.
+
+Uso:
+  OPENAI_API_KEY=xxx python obtener_desde_chatgpt.py
+  OPENAI_API_KEY=xxx python obtener_desde_chatgpt.py --spot herradura
+"""
+
 import openai
 import json
-from datetime import datetime, timedelta, timezone
+import sys
 import os
 import requests
 import pytz
+from datetime import datetime, timedelta
 
-# Coordenadas de La Herradura (Club de Yates)
-LAT = -29.983059
-LON = -71.365225
+HORAS_OBJETIVO = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
+ZONA_CHILE = pytz.timezone("America/Santiago")
 
-# Función para convertir grados a dirección cardinal
+
 def direccion_cardinal(grados):
-    direcciones = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste']
-    idx = int((grados + 22.5) % 360 / 45)
-    return direcciones[idx]
+    dirs = ['Norte', 'Noreste', 'Este', 'Sureste', 'Sur', 'Suroeste', 'Oeste', 'Noroeste']
+    return dirs[int((grados + 22.5) % 360 / 45)]
 
-# Obtener datos marinos desde Open-Meteo (oleaje y temperatura del agua)
-print("📡 Consultando Open-Meteo (marine)...")
-marine_url = (
-    f"https://marine-api.open-meteo.com/v1/marine?latitude={LAT}&longitude={LON}"
-    f"&hourly=wave_height,wave_direction"
-    f"&timezone=auto"
-)
-response_marine = requests.get(marine_url)
-data_marine = response_marine.json()
 
-# Obtener datos atmosféricos desde Open-Meteo (viento, temperatura ambiente)
-print("🌬️ Consultando Open-Meteo (forecast)...")
-forecast_url = (
-    f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
-    f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m"
-    f"&timezone=auto"
-)
-response_forecast = requests.get(forecast_url)
-print("🔎 Respuesta Open-Meteo (forecast):", response_forecast.text)
-data_forecast = response_forecast.json()
+def obtener_datos_openmeteo(lat, lon):
+    hoy = datetime.now().date().isoformat()
+    manana = (datetime.now().date() + timedelta(days=1)).isoformat()
 
-# Validar respuestas
-print("🔎 Respuesta Open-Meteo (marine):", json.dumps(data_marine, indent=2))
-if "hourly" not in data_marine:
-    raise ValueError("❌ Open-Meteo (marine) no devolvió datos 'hourly'.")
-if "hourly" not in data_forecast:
-    raise ValueError("❌ Open-Meteo (forecast) no devolvió datos 'hourly'.")
+    print(f"  📡 Open-Meteo marine ({lat}, {lon})...")
+    r_marine = requests.get(
+        f"https://marine-api.open-meteo.com/v1/marine"
+        f"?latitude={lat}&longitude={lon}"
+        f"&hourly=wave_height,wave_direction&timezone=auto&forecast_days=2",
+        timeout=15
+    )
+    data_marine = r_marine.json()
 
-# Filtrar solo las horas relevantes (06:00 a 21:00 cada 3h)
-horas_objetivo = ["06:00", "09:00", "12:00", "15:00", "18:00", "21:00"]
-hoy = datetime.now().date().isoformat()
-manana = (datetime.now().date() + timedelta(days=1)).isoformat()
+    print(f"  🌬️ Open-Meteo forecast ({lat}, {lon})...")
+    r_forecast = requests.get(
+        f"https://api.open-meteo.com/v1/forecast"
+        f"?latitude={lat}&longitude={lon}"
+        f"&hourly=wind_speed_10m,wind_direction_10m,temperature_2m&timezone=auto&forecast_days=2",
+        timeout=15
+    )
+    data_forecast = r_forecast.json()
 
-horarios = {"hoy": [], "mañana": []}
+    if "hourly" not in data_marine:
+        raise ValueError(f"Open-Meteo marine sin datos: {data_marine.get('reason', 'sin razón')}")
+    if "hourly" not in data_forecast:
+        raise ValueError(f"Open-Meteo forecast sin datos: {data_forecast.get('reason', 'sin razón')}")
 
-for i, fecha in enumerate([hoy, manana]):
-    bloques = []
-    for hora in horas_objetivo:
-        timestamp = f"{fecha}T{hora}"
-        if timestamp in data_forecast["hourly"]["time"] and timestamp in data_marine["hourly"]["time"]:
-            idx_f = data_forecast["hourly"]["time"].index(timestamp)
-            idx_m = data_marine["hourly"]["time"].index(timestamp)
-            dir_oleaje_grados = int(data_marine['hourly']['wave_direction'][idx_m])
-            dir_viento_grados = int(data_forecast['hourly']['wind_direction_10m'][idx_f])
-            bloque = {
+    horarios = {"hoy": [], "mañana": []}
+    for i, fecha in enumerate([hoy, manana]):
+        for hora in HORAS_OBJETIVO:
+            ts = f"{fecha}T{hora}"
+            times_f = data_forecast["hourly"]["time"]
+            times_m = data_marine["hourly"]["time"]
+            if ts not in times_f or ts not in times_m:
+                continue
+            idx_f = times_f.index(ts)
+            idx_m = times_m.index(ts)
+            dir_viento = int(data_forecast["hourly"]["wind_direction_10m"][idx_f] or 0)
+            dir_oleaje = int(data_marine["hourly"]["wave_direction"][idx_m] or 0)
+            horarios["hoy" if i == 0 else "mañana"].append({
                 "hora": hora,
                 "viento": f"{data_forecast['hourly']['wind_speed_10m'][idx_f]} km/h",
                 "oleaje": f"{data_marine['hourly']['wave_height'][idx_m]} m",
-                "direccionOleaje": direccion_cardinal(dir_oleaje_grados),
+                "direccionOleaje": direccion_cardinal(dir_oleaje),
                 "temperatura": f"{data_forecast['hourly']['temperature_2m'][idx_f]}°C",
-                "direccionViento": direccion_cardinal(dir_viento_grados),
-                "direccionVientoGrados": dir_viento_grados
-            }
-            bloques.append(bloque)
-    horarios["hoy" if i == 0 else "mañana"] = bloques
+                "direccionViento": direccion_cardinal(dir_viento),
+                "direccionVientoGrados": dir_viento,
+            })
 
-# Obtener mareas desde WorldTides (requiere API key)
-print("🌊 Consultando WorldTides...")
-WT_API_KEY = os.environ.get("WORLDTIDES_API_KEY")
-if not WT_API_KEY:
-    raise ValueError("❌ WORLDTIDES_API_KEY no está definido en el entorno.")
+    return horarios
 
-worldtides_url = f"https://www.worldtides.info/api/v2?extremes&lat={LAT}&lon={LON}&days=2&key={WT_API_KEY}"
-response_mareas = requests.get(worldtides_url)
-mareas_data = response_mareas.json()
 
-# Agrupar próximas mareas (máximo 6 eventos)
-mareas_proximas = []
-for m in mareas_data.get("extremes", [])[:6]:
-    tipo = "alta" if m["type"].lower() == "high" else "baja"
-    fecha_evento = datetime.fromisoformat(m["date"].replace("+0000", ""))
-    hora = fecha_evento.strftime("%H:%M")
-    mareas_proximas.append({"tipo": tipo, "hora": hora})
+def generar_con_openai(spot, horarios, fecha_generacion, api_key):
+    clima_ctx = json.dumps(horarios, indent=2, ensure_ascii=False)
+    prompt = f"""
+Actúa como un asistente experto en SUP (stand up paddle) para {spot['nombre']}, Chile.
+Tienes datos REALES de clima horario extraídos de Open-Meteo:
 
-# Fecha de generación con hora local de Chile
-zona_chile = pytz.timezone("America/Santiago")
-fecha_generacion = datetime.now(zona_chile).strftime("%Y-%m-%d %H:%M:%S")
+{clima_ctx}
 
-# Preparar prompt para OpenAI
-clima_contexto = json.dumps(horarios, indent=2, ensure_ascii=False)
-marea_contexto = json.dumps(mareas_proximas, indent=2, ensure_ascii=False)
-
-prompt = f"""
-Actúa como un asistente experto en SUP (stand up paddle) para La Herradura, Coquimbo.
-A continuación tienes datos REALES de clima y condiciones horarias extraídas de Open-Meteo, y horarios reales de mareas desde WorldTides:
-
-CLIMA:
-{clima_contexto}
-
-PRÓXIMAS MAREAS:
-{marea_contexto}
-
-Usando exclusivamente esta información como base, genera un JSON estructurado como este ejemplo:
+Genera un JSON con esta estructura exacta:
 
 {{
   "hoy": [
@@ -124,50 +101,93 @@ Usando exclusivamente esta información como base, genera un JSON estructurado c
     }}
   ],
   "mañana": [...],
-  "mareas": [
-    {{"tipo": "alta", "hora": "03:00"}},
-    {{"tipo": "baja", "hora": "09:00"}}
-  ],
+  "mareas": [],
   "generado": "{fecha_generacion}"
 }}
 
 Reglas:
-- Responde únicamente con JSON válido.
-- Las condiciones deben ser coherentes con los datos reales (viento, temperatura, oleaje solo como apoyo).
-- Cada bloque horario debe incluir SIEMPRE: viento, dirección del viento (en palabras y en grados), oleaje, dirección del oleaje (en palabras), temperatura, condiciones y nivel.
-- Las "condiciones" deben ser una frase útil para el usuario sobre si es un buen momento para hacer SUP y por qué.
-- Asigna "nivel" de SUP **solo en base al viento**:
-  - Principiante: ≤ 8 km/h
-  - Intermedio: entre 9 y 15 km/h
-  - Avanzado: > 15 km/h
-- No repitas descripciones entre bloques horarios.
-- La clave "mareas" debe ser una lista con las próximas 4 a 6 mareas (alta y baja).
-- Agrega la clave "generado" con exactamente este valor: "{fecha_generacion}"
+- Responde ÚNICAMENTE con JSON válido, sin texto adicional.
+- Conserva exactamente los valores de viento, oleaje, temperatura y direcciones del input.
+- "condiciones": frase útil sobre si es buen momento para SUP en {spot['nombre']} y por qué.
+- "nivel" basado SOLO en velocidad del viento:
+    Principiante: ≤ 8 km/h
+    Intermedio: 9–15 km/h
+    Avanzado: > 15 km/h
+- "mareas" debe ser siempre un array vacío [].
+- No repitas frases de condiciones entre bloques.
+- "generado" debe ser exactamente: "{fecha_generacion}"
 """
 
-print("🤖 Generando JSON con interpretación desde ChatGPT...")
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("❌ OPENAI_API_KEY no está definido en el entorno.")
-
-client = openai.OpenAI(api_key=api_key)
-response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "Eres un asistente que responde solo con JSON válido."},
-        {"role": "user", "content": prompt}
-    ],
-    temperature=0.4,
-    max_tokens=2000
-)
-
-# Guardar respuesta final
-try:
+    client = openai.OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "Responde solo con JSON válido."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.4,
+        max_tokens=2000
+    )
     content = response.choices[0].message.content.strip()
-    parsed = json.loads(content)
-    with open("data.json", "w", encoding="utf-8") as f:
-        json.dump(parsed, f, indent=2, ensure_ascii=False)
-    print("✅ Archivo data.json generado exitosamente con datos reales e interpretación.")
-except Exception as e:
-    print("❌ Error al guardar el JSON:", e)
-    print("Respuesta cruda:", response.choices[0].message.content)
+    # Quitar bloques ```json si los hay
+    if content.startswith("```"):
+        content = content.split("```")[1]
+        if content.startswith("json"):
+            content = content[4:]
+    return json.loads(content.strip())
+
+
+def procesar_spot(spot, api_key, fecha_generacion):
+    print(f"\n🏄 Procesando: {spot['nombre']} ({spot['id']})")
+    try:
+        horarios = obtener_datos_openmeteo(spot["lat"], spot["lng"])
+        print(f"  🤖 Generando interpretación con OpenAI...")
+        data = generar_con_openai(spot, horarios, fecha_generacion, api_key)
+        # Aseguramos que mareas sea array vacío si no viene
+        data.setdefault("mareas", [])
+        filename = f"data-{spot['id']}.json"
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        print(f"  ✅ Guardado: {filename}")
+        return True
+    except Exception as e:
+        print(f"  ❌ Error: {e}")
+        return False
+
+
+def main():
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY no está definida.")
+
+    with open("spots-config.json", encoding="utf-8") as f:
+        spots = json.load(f)
+
+    # Filtro opcional por --spot id
+    filtro = None
+    if "--spot" in sys.argv:
+        idx = sys.argv.index("--spot")
+        filtro = sys.argv[idx + 1] if idx + 1 < len(sys.argv) else None
+
+    if filtro:
+        spots = [s for s in spots if s["id"] == filtro]
+        if not spots:
+            print(f"❌ Spot '{filtro}' no encontrado en spots-config.json")
+            sys.exit(1)
+
+    fecha_generacion = datetime.now(ZONA_CHILE).strftime("%Y-%m-%d %H:%M:%S")
+    print(f"🗓  Fecha: {fecha_generacion} | {len(spots)} spot(s) a procesar")
+
+    resultados = {s["id"]: procesar_spot(s, api_key, fecha_generacion) for s in spots}
+
+    ok = sum(resultados.values())
+    print(f"\n{'='*50}")
+    print(f"Resultado: {ok}/{len(spots)} spots generados correctamente")
+    if ok < len(spots):
+        fallidos = [k for k, v in resultados.items() if not v]
+        print(f"Fallidos: {', '.join(fallidos)}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

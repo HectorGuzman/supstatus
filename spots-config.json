@@ -1,0 +1,38 @@
+[
+  {
+    "id": "herradura",
+    "nombre": "La Herradura",
+    "lat": -29.983059,
+    "lng": -71.365225
+  },
+  {
+    "id": "vina",
+    "nombre": "Viña del Mar",
+    "lat": -33.0243,
+    "lng": -71.5516
+  },
+  {
+    "id": "pichilemu",
+    "nombre": "Pichilemu",
+    "lat": -34.3869,
+    "lng": -72.0045
+  },
+  {
+    "id": "iquique",
+    "nombre": "Iquique",
+    "lat": -20.2133,
+    "lng": -70.1503
+  },
+  {
+    "id": "bahia_inglesa",
+    "nombre": "Bahía Inglesa",
+    "lat": -27.1058,
+    "lng": -70.8571
+  },
+  {
+    "id": "arica",
+    "nombre": "Arica",
+    "lat": -18.4783,
+    "lng": -70.3126
+  }
+]

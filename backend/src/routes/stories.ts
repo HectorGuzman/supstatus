@@ -13,6 +13,9 @@ import {
   listUserStories,
   toggleStoryLike,
   updateStoryAdmin,
+  listComments,
+  addComment,
+  deleteComment,
   type StoryPayload,
   type StoryStatus,
 } from '../services/stories.js';
@@ -47,8 +50,10 @@ function isAdmin(decoded?: DecodedIdToken | null) {
 router.get('/', async (req: Request, res: Response) => {
   try {
     const decoded = await decodeOptionalAuth(req);
-    const stories = await listPublishedStories(20, decoded?.uid || null);
-    res.json({ stories });
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 20, 1), 50);
+    const after = typeof req.query.after === 'string' && req.query.after ? req.query.after : null;
+    const result = await listPublishedStories(limit, decoded?.uid || null, after);
+    res.json(result);
   } catch (error) {
     console.error('[stories] error listing published stories', error);
     res.status(500).json({ error: 'No se pudieron cargar las historias.' });
@@ -193,6 +198,55 @@ router.delete('/:storyId', authenticate, async (req: Request, res: Response) => 
   } catch (error) {
     console.error('[stories] admin delete error', error);
     res.status(500).json({ error: 'No se pudo eliminar la historia.' });
+  }
+});
+
+router.get('/:storyId/comments', async (req: Request, res: Response) => {
+  const { storyId } = req.params;
+  try {
+    const comments = await listComments(storyId);
+    res.json({ comments });
+  } catch (error) {
+    console.error('[stories] error listing comments', error);
+    res.status(500).json({ error: 'No se pudieron cargar los comentarios.' });
+  }
+});
+
+router.post('/:storyId/comments', authenticate, async (req: Request, res: Response) => {
+  const decoded = decodedFromReq(req);
+  if (!decoded?.uid) return res.status(400).json({ error: 'UID no disponible.' });
+  const { storyId } = req.params;
+  const text = typeof req.body?.text === 'string' ? req.body.text.trim() : '';
+  if (!text.length) return res.status(400).json({ error: 'El comentario no puede estar vacío.' });
+  if (text.length > 500) return res.status(400).json({ error: 'Comentario demasiado largo (máx 500 caracteres).' });
+  try {
+    const authorName = decoded.name || decoded.email?.split('@')[0] || 'Usuario';
+    const authorAvatar = typeof decoded.picture === 'string' ? decoded.picture : undefined;
+    const comment = await addComment(storyId, decoded.uid, authorName, text, authorAvatar);
+    res.json({ comment });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'NOT_FOUND') {
+      return res.status(404).json({ error: 'Historia no encontrada.' });
+    }
+    console.error('[stories] error adding comment', error);
+    res.status(500).json({ error: 'No se pudo agregar el comentario.' });
+  }
+});
+
+router.delete('/:storyId/comments/:commentId', authenticate, async (req: Request, res: Response) => {
+  const decoded = decodedFromReq(req);
+  if (!decoded?.uid) return res.status(400).json({ error: 'UID no disponible.' });
+  const { storyId, commentId } = req.params;
+  try {
+    const result = await deleteComment(storyId, commentId, decoded.uid);
+    if (!result.removed) {
+      if (result.reason === 'NOT_FOUND') return res.status(404).json({ error: 'Comentario no encontrado.' });
+      if (result.reason === 'FORBIDDEN') return res.status(403).json({ error: 'No puedes eliminar este comentario.' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[stories] error deleting comment', error);
+    res.status(500).json({ error: 'No se pudo eliminar el comentario.' });
   }
 });
 
