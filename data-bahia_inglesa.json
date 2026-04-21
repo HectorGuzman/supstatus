@@ -9,7 +9,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 217,
       "nivel": "Principiante",
-      "condiciones": "El viento es muy suave, pero el oleaje puede ser un desafío para principiantes."
+      "condiciones": "El viento es muy bajo, pero el oleaje puede ser desafiante para principiantes."
     },
     {
       "hora": "09:00",
@@ -20,7 +20,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 180,
       "nivel": "Principiante",
-      "condiciones": "Condiciones moderadas, ideal para quienes están iniciando en el SUP."
+      "condiciones": "Condiciones suaves, pero el oleaje sigue siendo alto, ideal para quienes buscan un reto."
     },
     {
       "hora": "12:00",
@@ -31,7 +31,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 233,
       "nivel": "Intermedio",
-      "condiciones": "El viento comienza a aumentar, lo que puede ser divertido para intermedios."
+      "condiciones": "Condiciones más favorables para intermedios, con viento moderado y oleaje manejable."
     },
     {
       "hora": "15:00",
@@ -42,7 +42,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 213,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones desafiantes, recomendadas solo para paddlers avanzados."
+      "condiciones": "El viento es fuerte, perfecto para paddlers avanzados que buscan adrenalina."
     },
     {
       "hora": "18:00",
@@ -53,7 +53,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 203,
       "nivel": "Avanzado",
-      "condiciones": "El viento fuerte y el oleaje hacen que sea adecuado solo para expertos."
+      "condiciones": "Condiciones desafiantes, solo para paddlers experimentados debido al viento fuerte."
     },
     {
       "hora": "21:00",
@@ -64,7 +64,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 194,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones muy complicadas, solo para los más experimentados."
+      "condiciones": "El viento sigue fuerte, ideal para quienes buscan un desafío nocturno."
     }
   ],
   "mañana": [
@@ -77,7 +77,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 180,
       "nivel": "Principiante",
-      "condiciones": "El viento suave es ideal para quienes recién comienzan."
+      "condiciones": "Condiciones suaves, pero el oleaje puede ser un poco complicado para principiantes."
     },
     {
       "hora": "09:00",
@@ -88,7 +88,7 @@
       "direccionViento": "Norte",
       "direccionVientoGrados": 7,
       "nivel": "Principiante",
-      "condiciones": "Condiciones tranquilas, perfectas para un inicio de día en el SUP."
+      "condiciones": "Viento suave, ideal para principiantes, aunque el oleaje sigue presente."
     },
     {
       "hora": "12:00",
@@ -99,7 +99,7 @@
       "direccionViento": "Oeste",
       "direccionVientoGrados": 258,
       "nivel": "Principiante",
-      "condiciones": "Condiciones agradables, ideales para principiantes en la tarde."
+      "condiciones": "Condiciones ideales para principiantes, con viento ligero y oleaje moderado."
     },
     {
       "hora": "15:00",
@@ -110,7 +110,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 210,
       "nivel": "Avanzado",
-      "condiciones": "El viento es fuerte, ideal para paddlers con más experiencia."
+      "condiciones": "El viento es más fuerte, perfecto para paddlers avanzados que buscan emoción."
     },
     {
       "hora": "18:00",
@@ -121,7 +121,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 200,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones muy activas, recomendadas solo para expertos."
+      "condiciones": "Condiciones desafiantes, solo recomendadas para paddlers experimentados."
     },
     {
       "hora": "21:00",
@@ -132,9 +132,9 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 202,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje y el viento son intensos, solo para los más experimentados."
+      "condiciones": "El viento es moderado, ideal para quienes buscan un reto en la noche."
     }
   ],
   "mareas": [],
-  "generado": "2026-04-21 15:50:30"
+  "generado": "2026-04-21 16:30:26"
 }

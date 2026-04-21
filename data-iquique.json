@@ -9,7 +9,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 187,
       "nivel": "Intermedio",
-      "condiciones": "El viento es moderado, pero el oleaje es alto, se recomienda precaución."
+      "condiciones": "El viento es moderado y el oleaje es un poco alto, recomendable para intermedios."
     },
     {
       "hora": "09:00",
@@ -20,7 +20,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 219,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones aceptables, pero el oleaje sigue siendo un factor a considerar."
+      "condiciones": "Condiciones adecuadas, aunque el oleaje puede ser desafiante para principiantes."
     },
     {
       "hora": "12:00",
@@ -31,7 +31,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 195,
       "nivel": "Intermedio",
-      "condiciones": "Mejores condiciones, el viento es un poco más fuerte, ideal para intermedios."
+      "condiciones": "El viento ha aumentado, ideal para intermedios que buscan un poco más de desafío."
     },
     {
       "hora": "15:00",
@@ -42,7 +42,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 199,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones favorables para avanzados, el viento y oleaje son desafiantes."
+      "condiciones": "Condiciones óptimas para avanzados, el oleaje y viento son favorables."
     },
     {
       "hora": "18:00",
@@ -53,7 +53,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 191,
       "nivel": "Intermedio",
-      "condiciones": "Adecuado para intermedios, el viento se mantiene estable y el oleaje baja."
+      "condiciones": "A medida que cae la tarde, las condiciones siguen siendo buenas para intermedios."
     },
     {
       "hora": "21:00",
@@ -64,7 +64,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 180,
       "nivel": "Principiante",
-      "condiciones": "Condiciones tranquilas, ideales para principiantes, aunque el oleaje aún está presente."
+      "condiciones": "El viento es suave, ideal para principiantes que buscan disfrutar de la tranquilidad."
     }
   ],
   "mañana": [
@@ -77,7 +77,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 205,
       "nivel": "Intermedio",
-      "condiciones": "Las condiciones son favorables, el viento es suave y el oleaje moderado."
+      "condiciones": "Condiciones suaves, perfectas para un inicio de día en el agua."
     },
     {
       "hora": "09:00",
@@ -88,7 +88,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 211,
       "nivel": "Intermedio",
-      "condiciones": "Buen momento para salir, el oleaje es bajo y el viento ligero."
+      "condiciones": "Las condiciones son favorables para intermedios, ideal para disfrutar de la mañana."
     },
     {
       "hora": "12:00",
@@ -99,7 +99,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 217,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones ideales para intermedios, el oleaje está en su punto más bajo."
+      "condiciones": "El viento sigue siendo manejable, adecuado para una sesión de SUP tranquila."
     },
     {
       "hora": "15:00",
@@ -110,7 +110,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 206,
       "nivel": "Intermedio",
-      "condiciones": "Excelente para practicar, el viento es constante y el oleaje manejable."
+      "condiciones": "Condiciones estables, perfectas para disfrutar de la tarde en el agua."
     },
     {
       "hora": "18:00",
@@ -121,7 +121,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 198,
       "nivel": "Principiante",
-      "condiciones": "Ideal para principiantes, condiciones muy tranquilas y agradable temperatura."
+      "condiciones": "El viento es ligero, ideal para principiantes que buscan relajarse."
     },
     {
       "hora": "21:00",
@@ -132,9 +132,9 @@
       "direccionViento": "Sureste",
       "direccionVientoGrados": 139,
       "nivel": "Principiante",
-      "condiciones": "Perfecto para principiantes, el viento es casi inexistente y el oleaje bajo."
+      "condiciones": "Las condiciones son muy tranquilas, perfectas para un paseo relajado al atardecer."
     }
   ],
   "mareas": [],
-  "generado": "2026-04-21 15:50:30"
+  "generado": "2026-04-21 16:30:26"
 }

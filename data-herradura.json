@@ -9,7 +9,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 207,
       "nivel": "Principiante",
-      "condiciones": "El viento es suave, pero el oleaje es alto, no recomendado para principiantes."
+      "condiciones": "El viento es muy bajo, pero el oleaje es alto, no es ideal para principiantes."
     },
     {
       "hora": "09:00",
@@ -20,7 +20,7 @@
       "direccionViento": "Noroeste",
       "direccionVientoGrados": 323,
       "nivel": "Principiante",
-      "condiciones": "Condiciones tranquilas, pero el oleaje sigue siendo un desafío."
+      "condiciones": "Condiciones suaves, aunque el oleaje sigue siendo un desafío para principiantes."
     },
     {
       "hora": "12:00",
@@ -31,7 +31,7 @@
       "direccionViento": "Oeste",
       "direccionVientoGrados": 264,
       "nivel": "Principiante",
-      "condiciones": "Viento moderado, el oleaje es manejable, ideal para principiantes."
+      "condiciones": "El viento es más fuerte, pero el oleaje es manejable; es un buen momento para salir."
     },
     {
       "hora": "15:00",
@@ -42,7 +42,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 245,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones adecuadas para intermedios, el viento y oleaje son favorables."
+      "condiciones": "Condiciones ideales para intermedios, el viento y el oleaje son favorables."
     },
     {
       "hora": "18:00",
@@ -53,7 +53,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 235,
       "nivel": "Principiante",
-      "condiciones": "Viento suave y oleaje moderado, buena opción para principiantes."
+      "condiciones": "El viento es moderado, pero el oleaje es bajo; puede ser adecuado para principiantes."
     },
     {
       "hora": "21:00",
@@ -64,7 +64,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 225,
       "nivel": "Principiante",
-      "condiciones": "Condiciones nocturnas tranquilas, pero el oleaje sigue siendo un factor."
+      "condiciones": "Las condiciones son tranquilas, aunque el oleaje puede ser un poco desafiante."
     }
   ],
   "mañana": [
@@ -77,7 +77,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 191,
       "nivel": "Principiante",
-      "condiciones": "El oleaje es alto, no recomendado para principiantes."
+      "condiciones": "El viento es moderado, pero el oleaje alto puede dificultar la práctica."
     },
     {
       "hora": "09:00",
@@ -88,7 +88,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 205,
       "nivel": "Principiante",
-      "condiciones": "El viento es suave, pero el oleaje es un poco complicado."
+      "condiciones": "Condiciones suaves, aunque el oleaje puede ser un reto para los principiantes."
     },
     {
       "hora": "12:00",
@@ -99,7 +99,7 @@
       "direccionViento": "Oeste",
       "direccionVientoGrados": 262,
       "nivel": "Principiante",
-      "condiciones": "Condiciones favorables para principiantes, el oleaje es manejable."
+      "condiciones": "El viento es adecuado, pero el oleaje sigue siendo un poco alto."
     },
     {
       "hora": "15:00",
@@ -110,7 +110,7 @@
       "direccionViento": "Oeste",
       "direccionVientoGrados": 267,
       "nivel": "Principiante",
-      "condiciones": "El viento es adecuado, pero el oleaje puede ser un poco desafiante."
+      "condiciones": "Condiciones aceptables, aunque el oleaje puede ser un desafío para principiantes."
     },
     {
       "hora": "18:00",
@@ -121,7 +121,7 @@
       "direccionViento": "Oeste",
       "direccionVientoGrados": 288,
       "nivel": "Principiante",
-      "condiciones": "Viento casi nulo, pero el oleaje es alto, no recomendable."
+      "condiciones": "El viento es muy bajo, pero el oleaje alto no es ideal para principiantes."
     },
     {
       "hora": "21:00",
@@ -132,9 +132,9 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 221,
       "nivel": "Principiante",
-      "condiciones": "Condiciones tranquilas, pero el oleaje es alto, cuidado."
+      "condiciones": "Las condiciones son tranquilas, pero el oleaje puede ser complicado."
     }
   ],
   "mareas": [],
-  "generado": "2026-04-21 15:50:30"
+  "generado": "2026-04-21 16:30:26"
 }

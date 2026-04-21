@@ -9,7 +9,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 186,
       "nivel": "Intermedio",
-      "condiciones": "Las condiciones son moderadas, ideal para paddlers intermedios que buscan un poco de desafío."
+      "condiciones": "El viento es moderado y el oleaje es manejable, ideal para principiantes."
     },
     {
       "hora": "09:00",
@@ -20,7 +20,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 184,
       "nivel": "Intermedio",
-      "condiciones": "El viento es suave, lo que hace de este un buen momento para disfrutar del SUP."
+      "condiciones": "Las condiciones son favorables, con un viento suave y oleaje bajo."
     },
     {
       "hora": "12:00",
@@ -31,7 +31,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 223,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones desafiantes, recomendadas solo para paddlers avanzados."
+      "condiciones": "El viento ha aumentado, adecuado para paddlers experimentados."
     },
     {
       "hora": "15:00",
@@ -42,7 +42,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 221,
       "nivel": "Avanzado",
-      "condiciones": "El viento y el oleaje son intensos, ideal para quienes buscan adrenalina."
+      "condiciones": "Las condiciones son desafiantes, perfectas para los más experimentados."
     },
     {
       "hora": "18:00",
@@ -53,7 +53,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 208,
       "nivel": "Avanzado",
-      "condiciones": "Altas condiciones de viento, solo para expertos en SUP."
+      "condiciones": "El viento fuerte y el oleaje alto hacen que sea mejor evitar el agua."
     },
     {
       "hora": "21:00",
@@ -64,7 +64,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 195,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones desafiantes, no recomendadas para principiantes."
+      "condiciones": "Las condiciones son complicadas, no recomendadas para paddlers inexpertos."
     }
   ],
   "mañana": [
@@ -77,7 +77,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 186,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones adecuadas para una sesión de SUP tranquila y placentera."
+      "condiciones": "Las condiciones son tranquilas, perfectas para una sesión matutina."
     },
     {
       "hora": "09:00",
@@ -88,7 +88,7 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 190,
       "nivel": "Intermedio",
-      "condiciones": "El viento es moderado, perfecto para quienes están aprendiendo."
+      "condiciones": "El viento es ligero, ideal para disfrutar de un paseo placentero."
     },
     {
       "hora": "12:00",
@@ -99,7 +99,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 205,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones fuertes, solo aptas para paddlers experimentados."
+      "condiciones": "El viento fuerte puede ser desafiante, recomendado para expertos."
     },
     {
       "hora": "15:00",
@@ -110,7 +110,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 211,
       "nivel": "Avanzado",
-      "condiciones": "Viento fuerte y oleaje alto, solo para los más atrevidos."
+      "condiciones": "Condiciones muy fuertes, solo para paddlers con experiencia."
     },
     {
       "hora": "18:00",
@@ -121,7 +121,7 @@
       "direccionViento": "Suroeste",
       "direccionVientoGrados": 204,
       "nivel": "Avanzado",
-      "condiciones": "Altas condiciones de viento, mejor evitar para paddlers inexpertos."
+      "condiciones": "El oleaje y el viento son intensos, mejor evitar el SUP."
     },
     {
       "hora": "21:00",
@@ -132,9 +132,9 @@
       "direccionViento": "Sur",
       "direccionVientoGrados": 199,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones extremas, solo para los más experimentados en SUP."
+      "condiciones": "Condiciones adversas, no recomendadas para principiantes."
     }
   ],
   "mareas": [],
-  "generado": "2026-04-21 15:50:30"
+  "generado": "2026-04-21 16:30:26"
 }
