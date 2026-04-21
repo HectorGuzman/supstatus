@@ -88,57 +88,50 @@ def obtener_datos_openmeteo(lat, lon):
     return horarios
 
 
+def nivel_por_viento(viento_str):
+    try:
+        kmh = float(viento_str.split()[0])
+        if kmh <= 8:
+            return "Principiante"
+        elif kmh <= 15:
+            return "Intermedio"
+        return "Avanzado"
+    except Exception:
+        return "Intermedio"
+
+
 def generar_con_openai(spot, horarios, fecha_generacion, api_key):
-    clima_ctx = json.dumps(horarios, indent=2, ensure_ascii=False)
-    prompt = f"""
-Actúa como un asistente experto en SUP (stand up paddle) para {spot['nombre']}, Chile.
-Tienes datos REALES de clima horario extraídos de Open-Meteo:
+    # Enrich each block with nivel (deterministic) before sending to OpenAI
+    for dia in ("hoy", "mañana"):
+        for bloque in horarios.get(dia, []):
+            bloque["nivel"] = nivel_por_viento(bloque.get("viento", "0 km/h"))
 
-{clima_ctx}
+    bloques_json = json.dumps(horarios, indent=2, ensure_ascii=False)
 
-Genera un JSON con esta estructura exacta:
+    prompt = f"""Eres un experto en SUP (stand up paddle) en {spot['nombre']}, Chile.
 
-{{
-  "hoy": [
-    {{
-      "hora": "06:00",
-      "viento": "5 km/h",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 45,
-      "oleaje": "0.3 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "17°C",
-      "condiciones": "Tranquilo y seguro para principiantes.",
-      "nivel": "Principiante"
-    }}
-  ],
-  "mañana": [...],
+Tienes {sum(len(horarios.get(d, [])) for d in ('hoy', 'mañana'))} bloques horarios con datos REALES de Open-Meteo.
+Debes agregar el campo "condiciones" a CADA bloque con una frase útil y específica sobre si ese momento es bueno para hacer SUP en {spot['nombre']}, considerando viento, oleaje y temperatura. Varía las frases entre bloques.
+
+Devuelve EXACTAMENTE este JSON, modificando solo los campos "condiciones" (no cambies ningún otro valor):
+
+{bloques_json}
+
+Agrega también:
   "mareas": [],
   "generado": "{fecha_generacion}"
-}}
 
-Reglas:
-- Responde ÚNICAMENTE con JSON válido, sin texto adicional.
-- Conserva exactamente los valores de viento, oleaje, temperatura y direcciones del input.
-- "condiciones": frase útil sobre si es buen momento para SUP en {spot['nombre']} y por qué.
-- "nivel" basado SOLO en velocidad del viento:
-    Principiante: ≤ 8 km/h
-    Intermedio: 9–15 km/h
-    Avanzado: > 15 km/h
-- "mareas" debe ser siempre un array vacío [].
-- No repitas frases de condiciones entre bloques.
-- "generado" debe ser exactamente: "{fecha_generacion}"
-"""
+Responde ÚNICAMENTE con JSON válido. Cero texto extra."""
 
     client = openai.OpenAI(api_key=api_key)
     response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Responde solo con JSON válido."},
+            {"role": "system", "content": "Responde solo con JSON válido, sin markdown ni explicaciones."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.4,
-        max_tokens=2000
+        temperature=0.5,
+        max_tokens=3000
     )
     content = response.choices[0].message.content.strip()
     # Quitar bloques ```json si los hay
