@@ -1095,6 +1095,25 @@ h1 {
   color: var(--text-muted);
 }
 
+.instagram-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.instagram-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(220, 39, 67, 0.35);
+}
+
 .bmc-button {
   display: inline-flex;
   align-items: center;

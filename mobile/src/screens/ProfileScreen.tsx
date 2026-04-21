@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput,
-  StyleSheet, Alert, ActivityIndicator, Image, Share,
+  StyleSheet, Alert, ActivityIndicator, Image, Share, Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
@@ -269,6 +269,14 @@ export default function ProfileScreen() {
             <InfoSection profile={profile} onEdit={() => setEditing(true)} />
           )}
         </View>
+        <TouchableOpacity
+          style={styles.igRow}
+          onPress={() => Linking.openURL('https://instagram.com/__supstatus')}
+          activeOpacity={0.75}
+        >
+          <Ionicons name="logo-instagram" size={18} color="#e1306c" />
+          <Text style={styles.igText}>Síguenos en Instagram <Text style={styles.igHandle}>@__supstatus</Text></Text>
+        </TouchableOpacity>
         <View style={{ height: 80 }} />
       </ScrollView>
     </View>
@@ -484,6 +492,9 @@ const styles = StyleSheet.create({
   saveBtn: { flex: 1, padding: 12, borderRadius: radius.md, alignItems: 'center', overflow: 'hidden', position: 'relative', justifyContent: 'center' },
   loginBtn: { padding: 14, borderRadius: radius.md, alignItems: 'center', overflow: 'hidden', position: 'relative', justifyContent: 'center' },
   saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  igRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: spacing.md, marginTop: spacing.sm, padding: 14, backgroundColor: colors.surface1, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
+  igText: { fontSize: 14, color: colors.textSecondary },
+  igHandle: { color: '#e1306c', fontWeight: '700' },
   loginContainer: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center' },
   loginHeader: { alignItems: 'center', marginBottom: spacing.xl },
   loginLogo: { width: 140, height: 140, borderRadius: 30, marginBottom: spacing.md },
