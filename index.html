@@ -81,8 +81,9 @@
 
     <section class="forecast container">
       <div class="forecast-header">
-        <h2 class="section-title">Pronóstico por bloque · La Herradura</h2>
+        <h2 class="section-title" id="forecast-title">Pronóstico por bloque</h2>
         <div class="forecast-controls">
+          <select id="spot-selector" class="spot-select" aria-label="Seleccionar spot"></select>
           <div id="selector-dia" class="segmented">
             <button data-dia="hoy" class="activo" onclick="cambiarDia('hoy')">Hoy</button>
             <button data-dia="mañana" onclick="cambiarDia('mañana')">Mañana</button>
@@ -451,8 +452,9 @@
     const estadoVientoEl = document.getElementById('estado-viento');
     const estadoOleajeEl = document.getElementById('estado-oleaje');
 
-    const lat = -29.983059;
-    const lon = -71.365225;
+    let currentSpot = null;
+    let lat = -29.983059;
+    let lon = -71.365225;
     function initializeMiniMap(mapId, direccionGrados) {
       const container = document.getElementById(mapId);
       if (!container || Number.isNaN(direccionGrados)) return;
@@ -1478,26 +1480,59 @@
     loadStories();
     startStoriesAutoRefresh();
 
-    fetch(`data.json?cb=${Date.now()}`, { cache: "no-store" })
-      .then(res => res.json())
-      .then(data => {
-        pronostico = data;
-        const fechaBase = new Date();
-        actualizarFechaVisor(fechaBase, "Hoy");
+    function cargarSpot(spot) {
+      currentSpot = spot;
+      lat = spot.lat;
+      lon = spot.lng;
+      const forecastTitle = document.getElementById('forecast-title');
+      if (forecastTitle) forecastTitle.textContent = `Pronóstico por bloque · ${spot.nombre}`;
+      const heroSubtitle = document.querySelector('.subtitle');
+      if (heroSubtitle) heroSubtitle.textContent = `Condiciones confiables y ventanas ideales para remar con tranquilidad en ${spot.nombre}.`;
 
-        renderizarPronostico("hoy");
-
-        if (data.generado) {
-          const generado = document.getElementById("generado-el");
-          if (generado) {
-            generado.innerHTML = `<strong>🕒 Datos generados:</strong> ${data.generado}`;
+      fetch(`${spot.dataUrl}?cb=${Date.now()}`, { cache: "no-store" })
+        .then(res => res.json())
+        .then(data => {
+          pronostico = data;
+          actualizarFechaVisor(new Date(), "Hoy");
+          renderizarPronostico("hoy");
+          if (data.generado) {
+            const generado = document.getElementById("generado-el");
+            if (generado) generado.innerHTML = `<strong>🕒 Datos generados:</strong> ${data.generado}`;
           }
-        }
+          mostrarHorariosMarea(data);
+        })
+        .catch(err => console.error("Error cargando datos del spot", err));
+    }
 
-        mostrarHorariosMarea(data);
+    const BASE_RAW = 'https://raw.githubusercontent.com/HectorGuzman/sup-vision/main';
+    fetch('spots-config.json')
+      .then(r => r.json())
+      .then(spots => {
+        const spotsConUrl = spots.map(s => ({ ...s, dataUrl: `${BASE_RAW}/data-${s.id}.json` }));
+        const sel = document.getElementById('spot-selector');
+        spotsConUrl.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.nombre;
+          sel.appendChild(opt);
+        });
+        sel.addEventListener('change', () => {
+          const spot = spotsConUrl.find(s => s.id === sel.value);
+          if (spot) cargarSpot(spot);
+        });
+        cargarSpot(spotsConUrl[0]);
       })
       .catch(err => {
-        console.error("Error cargando data.json", err);
+        console.error("Error cargando spots-config.json", err);
+        // fallback a data.json original
+        fetch(`data.json?cb=${Date.now()}`, { cache: "no-store" })
+          .then(res => res.json())
+          .then(data => {
+            pronostico = data;
+            actualizarFechaVisor(new Date(), "Hoy");
+            renderizarPronostico("hoy");
+            mostrarHorariosMarea(data);
+          });
       });
   </script>
   <script type="module" src="auth.js"></script>
