@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { authenticate } from '../middleware/authenticate.js';
+import { authenticate, authenticateAny } from '../middleware/authenticate.js';
 import { env } from '../config/env.js';
 import { getUserProfile, upsertUserProfile, listAllProfiles, listSessions } from '../services/firestore.js';
 
@@ -18,7 +18,7 @@ function isAdmin(decoded?: DecodedIdToken | null) {
   return !!email && env.adminEmails.includes(email);
 }
 
-router.get('/me', authenticate, async (req: Request, res: Response) => {
+router.get('/me', authenticateAny, async (req: Request, res: Response) => {
   const decoded = (req as Request & { user?: DecodedIdToken }).user;
   if (!decoded?.uid) {
     return res.status(400).json({ error: 'UID no disponible en el token.' });
@@ -33,7 +33,7 @@ router.get('/me', authenticate, async (req: Request, res: Response) => {
   }
 });
 
-router.post('/me', authenticate, async (req: Request, res: Response) => {
+router.post('/me', authenticateAny, async (req: Request, res: Response) => {
   const decoded = (req as Request & { user?: DecodedIdToken }).user;
   if (!decoded?.uid) {
     return res.status(400).json({ error: 'UID no disponible en el token.' });
