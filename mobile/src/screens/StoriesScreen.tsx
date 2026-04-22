@@ -94,9 +94,19 @@ export default function StoriesScreen() {
     }
   };
 
+  const loadSuggestions = async () => {
+    setSearchLoading(true);
+    try {
+      const d = await api.searchUsers('');
+      setSearchResults(d.users ?? []);
+    } catch {} finally {
+      setSearchLoading(false);
+    }
+  };
+
   const runSearch = async (q: string) => {
     setSearchQuery(q);
-    if (q.trim().length < 2) { setSearchResults([]); return; }
+    if (q.trim().length < 2) { loadSuggestions(); return; }
     setSearchLoading(true);
     try {
       const d = await api.searchUsers(q.trim());
@@ -240,7 +250,7 @@ export default function StoriesScreen() {
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {currentUser && (
-              <TouchableOpacity style={styles.iconBtn} onPress={() => setShowSearch(true)}>
+              <TouchableOpacity style={styles.iconBtn} onPress={() => { setShowSearch(true); loadSuggestions(); }}>
                 <Ionicons name="person-add-outline" size={20} color={colors.textMuted} />
               </TouchableOpacity>
             )}
@@ -357,8 +367,15 @@ export default function StoriesScreen() {
             data={searchResults}
             keyExtractor={item => item.uid}
             contentContainerStyle={{ padding: spacing.md, gap: 10 }}
-            ListEmptyComponent={searchQuery.length >= 2 && !searchLoading ? (
-              <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 40 }}>Sin resultados</Text>
+            ListHeaderComponent={!searchLoading && searchResults.length > 0 ? (
+              <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
+                {searchQuery.length >= 2 ? 'Resultados' : 'Sugerencias'}
+              </Text>
+            ) : null}
+            ListEmptyComponent={!searchLoading ? (
+              <Text style={{ color: colors.textMuted, textAlign: 'center', marginTop: 40 }}>
+                {searchQuery.length >= 2 ? 'Sin resultados' : 'No hay usuarios aún'}
+              </Text>
             ) : null}
             renderItem={({ item }) => (
               <View style={styles.userRow}>

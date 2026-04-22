@@ -29,20 +29,32 @@ router.get('/following', authenticate, async (req: Request, res: Response) => {
   }
 });
 
-// GET /v1/users?q=term — search users by displayName prefix
+// GET /v1/users?q=term — search users by displayName prefix, or return suggestions if no query
 router.get('/', authenticate, async (req: Request, res: Response) => {
   const me = uid(req);
   const q = (typeof req.query.q === 'string' ? req.query.q : '').trim();
-  if (!q || q.length < 2) return res.json({ users: [] });
   try {
     const admin = ensureFirebase();
     const db = admin.firestore();
 
-    const snap = await db.collection('users')
-      .where('displayName', '>=', q)
-      .where('displayName', '<=', q + '\uf8ff')
-      .limit(20)
-      .get();
+    let snap;
+    if (q.length >= 2) {
+      snap = await db.collection('users')
+        .where('displayName', '>=', q)
+        .where('displayName', '<=', q + '\uf8ff')
+        .limit(20)
+        .get();
+    } else {
+      // Return suggested users — try orderBy followersCount, fallback to plain limit
+      try {
+        snap = await db.collection('users')
+          .orderBy('followersCount', 'desc')
+          .limit(10)
+          .get();
+      } catch {
+        snap = await db.collection('users').limit(10).get();
+      }
+    }
 
     const followSnap = me
       ? await db.collection('follows').where('followerUid', '==', me).get()
