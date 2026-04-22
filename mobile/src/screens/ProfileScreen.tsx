@@ -320,6 +320,7 @@ function InfoSection({ profile, onEdit }: { profile: UserProfile | null; onEdit:
           value={profile.disciplinas?.join(' · ') ?? profile.disciplina!}
         />
       )}
+      {profile?.boardSetup && <InfoRow icon="boat-outline" label="Tabla" value={profile.boardSetup} />}
       {profile?.equipo && <InfoRow icon="people-outline" label="Equipo" value={profile.equipo} />}
       {profile?.bio && <InfoRow icon="person-circle-outline" label="Bio" value={profile.bio} />}
       <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
@@ -378,7 +379,12 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset }: any)
         })}
       </View>
 
-      <Text style={styles.editSectionTitle}>Equipo</Text>
+      <Text style={styles.editSectionTitle}>Tabla y equipo</Text>
+      <View style={styles.inputGroup}>
+        <Ionicons name="boat-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
+        <TextInput style={styles.input} placeholder="Ej: 12'6 racing, remo carbono..." placeholderTextColor={colors.textMuted} value={form.boardSetup ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, boardSetup: v }))} />
+      </View>
+
       <View style={styles.inputGroup}>
         <Ionicons name="people-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
         <TextInput style={styles.input} placeholder="¿A qué equipo perteneces?" placeholderTextColor={colors.textMuted} value={form.equipo ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, equipo: v }))} />

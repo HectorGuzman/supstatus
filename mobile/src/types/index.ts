@@ -73,6 +73,7 @@ export interface UserProfile {
   disciplina?: string;
   disciplinas?: string[];
   tabla?: string;
+  boardSetup?: string;
   remo?: string;
   bio?: string;
   equipo?: string;
