@@ -45,6 +45,7 @@ export interface Session {
 export interface Story {
   id: string;
   body: string;
+  authorUid?: string;
   authorName: string;
   authorAvatar?: string;
   spot?: string;

@@ -334,6 +334,7 @@ export default function StoriesScreen() {
                 onComment={() => openComments(s)}
                 isFollowing={followingUsers.has(s.authorUid ?? '')}
                 onFollowToggle={currentUser && s.authorUid !== currentUser.uid ? () => toggleFollow(s.authorUid ?? '') : undefined}
+                onViewProfile={s.authorUid ? () => openUserProfile(s.authorUid!) : undefined}
               />
             ))}</>;
           })()}
@@ -348,7 +349,7 @@ export default function StoriesScreen() {
                 : <Text style={styles.loadMoreText}>Cargar más historias</Text>}
             </TouchableOpacity>
           )}
-          <View style={{ height: 80 }} />
+          <View style={{ height: 80 + insets.bottom }} />
         </ScrollView>
       )}
 
@@ -431,7 +432,7 @@ export default function StoriesScreen() {
       {/* Public profile modal */}
       <Modal visible={!!viewingProfile} animationType="slide" transparent onRequestClose={() => setViewingProfile(null)}>
         <View style={styles.profileOverlay}>
-          <View style={styles.profileSheet}>
+          <View style={[styles.profileSheet, { paddingBottom: spacing.lg + insets.bottom }]}>
             <TouchableOpacity style={styles.profileClose} onPress={() => setViewingProfile(null)}>
               <Ionicons name="close" size={22} color={colors.textMuted} />
             </TouchableOpacity>
@@ -689,26 +690,28 @@ function Avatar({ uri, name, size = 40 }: { uri?: string; name?: string; size?: 
   );
 }
 
-function StoryCard({ story, onLike, onComment, isFollowing, onFollowToggle }: {
+function StoryCard({ story, onLike, onComment, isFollowing, onFollowToggle, onViewProfile }: {
   story: Story; onLike: () => void; onComment: () => void;
-  isFollowing?: boolean; onFollowToggle?: () => void;
+  isFollowing?: boolean; onFollowToggle?: () => void; onViewProfile?: () => void;
 }) {
   return (
     <View style={styles.card}>
       {/* Header */}
       <View style={styles.cardHeader}>
-        <View style={styles.avatarRing}>
-          <Avatar uri={story.authorAvatar} name={story.authorName} size={36} />
-        </View>
-        <View style={{ flex: 1, marginLeft: 10 }}>
-          <Text style={styles.cardAuthorName}>{story.authorName}</Text>
-          {story.spot && (
-            <View style={styles.spotRow}>
-              <Ionicons name="location-outline" size={11} color={colors.primary} />
-              <Text style={styles.spotLabel}>{story.spot}</Text>
-            </View>
-          )}
-        </View>
+        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }} onPress={onViewProfile} disabled={!onViewProfile} activeOpacity={0.7}>
+          <View style={styles.avatarRing}>
+            <Avatar uri={story.authorAvatar} name={story.authorName} size={36} />
+          </View>
+          <View style={{ flex: 1, marginLeft: 10 }}>
+            <Text style={styles.cardAuthorName}>{story.authorName}</Text>
+            {story.spot && (
+              <View style={styles.spotRow}>
+                <Ionicons name="location-outline" size={11} color={colors.primary} />
+                <Text style={styles.spotLabel}>{story.spot}</Text>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
         {onFollowToggle && (
           <TouchableOpacity onPress={onFollowToggle} style={[styles.followBtn, isFollowing && styles.followBtnActive]}>
             <Text style={[styles.followBtnText, isFollowing && { color: colors.textMuted }]}>
@@ -826,7 +829,7 @@ const styles = StyleSheet.create({
 
   // Public profile modal
   profileOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  profileSheet: { backgroundColor: colors.surface1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '85%' },
+  profileSheet: { backgroundColor: colors.surface1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '85%', paddingBottom: spacing.lg },
   profileClose: { alignSelf: 'flex-end', padding: 4, marginBottom: 8 },
   profileHeader: { alignItems: 'center', marginBottom: spacing.lg },
   profileAvatarWrap: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: 12 },
