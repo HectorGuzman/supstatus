@@ -15,11 +15,23 @@ import { auth, storage } from '../services/firebase';
 import { requestMediaLibraryPermission, requestCameraPermission } from '../services/permissions';
 import { useGoogleSignIn } from '../services/googleAuth';
 import { api } from '../services/api';
+import { registerPushToken } from '../services/notifications';
 import { UserProfile } from '../types';
 import { colors, radius, spacing } from '../theme';
 
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
 const DISCIPLINAS = ['Travesía', 'Surf', 'Racing', 'Yoga SUP', 'Pesca', 'Recreativo'];
+const SPOTS = [
+  { id: 'herradura', nombre: 'La Herradura' },
+  { id: 'skate_park_coquimbo', nombre: 'Skatepark 465 - Coquimbo' },
+  { id: 'guanaqueros', nombre: 'Guanaqueros' },
+  { id: 'tongoy', nombre: 'Tongoy' },
+  { id: 'vina', nombre: 'Viña del Mar' },
+  { id: 'pichilemu', nombre: 'Pichilemu' },
+  { id: 'iquique', nombre: 'Iquique' },
+  { id: 'bahia_inglesa', nombre: 'Bahía Inglesa' },
+  { id: 'arica', nombre: 'Arica' },
+];
 
 const RANKS = [
   { min: 0,   label: 'Sin remadas',     color: colors.textMuted,  icon: '🌊' },
@@ -57,7 +69,7 @@ export default function ProfileScreen() {
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((u: any) => {
       setUser(u);
-      if (u) loadProfile(); else setLoading(false);
+      if (u) { loadProfile(); registerPushToken(); } else setLoading(false);
     });
     return unsub;
   }, []);
@@ -341,6 +353,7 @@ function InfoSection({ profile, onEdit }: { profile: UserProfile | null; onEdit:
       {profile?.boardSetup && <InfoRow icon="tablet-landscape-outline" label="Tabla" value={profile.boardSetup} />}
       {profile?.equipo && <InfoRow icon="people-outline" label="Equipo" value={profile.equipo} />}
       {profile?.bio && <InfoRow icon="person-circle-outline" label="Bio" value={profile.bio} />}
+      {(profile as any)?.favSpot && <InfoRow icon="notifications-outline" label="Spot favorito" value={SPOTS.find(s => s.id === (profile as any).favSpot)?.nombre ?? (profile as any).favSpot} />}
     </View>
   );
 }
@@ -406,6 +419,16 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset }: any)
 
       <Text style={styles.editSectionTitle}>Bio</Text>
       <TextInput style={[styles.input, { height: 80, textAlignVertical: 'top' }]} placeholder="Cuéntanos sobre ti..." placeholderTextColor={colors.textMuted} multiline value={form.bio ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, bio: v }))} />
+
+      <Text style={styles.editSectionTitle}>Spot favorito (notificaciones de condiciones)</Text>
+      <View style={styles.pills}>
+        {SPOTS.map(s => (
+          <TouchableOpacity key={s.id} onPress={() => setForm((f: any) => ({ ...f, favSpot: f.favSpot === s.id ? null : s.id }))} style={[styles.pill, form.favSpot === s.id && styles.pillActive]}>
+            {form.favSpot === s.id && <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.full }]} />}
+            <Text style={[styles.pillText, form.favSpot === s.id && { color: '#fff' }]}>{s.nombre}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
       <View style={[styles.editActions, { marginBottom: bottomInset ?? 0 }]}>
         <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>

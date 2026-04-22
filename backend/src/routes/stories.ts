@@ -2,8 +2,9 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { ensureFirebase } from '../config/firebase.js';
-import { authenticate } from '../middleware/authenticate.js';
+import { authenticate, authenticateAny } from '../middleware/authenticate.js';
 import { env } from '../config/env.js';
+import { sendPushNotification, getUserFcmToken } from '../services/notifications.js';
 import {
   createUserStory,
   deleteStoryAdmin,
@@ -212,7 +213,7 @@ router.get('/:storyId/comments', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/:storyId/comments', authenticate, async (req: Request, res: Response) => {
+router.post('/:storyId/comments', authenticateAny, async (req: Request, res: Response) => {
   const decoded = decodedFromReq(req);
   if (!decoded?.uid) return res.status(400).json({ error: 'UID no disponible.' });
   const { storyId } = req.params;
@@ -224,6 +225,13 @@ router.post('/:storyId/comments', authenticate, async (req: Request, res: Respon
     const authorAvatar = typeof decoded.picture === 'string' ? decoded.picture : undefined;
     const comment = await addComment(storyId, decoded.uid, authorName, text, authorAvatar);
     res.json({ comment });
+    // Notify story author
+    const storyDoc = await ensureFirebase().firestore().collection('stories').doc(storyId).get();
+    const authorUid = storyDoc.data()?.authorUid;
+    if (authorUid && authorUid !== decoded.uid) {
+      const token = await getUserFcmToken(authorUid);
+      if (token) sendPushNotification(token, '💬 Nuevo comentario', `${authorName}: "${text.slice(0, 60)}"`, { type: 'comment', storyId });
+    }
   } catch (error) {
     if (error instanceof Error && error.message === 'NOT_FOUND') {
       return res.status(404).json({ error: 'Historia no encontrada.' });
@@ -250,7 +258,7 @@ router.delete('/:storyId/comments/:commentId', authenticate, async (req: Request
   }
 });
 
-router.post('/:storyId/like', authenticate, async (req: Request, res: Response) => {
+router.post('/:storyId/like', authenticateAny, async (req: Request, res: Response) => {
   const decoded = decodedFromReq(req);
   if (!decoded?.uid) {
     return res.status(400).json({ error: 'UID no disponible en el token.' });
@@ -262,6 +270,14 @@ router.post('/:storyId/like', authenticate, async (req: Request, res: Response) 
       return res.status(404).json({ error: 'Historia no encontrada.' });
     }
     res.json({ story: result.story, liked: result.liked, likes: result.likes });
+    // Send notification to story author if liked (not unliked)
+    if (result.liked && result.story.authorUid && result.story.authorUid !== decoded.uid) {
+      const token = await getUserFcmToken(result.story.authorUid);
+      if (token) {
+        const name = decoded.name || decoded.email?.split('@')[0] || 'Alguien';
+        sendPushNotification(token, '❤️ Nuevo me gusta', `${name} le dio like a tu historia`, { type: 'like', storyId });
+      }
+    }
   } catch (error) {
     if (error instanceof Error && error.message === 'NOT_FOUND') {
       return res.status(404).json({ error: 'Historia no encontrada.' });

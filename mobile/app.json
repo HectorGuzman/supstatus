@@ -66,8 +66,20 @@
         }
       ],
       "expo-web-browser",
-      "@react-native-google-signin/google-signin"
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#0ea5e9",
+          "sounds": []
+        }
+      ]
     ],
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#0ea5e9"
+    },
     "extra": {
       "eas": {
         "projectId": "56126d1c-c127-4db5-bae1-273607526e02"

@@ -4,6 +4,7 @@ import type { DecodedIdToken } from 'firebase-admin/auth';
 import { authenticateAny } from '../middleware/authenticate.js';
 import { ensureFirebase } from '../config/firebase.js';
 import { getUserProfile, listSessions } from '../services/firestore.js';
+import { sendPushNotification, getUserFcmToken } from '../services/notifications.js';
 
 const router = Router();
 
@@ -106,6 +107,13 @@ router.post('/:targetUid/follow', authenticateAny, async (req: Request, res: Res
     batch.set(db.collection('users').doc(targetUid), { followersCount: admin.firestore.FieldValue.increment(1) }, { merge: true });
     await batch.commit();
     res.json({ following: true });
+    // Notify target user
+    const token = await getUserFcmToken(targetUid);
+    if (token) {
+      const follower = await getUserProfile(me);
+      const name = follower?.displayName || 'Alguien';
+      sendPushNotification(token, '👤 Nuevo seguidor', `${name} comenzó a seguirte`, { type: 'follow', uid: me });
+    }
   } catch (err) {
     console.error('[users] follow error', err);
     res.status(500).json({ error: 'No se pudo seguir al usuario.' });

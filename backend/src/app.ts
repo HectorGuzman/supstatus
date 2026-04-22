@@ -7,6 +7,7 @@ import profileRouter from './routes/profile.js';
 import storiesRouter from './routes/stories.js';
 import sessionsRouter from './routes/sessions.js';
 import usersRouter from './routes/users.js';
+import notifyRouter from './routes/notify.js';
 
 ensureFirebase();
 
@@ -35,5 +36,6 @@ app.use('/v1/profile', profileRouter);
 app.use('/v1/stories', storiesRouter);
 app.use('/v1/sessions', sessionsRouter);
 app.use('/v1/users', usersRouter);
+app.use('/v1/notify', notifyRouter);
 
 export default app;

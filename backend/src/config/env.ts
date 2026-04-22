@@ -18,4 +18,5 @@ export const env = {
   adminEmails: process.env.ADMIN_EMAILS
     ? process.env.ADMIN_EMAILS.split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
     : [],
+  notifySecret: process.env.NOTIFY_SECRET || 'supstatus-notify-secret',
 };

@@ -9,6 +9,8 @@ export interface UserProfilePayload {
   bio?: string;
   goals?: string;
   email?: string;
+  fcmToken?: string;
+  favSpot?: string | null;
 }
 
 export interface SessionPayload {
