@@ -159,7 +159,7 @@ export default function ProfileScreen() {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-      const fileRef = ref(storage, `avatars/${user!.uid}.jpg`);
+      const fileRef = ref(storage, `avatars/${user!.uid}/avatar.jpg`);
       await uploadBytes(fileRef, blob);
       const url = await getDownloadURL(fileRef);
       setForm(f => ({ ...f, avatarUrl: url }));
