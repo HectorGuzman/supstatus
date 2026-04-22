@@ -18,6 +18,14 @@ async function fetchDefaultSpots(): Promise<Omit<Spot, 'id'>[]> {
   }));
 }
 
+export async function fetchSpotsConfig(): Promise<{ id: string; nombre: string }[]> {
+  try {
+    const res = await fetch(`${SPOTS_CONFIG_URL}?cb=${Date.now()}`, { cache: 'no-store' });
+    const config: { id: string; nombre: string }[] = await res.json();
+    return config.map(s => ({ id: s.id, nombre: s.nombre }));
+  } catch { return []; }
+}
+
 export async function getSpots(): Promise<Spot[]> {
   const snap = await getDocs(collection(db, COLLECTION));
   if (snap.empty) {

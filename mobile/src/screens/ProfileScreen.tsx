@@ -15,23 +15,13 @@ import { auth, storage } from '../services/firebase';
 import { requestMediaLibraryPermission, requestCameraPermission } from '../services/permissions';
 import { useGoogleSignIn } from '../services/googleAuth';
 import { api } from '../services/api';
+import { fetchSpotsConfig } from '../services/spots';
 import { registerPushToken } from '../services/notifications';
 import { UserProfile } from '../types';
 import { colors, radius, spacing } from '../theme';
 
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
 const DISCIPLINAS = ['Travesía', 'Surf', 'Racing', 'Yoga SUP', 'Pesca', 'Recreativo'];
-const SPOTS = [
-  { id: 'herradura', nombre: 'La Herradura' },
-  { id: 'skate_park_coquimbo', nombre: 'Skatepark 465 - Coquimbo' },
-  { id: 'guanaqueros', nombre: 'Guanaqueros' },
-  { id: 'tongoy', nombre: 'Tongoy' },
-  { id: 'vina', nombre: 'Viña del Mar' },
-  { id: 'pichilemu', nombre: 'Pichilemu' },
-  { id: 'iquique', nombre: 'Iquique' },
-  { id: 'bahia_inglesa', nombre: 'Bahía Inglesa' },
-  { id: 'arica', nombre: 'Arica' },
-];
 
 const RANKS = [
   { min: 0,   label: 'Sin remadas',     color: colors.textMuted,  icon: '🌊' },
@@ -64,9 +54,11 @@ export default function ProfileScreen() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [spots, setSpots] = useState<{ id: string; nombre: string }[]>([]);
   const { signIn: googleSignIn, ready: googleReady } = useGoogleSignIn();
 
   useEffect(() => {
+    fetchSpotsConfig().then(setSpots);
     const unsub = auth.onAuthStateChanged((u: any) => {
       setUser(u);
       if (u) { loadProfile(); registerPushToken(); } else setLoading(false);
@@ -297,9 +289,9 @@ export default function ProfileScreen() {
 
         <View style={styles.content}>
           {editing ? (
-            <EditForm form={form} setForm={setForm} onSave={saveProfile} onCancel={() => setEditing(false)} saving={saving} bottomInset={insets.bottom} />
+            <EditForm form={form} setForm={setForm} onSave={saveProfile} onCancel={() => setEditing(false)} saving={saving} bottomInset={insets.bottom} spots={spots} />
           ) : (
-            <InfoSection profile={profile} onEdit={() => setEditing(true)} />
+            <InfoSection profile={profile} onEdit={() => setEditing(true)} spots={spots} />
           )}
         </View>
         <TouchableOpacity
@@ -326,7 +318,7 @@ function StatBox({ value, label, color }: { value: string; label: string; color:
   );
 }
 
-function InfoSection({ profile, onEdit }: { profile: UserProfile | null; onEdit: () => void }) {
+function InfoSection({ profile, onEdit, spots }: { profile: UserProfile | null; onEdit: () => void; spots: { id: string; nombre: string }[] }) {
   const hasData = !!(profile?.nivel || profile?.disciplina || profile?.disciplinas?.length || profile?.bio || profile?.boardSetup || profile?.equipo);
   if (!hasData) {
     return (
@@ -353,7 +345,7 @@ function InfoSection({ profile, onEdit }: { profile: UserProfile | null; onEdit:
       {profile?.boardSetup && <InfoRow icon="tablet-landscape-outline" label="Tabla" value={profile.boardSetup} />}
       {profile?.equipo && <InfoRow icon="people-outline" label="Equipo" value={profile.equipo} />}
       {profile?.bio && <InfoRow icon="person-circle-outline" label="Bio" value={profile.bio} />}
-      {(profile as any)?.favSpot && <InfoRow icon="notifications-outline" label="Spot favorito" value={SPOTS.find(s => s.id === (profile as any).favSpot)?.nombre ?? (profile as any).favSpot} />}
+      {(profile as any)?.favSpot && <InfoRow icon="notifications-outline" label="Spot favorito" value={spots.find(s => s.id === (profile as any).favSpot)?.nombre ?? (profile as any).favSpot} />}
     </View>
   );
 }
@@ -370,7 +362,7 @@ function InfoRow({ icon, label, value }: { icon: any; label: string; value: stri
   );
 }
 
-function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset }: any) {
+function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots }: any) {
   return (
     <View style={styles.editForm}>
       <Text style={styles.editSectionTitle}>Información básica</Text>
@@ -422,7 +414,7 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset }: any)
 
       <Text style={styles.editSectionTitle}>Spot favorito (notificaciones de condiciones)</Text>
       <View style={styles.pills}>
-        {SPOTS.map(s => (
+        {spots.map((s: { id: string; nombre: string }) => (
           <TouchableOpacity key={s.id} onPress={() => setForm((f: any) => ({ ...f, favSpot: f.favSpot === s.id ? null : s.id }))} style={[styles.pill, form.favSpot === s.id && styles.pillActive]}>
             {form.favSpot === s.id && <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.full }]} />}
             <Text style={[styles.pillText, form.favSpot === s.id && { color: '#fff' }]}>{s.nombre}</Text>
