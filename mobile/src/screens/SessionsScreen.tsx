@@ -142,17 +142,17 @@ export default function SessionsScreen() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [tracking, setTracking] = useState(false);
-  const [showManual, setShowManual] = useState(false);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [completedSession, setCompletedSession] = useState<Session | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [distanceKm, setDistanceKm] = useState(0);
+  const [pendingSession, setPendingSession] = useState<{ dist: number; min: number; pts: TrackPoint[] } | null>(null);
+  const [spotName, setSpotName] = useState('');
   const trackPoints = useRef<TrackPoint[]>([]);
   const elapsedRef = useRef(0);
   const distanceRef = useRef(0);
   const locationSub = useRef<Location.LocationSubscription | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [manual, setManual] = useState({ spot: '', distanceKm: '', durationMin: '', notes: '' });
 
   useEffect(() => {
     const unsub = (auth as any).onAuthStateChanged((u: any) => {
@@ -165,8 +165,15 @@ export default function SessionsScreen() {
   }, []);
 
   const loadSessions = async () => {
-    try { const d = await api.getMySessions(); setSessions(d.sessions ?? []); }
-    finally { setLoading(false); }
+    try {
+      const d = await api.getMySessions();
+      const normalized = (d.sessions ?? []).map((s: any) => ({
+        ...s,
+        date: s.date || (s.startedAt ? s.startedAt : new Date().toISOString()),
+        trackPoints: s.trackPoints?.map((p: any) => ({ lat: p.lat, lng: p.lng ?? p.lon, timestamp: p.timestamp })),
+      }));
+      setSessions(normalized);
+    } finally { setLoading(false); }
   };
 
   const startTracking = async () => {
@@ -213,23 +220,23 @@ export default function SessionsScreen() {
       return;
     }
 
-    try {
-      const date = new Date().toISOString();
-      await api.createSession({ distanceKm: totalDist, durationMin: totalMin, trackPoints: pts.slice(0, 500), spot: 'GPS', date });
-      await loadSessions();
-      setCompletedSession({ id: '', distanceKm: totalDist, durationMin: totalMin, spot: 'GPS', date, trackPoints: pts.slice(0, 500) });
-    } catch {
-      Alert.alert('Error', 'No se pudo guardar la sesión.');
-    }
+    setPendingSession({ dist: totalDist, min: totalMin, pts: pts.slice(0, 500) });
+    setSpotName('');
   };
 
-  const saveManual = async () => {
-    if (!manual.distanceKm && !manual.durationMin) { Alert.alert('Ingresa distancia o duración'); return; }
+  const savePendingSession = async () => {
+    if (!pendingSession) return;
+    const { dist, min, pts } = pendingSession;
+    const name = spotName.trim() || 'Sin nombre';
     try {
-      await api.createSession({ distanceKm: manual.distanceKm ? parseFloat(manual.distanceKm) : undefined, durationMin: manual.durationMin ? parseInt(manual.durationMin) : undefined, spot: manual.spot || 'Sin especificar', notes: manual.notes || undefined, date: new Date().toISOString() });
-      setShowManual(false); setManual({ spot: '', distanceKm: '', durationMin: '', notes: '' });
+      await api.createSession({ distanceKm: dist, durationMin: min, trackPoints: pts, spot: name, date: new Date().toISOString() });
       await loadSessions();
-    } catch { Alert.alert('Error', 'No se pudo guardar la sesión.'); }
+      setCompletedSession({ id: '', distanceKm: dist, durationMin: min, spot: name, date: new Date().toISOString(), trackPoints: pts });
+    } catch {
+      Alert.alert('Error', 'No se pudo guardar la sesión.');
+    } finally {
+      setPendingSession(null);
+    }
   };
 
   const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
@@ -254,17 +261,11 @@ export default function SessionsScreen() {
         <Text style={styles.screenSub}>{sessions.length} sesiones registradas</Text>
 
         {!tracking && (
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.gpsBtn} onPress={startTracking}>
-              <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]} />
-              <Ionicons name="navigate" size={18} color="#fff" />
-              <Text style={styles.gpsBtnText}>Iniciar GPS</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.manualBtn} onPress={() => setShowManual(true)}>
-              <Ionicons name="create-outline" size={18} color={colors.textSecondary} />
-              <Text style={styles.manualBtnText}>Manual</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.gpsBtn} onPress={startTracking}>
+            <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]} />
+            <Ionicons name="navigate" size={18} color="#fff" />
+            <Text style={styles.gpsBtnText}>Iniciar GPS</Text>
+          </TouchableOpacity>
         )}
       </LinearGradient>
 
@@ -301,7 +302,7 @@ export default function SessionsScreen() {
             <View style={styles.emptyState}>
               <Ionicons name="navigate-circle-outline" size={56} color={colors.textMuted} />
               <Text style={styles.emptyTitle}>Sin remadas aún</Text>
-              <Text style={styles.emptySub}>Inicia el GPS o registra una sesión manual</Text>
+              <Text style={styles.emptySub}>Inicia el GPS para registrar tu primera remada</Text>
             </View>
           )}
           {sessions.map(s => (
@@ -344,37 +345,29 @@ export default function SessionsScreen() {
         />
       )}
 
-      <Modal visible={showManual} animationType="slide" transparent>
+      <Modal visible={!!pendingSession} animationType="slide" transparent>
         <View style={styles.sheetOverlay}>
           <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.md }]}>
             <LinearGradient colors={['#0d2035', '#071828']} style={[StyleSheet.absoluteFill, { borderRadius: 24 }]} />
             <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Registro Manual</Text>
-
+            <Text style={styles.sheetTitle}>¿Dónde remaste?</Text>
+            <Text style={{ color: colors.textMuted, marginBottom: spacing.md, fontSize: 14 }}>Ponle un nombre a esta remada</Text>
             <View style={styles.inputRow}>
               <Ionicons name="location-outline" size={16} color={colors.textMuted} />
-              <TextInput style={styles.sheetInput} placeholder="Spot" placeholderTextColor={colors.textMuted} value={manual.spot} onChangeText={v => setManual(m => ({ ...m, spot: v }))} />
+              <TextInput
+                style={styles.sheetInput}
+                placeholder="Ej: La Herradura, playa, canal..."
+                placeholderTextColor={colors.textMuted}
+                value={spotName}
+                onChangeText={setSpotName}
+                autoFocus
+              />
             </View>
-            <View style={styles.twoCol}>
-              <View style={[styles.inputRow, { flex: 1 }]}>
-                <Ionicons name="map-outline" size={15} color={colors.textMuted} />
-                <TextInput style={styles.sheetInput} placeholder="km" placeholderTextColor={colors.textMuted} keyboardType="numeric" value={manual.distanceKm} onChangeText={v => setManual(m => ({ ...m, distanceKm: v }))} />
-              </View>
-              <View style={[styles.inputRow, { flex: 1 }]}>
-                <Ionicons name="time-outline" size={15} color={colors.textMuted} />
-                <TextInput style={styles.sheetInput} placeholder="min" placeholderTextColor={colors.textMuted} keyboardType="numeric" value={manual.durationMin} onChangeText={v => setManual(m => ({ ...m, durationMin: v }))} />
-              </View>
-            </View>
-            <View style={styles.inputRow}>
-              <Ionicons name="document-text-outline" size={16} color={colors.textMuted} />
-              <TextInput style={[styles.sheetInput, { height: 60 }]} placeholder="Notas (opcional)" placeholderTextColor={colors.textMuted} multiline value={manual.notes} onChangeText={v => setManual(m => ({ ...m, notes: v }))} />
-            </View>
-
             <View style={styles.sheetActions}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowManual(false)}>
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setPendingSession(null)}>
+                <Text style={styles.cancelBtnText}>Descartar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.saveBtn} onPress={saveManual}>
+              <TouchableOpacity style={styles.saveBtn} onPress={savePendingSession}>
                 <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]} />
                 <Text style={styles.saveBtnText}>Guardar</Text>
               </TouchableOpacity>

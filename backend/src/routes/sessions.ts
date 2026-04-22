@@ -2,7 +2,7 @@ import { Router } from 'express';
 import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { Timestamp } from 'firebase-admin/firestore';
-import { authenticate } from '../middleware/authenticate.js';
+import { authenticateAny as authenticate } from '../middleware/authenticate.js';
 import { createSession, deleteSession, listSessions, type SessionPayload } from '../services/firestore.js';
 
 const router = Router();
@@ -31,7 +31,7 @@ function sanitizeTrackPoints(value: unknown) {
   const points = value
     .map((point) => {
       const lat = typeof point?.lat === 'number' ? point.lat : undefined;
-      const lon = typeof point?.lon === 'number' ? point.lon : undefined;
+      const lon = typeof point?.lon === 'number' ? point.lon : (typeof point?.lng === 'number' ? point.lng : undefined);
       const timestamp = typeof point?.timestamp === 'number' ? point.timestamp : Date.now();
       if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
       return { lat, lon, timestamp };

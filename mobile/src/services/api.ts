@@ -38,7 +38,7 @@ export const api = {
   deleteComment: (storyId: string, commentId: string) => request<any>(`/v1/stories/${storyId}/comments/${commentId}`, { method: 'DELETE' }),
   getMySessions: () => request<any>('/v1/sessions/me'),
   createSession: (body: object) => request<any>('/v1/sessions/me', { method: 'POST', body: JSON.stringify(body) }),
-  deleteSession: (id: string) => request<any>(`/v1/sessions/${id}`, { method: 'DELETE' }),
+  deleteSession: (id: string) => request<any>(`/v1/sessions/me/${id}`, { method: 'DELETE' }),
   getProfile: () => request<any>('/v1/profile/me'),
   updateProfile: (body: object) => request<any>('/v1/profile/me', { method: 'POST', body: JSON.stringify(body) }),
   searchUsers: (q: string) => request<any>(`/v1/users?q=${encodeURIComponent(q)}`),

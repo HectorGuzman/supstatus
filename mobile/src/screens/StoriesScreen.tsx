@@ -438,7 +438,12 @@ export default function StoriesScreen() {
             </TouchableOpacity>
             {profileLoading ? (
               <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
-            ) : viewingProfile?.displayName ? (
+            ) : !viewingProfile?.displayName ? (
+              <View style={{ alignItems: 'center', padding: 40, gap: 10 }}>
+                <Ionicons name="person-circle-outline" size={48} color={colors.textMuted} />
+                <Text style={{ color: colors.textMuted, fontSize: 15 }}>Perfil no disponible</Text>
+              </View>
+            ) : (
               <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Avatar + name */}
                 <View style={styles.profileHeader}>
@@ -515,7 +520,7 @@ export default function StoriesScreen() {
                   )}
                 </View>
               </ScrollView>
-            ) : null}
+            )}
           </View>
         </View>
       </Modal>

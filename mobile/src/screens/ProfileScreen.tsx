@@ -191,6 +191,20 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
+      {user && !user.emailVerified && user.providerData?.[0]?.providerId === 'password' && (
+        <TouchableOpacity
+          style={styles.verifyBanner}
+          onPress={async () => {
+            try {
+              await (await import('firebase/auth')).sendEmailVerification(user);
+              Alert.alert('Correo enviado', 'Revisa tu bandeja de entrada y verifica tu cuenta.');
+            } catch { Alert.alert('Error', 'No se pudo enviar el correo.'); }
+          }}
+        >
+          <Ionicons name="mail-outline" size={16} color="#fff" />
+          <Text style={styles.verifyBannerText}>Verifica tu correo electrónico — toca aquí para reenviar</Text>
+        </TouchableOpacity>
+      )}
       <ScrollView showsVerticalScrollIndicator={false}>
         <View ref={profileCardRef} collapsable={false}>
         <LinearGradient colors={['#071828', '#040e1e']} style={styles.headerGradient}>
@@ -301,7 +315,8 @@ function StatBox({ value, label, color }: { value: string; label: string; color:
 }
 
 function InfoSection({ profile, onEdit }: { profile: UserProfile | null; onEdit: () => void }) {
-  if (!profile?.nivel && !profile?.disciplina && !profile?.disciplinas?.length && !profile?.bio) {
+  const hasData = !!(profile?.nivel || profile?.disciplina || profile?.disciplinas?.length || profile?.bio || profile?.boardSetup || profile?.equipo);
+  if (!hasData) {
     return (
       <TouchableOpacity style={styles.emptyProfile} onPress={onEdit}>
         <Ionicons name="create-outline" size={32} color={colors.primary} />
@@ -312,21 +327,20 @@ function InfoSection({ profile, onEdit }: { profile: UserProfile | null; onEdit:
   }
   return (
     <View style={styles.infoCard}>
+      <TouchableOpacity style={styles.editIconBtn} onPress={onEdit}>
+        <Ionicons name="settings-outline" size={18} color={colors.textMuted} />
+      </TouchableOpacity>
       {profile?.nivel && <InfoRow icon="ribbon-outline" label="Nivel" value={profile.nivel} />}
       {(profile?.disciplinas?.length || profile?.disciplina) && (
         <InfoRow
-          icon="boat-outline"
+          icon="water-outline"
           label={(profile.disciplinas?.length ?? 0) > 1 ? 'Disciplinas' : 'Disciplina'}
           value={profile.disciplinas?.join(' · ') ?? profile.disciplina!}
         />
       )}
-      {profile?.boardSetup && <InfoRow icon="boat-outline" label="Tabla" value={profile.boardSetup} />}
+      {profile?.boardSetup && <InfoRow icon="tablet-landscape-outline" label="Tabla" value={profile.boardSetup} />}
       {profile?.equipo && <InfoRow icon="people-outline" label="Equipo" value={profile.equipo} />}
       {profile?.bio && <InfoRow icon="person-circle-outline" label="Bio" value={profile.bio} />}
-      <TouchableOpacity style={styles.editBtn} onPress={onEdit}>
-        <Ionicons name="create-outline" size={16} color={colors.primary} />
-        <Text style={styles.editBtnText}>Editar perfil</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -381,7 +395,7 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset }: any)
 
       <Text style={styles.editSectionTitle}>Tabla y equipo</Text>
       <View style={styles.inputGroup}>
-        <Ionicons name="boat-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
+        <Ionicons name="tablet-landscape-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
         <TextInput style={styles.input} placeholder="Ej: 12'6 racing, remo carbono..." placeholderTextColor={colors.textMuted} value={form.boardSetup ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, boardSetup: v }))} />
       </View>
 
@@ -458,6 +472,8 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
+  verifyBanner: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#d97706', paddingHorizontal: spacing.md, paddingVertical: 10 },
+  verifyBannerText: { color: '#fff', fontSize: 13, fontWeight: '600', flex: 1 },
   headerGradient: { paddingTop: 56, paddingHorizontal: spacing.md, paddingBottom: spacing.lg },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.lg },
   screenTitle: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
@@ -487,6 +503,7 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 15, color: colors.textPrimary, fontWeight: '500' },
   editBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: spacing.md, justifyContent: 'center' },
   editBtnText: { color: colors.primary, fontWeight: '600' },
+  editIconBtn: { position: 'absolute', top: spacing.sm, right: spacing.sm, padding: 6 },
   emptyProfile: { alignItems: 'center', padding: spacing.xl, backgroundColor: colors.surface1, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', gap: 8 },
   emptyProfileText: { color: colors.textPrimary, fontSize: 16, fontWeight: '600' },
   emptyProfileSub: { color: colors.textMuted, fontSize: 13 },
