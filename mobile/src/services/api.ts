@@ -39,4 +39,5 @@ export const api = {
   getFollowing: () => request<any>('/v1/users/following'),
   followUser: (targetUid: string) => request<any>(`/v1/users/${targetUid}/follow`, { method: 'POST' }),
   unfollowUser: (targetUid: string) => request<any>(`/v1/users/${targetUid}/follow`, { method: 'DELETE' }),
+  getUserProfile: (uid: string) => request<any>(`/v1/users/${uid}/profile`),
 };

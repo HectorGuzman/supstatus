@@ -52,6 +52,8 @@ export default function StoriesScreen() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
+  const [viewingProfile, setViewingProfile] = useState<any>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   const [commentsStory, setCommentsStory] = useState<Story | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -91,6 +93,19 @@ export default function StoriesScreen() {
         isFollowing ? next.add(targetUid) : next.delete(targetUid);
         return next;
       });
+    }
+  };
+
+  const openUserProfile = async (uid: string) => {
+    setProfileLoading(true);
+    setViewingProfile({ uid });
+    try {
+      const d = await api.getUserProfile(uid);
+      setViewingProfile({ ...d.profile, stats: d.stats, isFollowing: followingUsers.has(uid) });
+    } catch {
+      setViewingProfile(null);
+    } finally {
+      setProfileLoading(false);
     }
   };
 
@@ -378,7 +393,7 @@ export default function StoriesScreen() {
               </Text>
             ) : null}
             renderItem={({ item }) => (
-              <View style={styles.userRow}>
+              <TouchableOpacity style={styles.userRow} onPress={() => openUserProfile(item.uid)} activeOpacity={0.7}>
                 <View style={styles.userAvatar}>
                   {item.avatarUrl
                     ? <Image source={{ uri: item.avatarUrl }} style={{ width: 44, height: 44, borderRadius: 22 }} />
@@ -407,9 +422,100 @@ export default function StoriesScreen() {
                     {followingUsers.has(item.uid) ? 'Siguiendo' : 'Seguir'}
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </TouchableOpacity>
             )}
           />
+        </View>
+      </Modal>
+
+      {/* Public profile modal */}
+      <Modal visible={!!viewingProfile} animationType="slide" transparent onRequestClose={() => setViewingProfile(null)}>
+        <View style={styles.profileOverlay}>
+          <View style={styles.profileSheet}>
+            <TouchableOpacity style={styles.profileClose} onPress={() => setViewingProfile(null)}>
+              <Ionicons name="close" size={22} color={colors.textMuted} />
+            </TouchableOpacity>
+            {profileLoading ? (
+              <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
+            ) : viewingProfile?.displayName ? (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Avatar + name */}
+                <View style={styles.profileHeader}>
+                  <View style={styles.profileAvatarWrap}>
+                    {viewingProfile.avatarUrl
+                      ? <Image source={{ uri: viewingProfile.avatarUrl }} style={styles.profileAvatarImg} />
+                      : <Ionicons name="person" size={36} color={colors.textMuted} />}
+                  </View>
+                  <Text style={styles.profileName}>{viewingProfile.displayName}</Text>
+                  {viewingProfile.nivel && <Text style={styles.profileNivel}>{viewingProfile.nivel}</Text>}
+                  {/* Follow button */}
+                  {currentUser && viewingProfile.uid !== currentUser.uid && (
+                    <TouchableOpacity
+                      style={[styles.profileFollowBtn, followingUsers.has(viewingProfile.uid) && styles.profileFollowBtnActive]}
+                      onPress={() => {
+                        toggleFollow(viewingProfile.uid);
+                        setViewingProfile((p: any) => ({ ...p, isFollowing: !p.isFollowing }));
+                      }}
+                    >
+                      <Text style={styles.profileFollowBtnText}>
+                        {followingUsers.has(viewingProfile.uid) ? 'Siguiendo' : 'Seguir'}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Stats */}
+                {viewingProfile.stats && (
+                  <View style={styles.profileStatsRow}>
+                    <View style={styles.profileStat}>
+                      <Text style={styles.profileStatVal}>{viewingProfile.stats.totalSessions}</Text>
+                      <Text style={styles.profileStatLabel}>Remadas</Text>
+                    </View>
+                    <View style={styles.profileStat}>
+                      <Text style={styles.profileStatVal}>{viewingProfile.stats.totalKm}</Text>
+                      <Text style={styles.profileStatLabel}>km</Text>
+                    </View>
+                    <View style={styles.profileStat}>
+                      <Text style={styles.profileStatVal}>{viewingProfile.stats.totalHours}</Text>
+                      <Text style={styles.profileStatLabel}>horas</Text>
+                    </View>
+                    <View style={styles.profileStat}>
+                      <Text style={styles.profileStatVal}>{viewingProfile.followersCount ?? 0}</Text>
+                      <Text style={styles.profileStatLabel}>seguidores</Text>
+                    </View>
+                  </View>
+                )}
+
+                {/* Info fields */}
+                <View style={styles.profileInfo}>
+                  {viewingProfile.disciplinas?.length > 0 && (
+                    <View style={styles.profileInfoRow}>
+                      <Ionicons name="water-outline" size={16} color={colors.textMuted} />
+                      <Text style={styles.profileInfoText}>{viewingProfile.disciplinas.join(' · ')}</Text>
+                    </View>
+                  )}
+                  {viewingProfile.boardSetup && (
+                    <View style={styles.profileInfoRow}>
+                      <Ionicons name="boat-outline" size={16} color={colors.textMuted} />
+                      <Text style={styles.profileInfoText}>{viewingProfile.boardSetup}</Text>
+                    </View>
+                  )}
+                  {viewingProfile.bio && (
+                    <View style={styles.profileInfoRow}>
+                      <Ionicons name="chatbubble-outline" size={16} color={colors.textMuted} />
+                      <Text style={styles.profileInfoText}>{viewingProfile.bio}</Text>
+                    </View>
+                  )}
+                  {viewingProfile.goals && (
+                    <View style={styles.profileInfoRow}>
+                      <Ionicons name="flag-outline" size={16} color={colors.textMuted} />
+                      <Text style={styles.profileInfoText}>{viewingProfile.goals}</Text>
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
+            ) : null}
+          </View>
         </View>
       </Modal>
 
@@ -717,6 +823,26 @@ const styles = StyleSheet.create({
   userAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   userDisplayName: { color: colors.textPrimary, fontWeight: '700', fontSize: 15 },
   userNivel: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+
+  // Public profile modal
+  profileOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  profileSheet: { backgroundColor: colors.surface1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: spacing.lg, maxHeight: '85%' },
+  profileClose: { alignSelf: 'flex-end', padding: 4, marginBottom: 8 },
+  profileHeader: { alignItems: 'center', marginBottom: spacing.lg },
+  profileAvatarWrap: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: 12 },
+  profileAvatarImg: { width: 80, height: 80, borderRadius: 40 },
+  profileName: { fontSize: 20, fontWeight: '800', color: colors.textPrimary, marginBottom: 4 },
+  profileNivel: { fontSize: 13, color: colors.textMuted, marginBottom: 12 },
+  profileFollowBtn: { paddingHorizontal: 24, paddingVertical: 8, borderRadius: radius.full, backgroundColor: colors.primary },
+  profileFollowBtnActive: { backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border },
+  profileFollowBtnText: { color: '#fff', fontWeight: '700', fontSize: 14 },
+  profileStatsRow: { flexDirection: 'row', backgroundColor: colors.surface2, borderRadius: radius.lg, padding: spacing.md, marginBottom: spacing.lg, gap: 0 },
+  profileStat: { flex: 1, alignItems: 'center' },
+  profileStatVal: { fontSize: 20, fontWeight: '800', color: colors.textPrimary },
+  profileStatLabel: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+  profileInfo: { gap: 12 },
+  profileInfoRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  profileInfoText: { flex: 1, color: colors.textSecondary, fontSize: 14, lineHeight: 20 },
 
   // Filters
   filterRow: { flexDirection: 'row', paddingHorizontal: spacing.md, paddingVertical: 10, gap: 8 },

@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { authenticateAny } from '../middleware/authenticate.js';
 import { ensureFirebase } from '../config/firebase.js';
+import { getUserProfile, listSessions } from '../services/firestore.js';
 
 const router = Router();
 
@@ -133,6 +134,44 @@ router.delete('/:targetUid/follow', authenticateAny, async (req: Request, res: R
   } catch (err) {
     console.error('[users] unfollow error', err);
     res.status(500).json({ error: 'No se pudo dejar de seguir al usuario.' });
+  }
+});
+
+// GET /v1/users/:uid/profile — public profile + session stats
+router.get('/:uid/profile', authenticateAny, async (req: Request, res: Response) => {
+  const { uid } = req.params;
+  try {
+    const profile = await getUserProfile(uid);
+    if (!profile) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+    const sessions = await listSessions(uid) as any[];
+    const totalSessions = sessions.length;
+    const totalKm = sessions.reduce((acc, s) => acc + (Number(s.distanceKm) || 0), 0);
+    const totalDurationMin = sessions.reduce((acc, s) => acc + (Number(s.durationMin) || 0), 0);
+
+    res.json({
+      profile: {
+        uid,
+        displayName: profile.displayName ?? '',
+        avatarUrl: profile.avatarUrl ?? null,
+        bio: profile.bio ?? null,
+        nivel: profile.nivel ?? null,
+        disciplinas: profile.disciplinas ?? (profile.disciplina ? [profile.disciplina] : []),
+        boardSetup: profile.boardSetup ?? null,
+        goals: profile.goals ?? null,
+        followersCount: profile.followersCount ?? 0,
+        followingCount: profile.followingCount ?? 0,
+      },
+      stats: {
+        totalSessions,
+        totalKm: Number(totalKm.toFixed(1)),
+        totalDurationMin: Number(totalDurationMin.toFixed(0)),
+        totalHours: Number((totalDurationMin / 60).toFixed(1)),
+      },
+    });
+  } catch (err) {
+    console.error('[users] profile error', err);
+    res.status(500).json({ error: 'No se pudo obtener el perfil.' });
   }
 });
 
