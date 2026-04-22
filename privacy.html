@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacidad y Términos — SUP Status</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #040b16;
+      --surface: #06121f;
+      --border: rgba(38,198,218,0.12);
+      --primary: #26c6da;
+      --accent: #ff73a1;
+      --gold: #ffc542;
+      --text: #f2f6ff;
+      --muted: rgba(242,246,255,0.6);
+      --radius: 14px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      background-image: linear-gradient(135deg, #0b3954 0%, #081d36 46%, #150b31 100%);
+      background-attachment: fixed;
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+    header {
+      background: rgba(6,18,31,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header img { width: 34px; height: 34px; border-radius: 8px; }
+    header a { color: var(--primary); text-decoration: none; font-size: 14px; margin-left: auto; transition: color .2s; }
+    header a:hover { color: var(--accent); }
+    .brand { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; color: var(--text); }
+
+    main {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .hero h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    .hero p { color: var(--muted); font-size: 14px; }
+
+    .toc {
+      background: rgba(6,18,31,0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+    .toc h2 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); margin-bottom: 12px; }
+    .toc ol { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .toc a { color: var(--text); text-decoration: none; font-size: 14px; transition: color .2s; }
+    .toc a:hover { color: var(--primary); }
+
+    section {
+      margin-bottom: 44px;
+      scroll-margin-top: 80px;
+    }
+    section h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    section h3 {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+      margin: 22px 0 8px;
+    }
+    p { margin-bottom: 12px; color: var(--text); }
+    ul, ol { padding-left: 22px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+    li { color: var(--text); }
+    li::marker { color: var(--primary); }
+    strong { color: #fff; font-weight: 600; }
+    a { color: var(--primary); text-decoration: none; }
+    a:hover { color: var(--accent); text-decoration: underline; }
+
+    .card {
+      background: rgba(6,18,31,0.7);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin: 16px 0;
+    }
+    .card p { margin: 0; }
+
+    .highlight {
+      border-left: 3px solid var(--gold);
+      background: rgba(255,197,66,0.06);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 12px 16px;
+      margin: 16px 0;
+    }
+    .highlight p { margin: 0; }
+
+    .badge {
+      display: inline-block;
+      background: rgba(38,198,218,0.15);
+      color: var(--primary);
+      border: 1px solid rgba(38,198,218,0.3);
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    footer {
+      text-align: center;
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img src="logosupstatus.png" alt="SUP Status" />
+  <span class="brand">SUP Status</span>
+  <a href="/">← Volver al inicio</a>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Privacidad y Términos</h1>
+    <p>Última actualización: abril 2025 · Aplicación móvil y sitio web SUP Status</p>
+  </div>
+
+  <nav class="toc">
+    <h2>Contenido</h2>
+    <ol>
+      <li><a href="#quienes-somos">¿Quiénes somos?</a></li>
+      <li><a href="#datos-recopilados">Datos que recopilamos</a></li>
+      <li><a href="#como-usamos">Cómo usamos tus datos</a></li>
+      <li><a href="#terceros">Terceros y servicios externos</a></li>
+      <li><a href="#almacenamiento">Almacenamiento y seguridad</a></li>
+      <li><a href="#tus-derechos">Tus derechos</a></li>
+      <li><a href="#eliminar-cuenta">Eliminación de cuenta y datos</a></li>
+      <li><a href="#menores">Menores de edad</a></li>
+      <li><a href="#notificaciones">Notificaciones push</a></li>
+      <li><a href="#terminos">Términos de uso</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ol>
+  </nav>
+
+  <!-- 1 -->
+  <section id="quienes-somos">
+    <h2>1. ¿Quiénes somos?</h2>
+    <p><strong>SUP Status</strong> es una plataforma independiente creada para la comunidad de Stand Up Paddle (SUP) en Chile. Incluye una aplicación móvil (iOS y Android) y un sitio web que muestran condiciones del mar, permiten registrar sesiones de entrenamiento y conectar a remeros.</p>
+    <div class="card">
+      <p>Responsable: <strong>SUP Status</strong><br>
+      Contacto: <a href="mailto:supstatus4r@gmail.com">supstatus4r@gmail.com</a><br>
+      Instagram: <a href="https://instagram.com/__supstatus" target="_blank">@__supstatus</a></p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="datos-recopilados">
+    <h2>2. Datos que recopilamos</h2>
+    <p>Solo recopilamos lo estrictamente necesario para que la app funcione:</p>
+
+    <h3>Datos de cuenta</h3>
+    <ul>
+      <li><strong>Email y contraseña</strong> (si registras cuenta con email)</li>
+      <li><strong>Nombre y foto de perfil</strong> de Google (si usas "Continuar con Google")</li>
+      <li><strong>Nombre visible</strong> que tú eliges en el perfil</li>
+    </ul>
+
+    <h3>Datos de perfil opcionales</h3>
+    <ul>
+      <li>Nivel de SUP, disciplinas, tipo de tabla, equipo, bio</li>
+      <li>Spot favorito (para notificaciones de condiciones)</li>
+    </ul>
+
+    <h3>Datos de sesiones</h3>
+    <ul>
+      <li>Distancia, duración y fecha de cada remada registrada</li>
+      <li><strong>Datos GPS</strong>: ruta (coordenadas lat/lng) capturada durante el seguimiento activo. Solo se recopila cuando el usuario inicia explícitamente el tracking</li>
+    </ul>
+
+    <h3>Historias y contenido</h3>
+    <ul>
+      <li>Texto e imágenes que publicas voluntariamente en la sección de historias</li>
+      <li>Comentarios y likes a historias de otros usuarios</li>
+    </ul>
+
+    <h3>Datos técnicos</h3>
+    <ul>
+      <li>Token de dispositivo para notificaciones push (FCM)</li>
+      <li>No recopilamos datos de diagnóstico, analytics ni seguimiento de comportamiento</li>
+    </ul>
+  </section>
+
+  <!-- 3 -->
+  <section id="como-usamos">
+    <h2>3. Cómo usamos tus datos</h2>
+    <div class="highlight">
+      <p><strong>No vendemos ni compartimos tus datos personales con terceros con fines comerciales.</strong></p>
+    </div>
+    <p>Usamos tus datos únicamente para:</p>
+    <ul>
+      <li>Autenticar tu sesión y mantener tu cuenta segura</li>
+      <li>Mostrar tu perfil, historial de remadas y estadísticas</li>
+      <li>Publicar las historias y comentarios que tú decides compartir</li>
+      <li>Enviarte notificaciones push si las habilitaste (condiciones del spot, interacciones sociales)</li>
+      <li>Calcular estadísticas agregadas anónimas sobre el uso de la app (sin identificar usuarios individuales)</li>
+    </ul>
+  </section>
+
+  <!-- 4 -->
+  <section id="terceros">
+    <h2>4. Terceros y servicios externos</h2>
+    <p>SUP Status utiliza los siguientes servicios de terceros. Cada uno tiene su propia política de privacidad:</p>
+
+    <h3>Firebase (Google)</h3>
+    <p>Usamos Firebase para autenticación, base de datos (Firestore) y almacenamiento de imágenes. Google puede procesar datos conforme a su política de privacidad.</p>
+    <p><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Política de privacidad de Firebase →</a></p>
+
+    <h3>Google Sign-In</h3>
+    <p>Si inicias sesión con Google, Google comparte tu nombre, email y foto de perfil con nosotros. No accedemos a otros datos de tu cuenta de Google.</p>
+
+    <h3>Open-Meteo</h3>
+    <p>Usamos la API pública de Open-Meteo para obtener datos meteorológicos y marinos. No se envían datos personales a este servicio.</p>
+    <p><a href="https://open-meteo.com/en/terms" target="_blank" rel="noopener">Términos de Open-Meteo →</a></p>
+
+    <h3>OpenAI</h3>
+    <p>Usamos GPT-4o mini para interpretar las condiciones del mar y generar texto descriptivo. Solo se envían datos meteorológicos (nunca datos personales de usuarios).</p>
+
+    <h3>Google Cloud Run</h3>
+    <p>Nuestro backend se ejecuta en Google Cloud. Los datos se almacenan en servidores de Google en la región <span class="badge">us-east1</span>.</p>
+
+    <h3>Expo / React Native</h3>
+    <p>La app móvil está construida con Expo. Expo puede recopilar datos técnicos básicos según su política de privacidad.</p>
+    <p><a href="https://expo.dev/privacy" target="_blank" rel="noopener">Política de Expo →</a></p>
+  </section>
+
+  <!-- 5 -->
+  <section id="almacenamiento">
+    <h2>5. Almacenamiento y seguridad</h2>
+    <ul>
+      <li>Todos los datos se almacenan en <strong>Google Firebase / Firestore</strong>, con cifrado en tránsito (HTTPS/TLS) y en reposo</li>
+      <li>Las contraseñas son manejadas íntegramente por Firebase Authentication — nunca almacenamos contraseñas en texto plano</li>
+      <li>Las imágenes se almacenan en Firebase Storage con acceso autenticado</li>
+      <li>Los tokens de notificación push se almacenan en Firestore y solo se usan para enviar notificaciones al dispositivo correspondiente</li>
+      <li>Los datos de GPS de sesiones se almacenan en tu subcuenta privada en Firestore y no son visibles para otros usuarios</li>
+    </ul>
+    <div class="highlight">
+      <p>En caso de detectar una vulnerabilidad de seguridad, contáctanos a <a href="mailto:supstatus4r@gmail.com">supstatus4r@gmail.com</a> antes de divulgarla públicamente.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="tus-derechos">
+    <h2>6. Tus derechos</h2>
+    <p>Tienes derecho a:</p>
+    <ul>
+      <li><strong>Acceder</strong> a los datos que tenemos sobre ti</li>
+      <li><strong>Corregir</strong> datos incorrectos desde la sección de perfil en la app</li>
+      <li><strong>Eliminar</strong> tu cuenta y todos los datos asociados (ver sección 7)</li>
+      <li><strong>Exportar</strong> tus datos — contáctanos y te enviamos un archivo con tu información</li>
+      <li><strong>Revocar</strong> el permiso de notificaciones push en cualquier momento desde la configuración de tu dispositivo</li>
+      <li><strong>Oponerte</strong> a cualquier uso de tus datos que no sea esencial para el servicio</li>
+    </ul>
+    <p>Para ejercer cualquiera de estos derechos escríbenos a <a href="mailto:supstatus4r@gmail.com">supstatus4r@gmail.com</a>.</p>
+  </section>
+
+  <!-- 7 -->
+  <section id="eliminar-cuenta">
+    <h2>7. Eliminación de cuenta y datos</h2>
+    <p>Puedes eliminar tu cuenta y todos tus datos de dos formas:</p>
+
+    <h3>Desde la app</h3>
+    <p>Ve a <strong>Perfil → Cerrar sesión</strong>. Para eliminar la cuenta completa, contáctanos desde el email asociado a tu cuenta.</p>
+
+    <h3>Por solicitud</h3>
+    <p>Envía un email a <a href="mailto:supstatus4r@gmail.com">supstatus4r@gmail.com</a> con el asunto <strong>"Eliminar mi cuenta"</strong> desde el correo con el que te registraste. Procesaremos tu solicitud en un plazo máximo de <strong>30 días</strong>.</p>
+
+    <div class="card">
+      <p>Al eliminar tu cuenta se borran permanentemente: perfil, sesiones de entrenamiento, historias publicadas, comentarios, likes e imagen de perfil. <strong>Esta acción es irreversible.</strong></p>
+    </div>
+
+    <p>Los datos que hayas compartido públicamente (historias, comentarios) pueden haber sido vistos por otros usuarios antes de la eliminación.</p>
+  </section>
+
+  <!-- 8 -->
+  <section id="menores">
+    <h2>8. Menores de edad</h2>
+    <p>SUP Status no está dirigido a menores de 13 años. No recopilamos intencionalmente datos de menores. Si eres padre/tutor y crees que un menor ha creado una cuenta, contáctanos para eliminarla.</p>
+    <p>Para usuarios entre 13 y 18 años, recomendamos que cuenten con la autorización de un adulto responsable.</p>
+  </section>
+
+  <!-- 9 -->
+  <section id="notificaciones">
+    <h2>9. Notificaciones push</h2>
+    <p>La app puede solicitar permiso para enviarte notificaciones. Esto es completamente <strong>opcional</strong>.</p>
+    <p>Si aceptas, podemos enviarte:</p>
+    <ul>
+      <li>Alertas de buenas condiciones en tu spot favorito (solo cuando el viento y oleaje son favorables)</li>
+      <li>Notificaciones de interacción social: likes, comentarios en tus historias, nuevos seguidores</li>
+    </ul>
+    <p>Puedes desactivar las notificaciones en cualquier momento desde <strong>Configuración del dispositivo → Notificaciones → SUP Status</strong>. Al desactivarlas, dejaremos de enviarte mensajes.</p>
+    <p>Los tokens de notificación (identificadores técnicos de dispositivo) se almacenan en nuestra base de datos y se usan únicamente para entregar notificaciones. No los compartimos con terceros.</p>
+  </section>
+
+  <!-- 10 -->
+  <section id="terminos">
+    <h2>10. Términos de uso</h2>
+
+    <h3>Uso aceptable</h3>
+    <p>Al usar SUP Status aceptas:</p>
+    <ul>
+      <li>No publicar contenido ofensivo, discriminatorio, ilegal o que infrinja derechos de terceros</li>
+      <li>No usar la plataforma para spam, acoso o actividades comerciales sin autorización</li>
+      <li>No intentar acceder a cuentas ajenas ni vulnerar la seguridad del servicio</li>
+      <li>Que el contenido que publicas (historias, fotos) es de tu autoría o tienes los derechos para compartirlo</li>
+    </ul>
+
+    <h3>Contenido del usuario</h3>
+    <p>Conservas la propiedad de todo el contenido que publicas. Al publicarlo, nos otorgas una licencia no exclusiva, libre de regalías, para mostrarlo dentro de la plataforma SUP Status. Podemos eliminar contenido que viole estos términos sin previo aviso.</p>
+
+    <h3>Exactitud de la información</h3>
+    <div class="highlight">
+      <p>Los datos de condiciones del mar (viento, oleaje, mareas) provienen de fuentes públicas como Open-Meteo y son orientativos. <strong>No nos responsabilizamos por decisiones tomadas en base a esta información.</strong> Siempre evalúa las condiciones reales antes de entrar al agua.</p>
+    </div>
+
+    <h3>Disponibilidad del servicio</h3>
+    <p>SUP Status es un proyecto independiente sin fines de lucro. No garantizamos disponibilidad continua del servicio. Podemos modificar, suspender o discontinuar la plataforma en cualquier momento, con o sin previo aviso.</p>
+
+    <h3>Limitación de responsabilidad</h3>
+    <p>En la máxima medida permitida por la ley aplicable, SUP Status y sus creadores no serán responsables por daños directos, indirectos, incidentales o consecuentes derivados del uso de la plataforma, incluyendo lesiones físicas resultantes de actividades en el agua.</p>
+
+    <h3>Modificaciones</h3>
+    <p>Podemos actualizar esta política y los términos de uso. Notificaremos cambios relevantes a través de la app o por email. El uso continuado de la plataforma implica la aceptación de los términos vigentes.</p>
+
+    <h3>Ley aplicable</h3>
+    <p>Estos términos se rigen por las leyes de la República de Chile. Cualquier disputa se someterá a los tribunales competentes de la ciudad de Coquimbo, Chile.</p>
+  </section>
+
+  <!-- 11 -->
+  <section id="contacto">
+    <h2>11. Contacto</h2>
+    <p>Para cualquier consulta sobre privacidad, solicitud de datos o reporte de contenido inapropiado:</p>
+    <div class="card">
+      <p>📧 <a href="mailto:supstatus4r@gmail.com">supstatus4r@gmail.com</a><br>
+      📱 Instagram: <a href="https://instagram.com/__supstatus" target="_blank" rel="noopener">@__supstatus</a><br>
+      ⏱ Tiempo de respuesta: máximo 30 días hábiles</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2025 SUP Status · <a href="/">Volver al inicio</a> · <a href="mailto:supstatus4r@gmail.com">Contacto</a></p>
+</footer>
+
+</body>
+</html>
