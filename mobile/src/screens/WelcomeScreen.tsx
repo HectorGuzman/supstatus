@@ -52,10 +52,11 @@ export default function WelcomeScreen() {
     try {
       if (mode === 'register') {
         const cred = await createUserWithEmailAndPassword(auth as any, email.trim(), password);
-        // Save display name immediately after registration
         if (cred.user) {
-          const { updateProfile } = await import('firebase/auth');
+          const { updateProfile, sendEmailVerification } = await import('firebase/auth');
           await updateProfile(cred.user, { displayName: name.trim() });
+          await sendEmailVerification(cred.user);
+          Alert.alert('¡Cuenta creada!', 'Te enviamos un correo de verificación. Revisa tu bandeja de entrada.');
         }
       } else {
         await signInWithEmailAndPassword(auth as any, email.trim(), password);

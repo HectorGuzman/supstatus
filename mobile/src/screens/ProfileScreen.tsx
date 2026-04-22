@@ -98,8 +98,15 @@ export default function ProfileScreen() {
       return;
     }
     try {
-      if (authMode === 'login') await signInWithEmailAndPassword(auth as any, email.trim(), password);
-      else await createUserWithEmailAndPassword(auth as any, email.trim(), password);
+      if (authMode === 'login') {
+        await signInWithEmailAndPassword(auth as any, email.trim(), password);
+      } else {
+        const cred = await createUserWithEmailAndPassword(auth as any, email.trim(), password);
+        if (cred.user) {
+          await (await import('firebase/auth')).sendEmailVerification(cred.user);
+          Alert.alert('¡Cuenta creada!', 'Te enviamos un correo de verificación. Revisa tu bandeja de entrada.');
+        }
+      }
     } catch (e: any) {
       const msgs: Record<string, string> = {
         'auth/invalid-credential': 'Email o contraseña incorrectos.',
