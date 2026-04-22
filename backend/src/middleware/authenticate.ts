@@ -3,11 +3,7 @@ import { ensureFirebase } from '../config/firebase.js';
 
 const admin = ensureFirebase();
 
-export async function authenticate(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+async function verifyToken(req: Request, res: Response, requireVerifiedEmail: boolean, next: NextFunction) {
   const header = req.headers.authorization;
 
   if (!header || !header.startsWith('Bearer ')) {
@@ -18,14 +14,23 @@ export async function authenticate(
 
   try {
     const decoded = await admin.auth().verifyIdToken(token);
-    if (!decoded.email_verified && decoded.firebase?.sign_in_provider === 'password') {
+    if (requireVerifiedEmail && !decoded.email_verified && decoded.firebase?.sign_in_provider === 'password') {
       return res.status(403).json({ error: 'Email no verificado.' });
     }
-    // Attach decoded token so downstream handlers can access user info
     (req as Request & { user?: typeof decoded }).user = decoded;
     return next();
   } catch (error) {
     console.error('[auth] Token verification failed', error);
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
+}
+
+// Requiere email verificado (para publicar historias)
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
+  return verifyToken(req, res, true, next);
+}
+
+// Solo requiere estar autenticado, sin exigir email verificado
+export async function authenticateAny(req: Request, res: Response, next: NextFunction) {
+  return verifyToken(req, res, false, next);
 }

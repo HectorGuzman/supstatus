@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { authenticate } from '../middleware/authenticate.js';
+import { authenticateAny } from '../middleware/authenticate.js';
 import { ensureFirebase } from '../config/firebase.js';
 
 const router = Router();
@@ -11,7 +11,7 @@ function uid(req: Request): string | undefined {
 }
 
 // GET /v1/users/following — list UIDs the current user follows
-router.get('/following', authenticate, async (req: Request, res: Response) => {
+router.get('/following', authenticateAny, async (req: Request, res: Response) => {
   const me = uid(req);
   if (!me) return res.status(400).json({ error: 'UID no disponible.' });
   try {
@@ -30,7 +30,7 @@ router.get('/following', authenticate, async (req: Request, res: Response) => {
 });
 
 // GET /v1/users?q=term — search users by displayName prefix, or return suggestions if no query
-router.get('/', authenticate, async (req: Request, res: Response) => {
+router.get('/', authenticateAny, async (req: Request, res: Response) => {
   const me = uid(req);
   const q = (typeof req.query.q === 'string' ? req.query.q : '').trim();
   try {
@@ -82,7 +82,7 @@ router.get('/', authenticate, async (req: Request, res: Response) => {
 });
 
 // POST /v1/users/:targetUid/follow
-router.post('/:targetUid/follow', authenticate, async (req: Request, res: Response) => {
+router.post('/:targetUid/follow', authenticateAny, async (req: Request, res: Response) => {
   const me = uid(req);
   const { targetUid } = req.params;
   if (!me) return res.status(400).json({ error: 'UID no disponible.' });
@@ -112,7 +112,7 @@ router.post('/:targetUid/follow', authenticate, async (req: Request, res: Respon
 });
 
 // DELETE /v1/users/:targetUid/follow
-router.delete('/:targetUid/follow', authenticate, async (req: Request, res: Response) => {
+router.delete('/:targetUid/follow', authenticateAny, async (req: Request, res: Response) => {
   const me = uid(req);
   const { targetUid } = req.params;
   if (!me) return res.status(400).json({ error: 'UID no disponible.' });
