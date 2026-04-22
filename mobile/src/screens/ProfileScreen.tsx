@@ -42,7 +42,7 @@ function getNextRank(km: number) {
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const profileCardRef = useRef<View>(null);
-  const [user, setUser] = useState(auth.currentUser);
+  const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -284,7 +284,7 @@ export default function ProfileScreen() {
           <Ionicons name="logo-instagram" size={18} color="#e1306c" />
           <Text style={styles.igText}>Síguenos en Instagram <Text style={styles.igHandle}>@__supstatus</Text></Text>
         </TouchableOpacity>
-        <View style={{ height: 80 }} />
+        <View style={{ height: 80 + insets.bottom }} />
       </ScrollView>
     </View>
   );

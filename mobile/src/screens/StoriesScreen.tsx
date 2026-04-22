@@ -33,7 +33,7 @@ function formatRelativeTime(dateStr: string | null) {
 
 export default function StoriesScreen() {
   const insets = useSafeAreaInsets();
-  const [currentUser, setCurrentUser] = useState<any>((auth as any).currentUser);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -382,7 +382,7 @@ export default function StoriesScreen() {
           <FlatList
             data={searchResults}
             keyExtractor={item => item.uid}
-            contentContainerStyle={{ padding: spacing.md, gap: 10 }}
+            contentContainerStyle={{ padding: spacing.md, gap: 10, paddingBottom: spacing.md + insets.bottom }}
             ListHeaderComponent={!searchLoading && searchResults.length > 0 ? (
               <Text style={{ color: colors.textMuted, fontSize: 12, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 8 }}>
                 {searchQuery.length >= 2 ? 'Resultados' : 'Sugerencias'}
@@ -609,7 +609,7 @@ export default function StoriesScreen() {
                 data={comments}
                 keyExtractor={c => c.id}
                 style={styles.commentsList}
-                contentContainerStyle={{ paddingVertical: 8 }}
+                contentContainerStyle={{ paddingTop: 8, paddingBottom: 8 + insets.bottom }}
                 ListEmptyComponent={
                   <View style={styles.noComments}>
                     <Ionicons name="chatbubble-outline" size={32} color={colors.textMuted} />

@@ -137,7 +137,7 @@ function SessionDetail({ session, onClose, onDeleted }: { session: Session; onCl
 
 export default function SessionsScreen() {
   const insets = useSafeAreaInsets();
-  const [currentUser, setCurrentUser] = useState<any>((auth as any).currentUser);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [authLoaded, setAuthLoaded] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -329,7 +329,7 @@ export default function SessionsScreen() {
               </LinearGradient>
             </TouchableOpacity>
           ))}
-          <View style={{ height: 80 }} />
+          <View style={{ height: 80 + insets.bottom }} />
         </ScrollView>
       )}
 
