@@ -32,6 +32,7 @@ export default function SpotSelector({ selected, onSelect }: Props) {
         lat: parseFloat(form.lat),
         lng: parseFloat(form.lng),
         dataUrl: form.dataUrl,
+        createdBy: auth.currentUser!.uid,
       });
       onSelect(spot);
       setShowAdd(false);
