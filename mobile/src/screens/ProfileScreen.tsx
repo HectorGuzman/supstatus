@@ -63,7 +63,7 @@ export default function ProfileScreen() {
   }, []);
 
   const loadProfile = async () => {
-    try { const d = await api.getProfile(); setProfile(d); setForm(d); }
+    try { const d = await api.getProfile(); setProfile(d.profile); setForm(d.profile ?? {}); }
     finally { setLoading(false); }
   };
 
@@ -165,7 +165,7 @@ export default function ProfileScreen() {
       setForm(f => ({ ...f, avatarUrl: url }));
       // Auto-save avatar immediately
       const updated = await api.updateProfile({ ...form, avatarUrl: url });
-      setProfile(updated);
+      setProfile(updated.profile);
     } catch (e: any) {
       Alert.alert('Error al subir foto', e?.message ?? 'No se pudo subir la imagen. Verifica tu conexión.');
     } finally {
@@ -175,7 +175,7 @@ export default function ProfileScreen() {
 
   const saveProfile = async () => {
     setSaving(true);
-    try { const d = await api.updateProfile(form); setProfile(d); setEditing(false); }
+    try { const d = await api.updateProfile(form); setProfile(d.profile); setEditing(false); }
     catch { Alert.alert('Error', 'No se pudo guardar el perfil.'); }
     finally { setSaving(false); }
   };
