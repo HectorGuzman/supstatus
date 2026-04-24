@@ -2,139 +2,139 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "5.1 km/h",
-      "oleaje": "1.7 m",
+      "viento": "5.8 km/h",
+      "oleaje": "2.48 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.6°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 8,
+      "temperatura": "14.8°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 187,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones son adecuadas para principiantes, el viento es suave."
+      "condiciones": "Las condiciones son adecuadas para principiantes, pero el oleaje es un poco alto."
     },
     {
       "hora": "09:00",
-      "viento": "5.7 km/h",
-      "oleaje": "1.74 m",
+      "viento": "5.2 km/h",
+      "oleaje": "2.5 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.8°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 342,
+      "temperatura": "14.8°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 192,
       "nivel": "Principiante",
-      "condiciones": "Aún es un buen momento para principiantes, aunque el oleaje comienza a aumentar."
+      "condiciones": "El viento es leve, pero el oleaje sigue siendo desafiante para los principiantes."
     },
     {
       "hora": "12:00",
-      "viento": "2.8 km/h",
-      "oleaje": "1.82 m",
+      "viento": "10.4 km/h",
+      "oleaje": "2.48 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.1°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 310,
-      "nivel": "Principiante",
-      "condiciones": "Las condiciones siguen siendo favorables, ideal para disfrutar del SUP."
-    },
-    {
-      "hora": "15:00",
-      "viento": "7.7 km/h",
-      "oleaje": "1.9 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "16.6°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 233,
-      "nivel": "Principiante",
-      "condiciones": "El viento ha aumentado, pero sigue siendo manejable para principiantes."
-    },
-    {
-      "hora": "18:00",
-      "viento": "13.4 km/h",
-      "oleaje": "2.0 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "16.7°C",
+      "temperatura": "15.7°C",
       "direccionViento": "Sur",
       "direccionVientoGrados": 200,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones más desafiantes, recomendadas para intermedios."
+      "condiciones": "Condiciones favorables para intermedios, con un viento moderado."
+    },
+    {
+      "hora": "15:00",
+      "viento": "20.0 km/h",
+      "oleaje": "2.48 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "15.9°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 206,
+      "nivel": "Avanzado",
+      "condiciones": "El viento fuerte y el oleaje hacen que sea ideal para avanzados."
+    },
+    {
+      "hora": "18:00",
+      "viento": "20.9 km/h",
+      "oleaje": "2.54 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "15.8°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 201,
+      "nivel": "Avanzado",
+      "condiciones": "Condiciones óptimas para surfistas avanzados, con oleaje y viento favorables."
     },
     {
       "hora": "21:00",
-      "viento": "16.2 km/h",
-      "oleaje": "2.12 m",
+      "viento": "18.0 km/h",
+      "oleaje": "2.58 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.3°C",
+      "temperatura": "15.4°C",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 197,
+      "direccionVientoGrados": 200,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones fuertes, solo para paddlers avanzados."
+      "condiciones": "El viento sigue siendo fuerte, ideal para quienes buscan desafíos."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "2.2 km/h",
-      "oleaje": "2.4 m",
+      "viento": "12.7 km/h",
+      "oleaje": "2.74 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.3°C",
+      "temperatura": "14.8°C",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 189,
-      "nivel": "Principiante",
-      "condiciones": "El viento es muy suave, pero el oleaje es un poco alto para principiantes."
+      "direccionVientoGrados": 187,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones adecuadas para intermedios, pero con precaución por el oleaje."
     },
     {
       "hora": "09:00",
-      "viento": "3.6 km/h",
-      "oleaje": "2.48 m",
+      "viento": "1.9 km/h",
+      "oleaje": "2.86 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.5°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 217,
+      "temperatura": "14.7°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 338,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones siguen siendo desafiantes para principiantes debido al oleaje."
+      "condiciones": "El viento es muy leve, pero el oleaje es un reto para principiantes."
     },
     {
       "hora": "12:00",
-      "viento": "8.8 km/h",
-      "oleaje": "2.5 m",
+      "viento": "5.6 km/h",
+      "oleaje": "2.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.1°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 215,
-      "nivel": "Intermedio",
-      "condiciones": "Condiciones más adecuadas para intermedios, el viento es moderado."
+      "temperatura": "15.2°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 345,
+      "nivel": "Principiante",
+      "condiciones": "Condiciones complicadas para principiantes por el oleaje alto."
     },
     {
       "hora": "15:00",
-      "viento": "19.5 km/h",
-      "oleaje": "2.54 m",
+      "viento": "5.8 km/h",
+      "oleaje": "2.9 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.9°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 203,
-      "nivel": "Avanzado",
-      "condiciones": "Condiciones fuertes, ideales para paddlers avanzados que buscan desafío."
+      "temperatura": "15.6°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 266,
+      "nivel": "Principiante",
+      "condiciones": "El viento es suave, pero el oleaje sigue siendo un desafío."
     },
     {
       "hora": "18:00",
-      "viento": "26.1 km/h",
-      "oleaje": "2.58 m",
+      "viento": "8.1 km/h",
+      "oleaje": "2.88 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.3°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 198,
-      "nivel": "Avanzado",
-      "condiciones": "Condiciones muy desafiantes, solo para expertos en SUP."
+      "temperatura": "15.7°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 212,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones adecuadas para intermedios, con viento moderado."
     },
     {
       "hora": "21:00",
-      "viento": "22.0 km/h",
-      "oleaje": "2.6 m",
+      "viento": "8.8 km/h",
+      "oleaje": "2.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.9°C",
+      "temperatura": "15.6°C",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 198,
-      "nivel": "Avanzado",
-      "condiciones": "El oleaje y viento son altos, recomendados solo para paddlers experimentados."
+      "direccionVientoGrados": 199,
+      "nivel": "Intermedio",
+      "condiciones": "El viento es aceptable, pero el oleaje puede ser complicado."
     }
   ],
   "mareas": [],
-  "generado": "2026-04-23 04:50:50"
+  "generado": "2026-04-24 04:58:01"
 }
