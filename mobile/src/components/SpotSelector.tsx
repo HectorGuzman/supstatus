@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, Modal, ScrollView,
   StyleSheet, Linking,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Spot } from '../types';
 import { subscribeSpots } from '../services/spots';
 
@@ -14,6 +15,7 @@ interface Props {
 export default function SpotSelector({ selected, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const [spots, setSpots] = useState<Spot[]>([]);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => subscribeSpots(setSpots), []);
 
@@ -26,7 +28,7 @@ export default function SpotSelector({ selected, onSelect }: Props) {
 
       <Modal visible={open} animationType="slide" transparent>
         <View style={styles.overlay}>
-          <View style={styles.sheet}>
+          <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
             <Text style={styles.sheetTitle}>Spots</Text>
             <ScrollView style={{ maxHeight: 320 }}>
               {spots.map(spot => (

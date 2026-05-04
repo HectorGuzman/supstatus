@@ -1,10 +1,10 @@
 export const colors = {
   bg: '#040e1e',
-  surface1: '#071828',
-  surface2: '#0c2035',
-  surface3: '#122844',
-  border: '#1a3550',
-  borderLight: '#1e4060',
+  surface1: '#081c2e',
+  surface2: '#0e2640',
+  surface3: '#142e4e',
+  border: '#1e3f5c',
+  borderLight: '#24507a',
 
   primary: '#0ea5e9',
   primaryLight: '#38bdf8',
@@ -20,10 +20,10 @@ export const colors = {
   purple: '#a855f7',
   purpleGlow: 'rgba(168,85,247,0.15)',
 
-  textPrimary: '#f0f9ff',
-  textSecondary: '#7dd3fc',
-  textMuted: '#3d6680',
-  textDim: '#1e4060',
+  textPrimary: '#ffffff',
+  textSecondary: '#bfdbfe',
+  textMuted: '#93c5fd',
+  textDim: '#60a5b8',
 };
 
 export const gradients = {

@@ -2,16 +2,45 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, Dimensions, Image, Share,
+  Modal, Linking, Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { Gradient as LinearGradient } from '../components/Gradient';
 import { Ionicons } from '@expo/vector-icons';
 import SpotSelector from '../components/SpotSelector';
 import { subscribeSpots } from '../services/spots';
+import { auth } from '../services/firebase';
+import { api } from '../services/api';
 import { ForecastBlock, ForecastData, Marea, Spot } from '../types';
 import { colors, difficultyStyle, radius, spacing } from '../theme';
+
+function buildSpotMapHtml(spot: Spot): string {
+  return `<!DOCTYPE html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>html,body,#map{margin:0;padding:0;width:100%;height:100%;}</style>
+</head><body><div id="map"></div><script>
+var map=L.map('map',{zoomControl:false,attributionControl:false}).setView([${spot.lat},${spot.lng}],14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+L.circleMarker([${spot.lat},${spot.lng}],{radius:10,color:'#fff',weight:2,fillColor:'#0ea5e9',fillOpacity:1}).addTo(map);
+</script></body></html>`;
+}
+
+function openMaps(spot: Spot, provider: 'apple' | 'google' | 'waze') {
+  const lat = spot.lat, lng = spot.lng, name = encodeURIComponent(spot.nombre);
+  const urls: Record<string, string> = {
+    apple: `maps://maps.apple.com/?daddr=${lat},${lng}&q=${name}`,
+    google: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+    waze: `waze://?ll=${lat},${lng}&navigate=yes`,
+  };
+  Linking.openURL(urls[provider]).catch(() =>
+    Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`)
+  );
+}
 
 const { width } = Dimensions.get('window');
 
@@ -178,7 +207,7 @@ function ForecastCard({ block, isHero, allBlocks }: { block: ForecastBlock; isHe
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
             <WindArrow degrees={(block.direccionVientoGrados + 180) % 360} size={isHero ? 52 : 44} />
-            <Text style={styles.statLabel}>Dirección</Text>
+            <Text style={styles.statLabel}>Dir. viento</Text>
           </View>
         </View>
 
@@ -259,10 +288,19 @@ export default function ForecastScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [showSpotMap, setShowSpotMap] = useState(false);
 
   useEffect(() => subscribeSpots(s => {
     if (s.length > 0) setSelectedSpot(prev => prev ?? s[0]);
   }), []);
+
+  useEffect(() => {
+    const unsub = (auth as any).onAuthStateChanged((u: any) => {
+      if (u) api.getProfile().then(d => setAvatarUrl(d?.profile?.avatarUrl ?? null)).catch(() => {});
+    });
+    return unsub;
+  }, []);
 
   useEffect(() => {
     if (selectedSpot) {
@@ -286,15 +324,15 @@ export default function ForecastScreen() {
 
   const blocks: ForecastBlock[] = data ? (data[day] ?? []) : [];
 
+  const forecastShareRef = useRef<View>(null);
+
   const shareConditions = async () => {
     if (!blocks.length) return;
     try {
-      if (heroRef.current) {
-        const uri = await captureRef(heroRef, { format: 'png', quality: 0.95 });
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir condiciones' });
-          return;
-        }
+      const uri = await captureRef(forecastShareRef, { format: 'png', quality: 1 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir condiciones' });
+        return;
       }
     } catch {}
     const b = getHeroBlock(blocks, day === 'hoy');
@@ -305,6 +343,47 @@ export default function ForecastScreen() {
 
   return (
     <View style={styles.container}>
+      {selectedSpot && (
+        <Modal visible={showSpotMap} animationType="slide" transparent onRequestClose={() => setShowSpotMap(false)}>
+          <View style={styles.mapOverlay}>
+            <View style={[styles.mapSheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+              <View style={styles.mapSheetHeader}>
+                <Text style={styles.mapSheetTitle}>{selectedSpot.nombre}</Text>
+                <TouchableOpacity onPress={() => setShowSpotMap(false)} style={styles.mapCloseBtn}>
+                  <Ionicons name="close" size={20} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+              <View style={{ height: 260, borderRadius: radius.lg, overflow: 'hidden', marginBottom: 16 }}>
+                <WebView
+                  source={{ html: buildSpotMapHtml(selectedSpot) }}
+                  style={{ flex: 1 }}
+                  javaScriptEnabled
+                  originWhitelist={['*']}
+                  mixedContentMode="always"
+                  scrollEnabled={false}
+                />
+              </View>
+              <View style={styles.navButtons}>
+                {Platform.OS === 'ios' && (
+                  <TouchableOpacity style={styles.navBtn} onPress={() => openMaps(selectedSpot, 'apple')}>
+                    <Ionicons name="map-outline" size={18} color="#fff" />
+                    <Text style={styles.navBtnText}>Apple Maps</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity style={[styles.navBtn, { backgroundColor: '#1a73e8' }]} onPress={() => openMaps(selectedSpot, 'google')}>
+                  <Ionicons name="navigate-outline" size={18} color="#fff" />
+                  <Text style={styles.navBtnText}>Google Maps</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.navBtn, { backgroundColor: '#33ccff' }]} onPress={() => openMaps(selectedSpot, 'waze')}>
+                  <Ionicons name="car-outline" size={18} color="#fff" />
+                  <Text style={styles.navBtnText}>Waze</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
       <LinearGradient colors={['#071828', '#040e1e']} style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.appBrand}>
@@ -314,11 +393,29 @@ export default function ForecastScreen() {
               <Text style={styles.appSub}>Condiciones del agua</Text>
             </View>
           </View>
-          <TouchableOpacity onPress={shareConditions} disabled={!blocks.length} style={{ opacity: blocks.length ? 1 : 0.3 }}>
-            <Ionicons name="share-outline" size={22} color={colors.textMuted} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <TouchableOpacity onPress={shareConditions} disabled={!blocks.length} style={{ opacity: blocks.length ? 1 : 0.3 }}>
+              <Ionicons name="share-outline" size={22} color={colors.textMuted} />
+            </TouchableOpacity>
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={styles.userAvatar} />
+            ) : (
+              <View style={styles.userAvatarPlaceholder}>
+                <Ionicons name="person" size={16} color={colors.textMuted} />
+              </View>
+            )}
+          </View>
         </View>
-        <SpotSelector selected={selectedSpot} onSelect={setSelectedSpot} />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={{ flex: 1 }}>
+            <SpotSelector selected={selectedSpot} onSelect={setSelectedSpot} />
+          </View>
+          {selectedSpot && (
+            <TouchableOpacity onPress={() => setShowSpotMap(true)} style={styles.mapIconBtn}>
+              <Ionicons name="location-outline" size={20} color={colors.primary} />
+            </TouchableOpacity>
+          )}
+        </View>
         <View style={styles.dayPicker}>
           {(['hoy', 'mañana'] as const).map(d => (
             <TouchableOpacity key={d} onPress={() => setDay(d)} style={[styles.dayBtn, day === d && styles.dayBtnActive]}>
@@ -376,6 +473,96 @@ export default function ForecastScreen() {
           <View style={{ height: 80 + insets.bottom }} />
         </ScrollView>
       )}
+
+      {/* Tarjeta invisible para compartir */}
+      {blocks.length > 0 && selectedSpot && (
+        <View style={{ position: 'absolute', left: 0, top: 0, opacity: 0 }} pointerEvents="none">
+          <ForecastShareCard
+            block={getHeroBlock(blocks, day === 'hoy')}
+            allBlocks={blocks}
+            spot={selectedSpot}
+            day={day}
+            cardRef={forecastShareRef}
+          />
+        </View>
+      )}
+    </View>
+  );
+}
+
+const FSHARE_W = 390;
+
+function ForecastShareCard({ block, allBlocks, spot, day, cardRef }: {
+  block: ForecastBlock; allBlocks: ForecastBlock[]; spot: Spot;
+  day: 'hoy' | 'mañana'; cardRef: any;
+}) {
+  const diff = difficultyStyle[block.nivel] ?? difficultyStyle['Principiante'];
+  const fecha = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const temps = allBlocks.map(b => parseFloat(b.temperatura));
+  const vientos = allBlocks.map(b => parseFloat(b.viento));
+  const minTemp = Math.min(...temps).toFixed(0);
+  const maxTemp = Math.max(...temps).toFixed(0);
+  const minViento = Math.min(...vientos).toFixed(0);
+  const maxViento = Math.max(...vientos).toFixed(0);
+  const bestBlock = getBestBlock(allBlocks);
+
+  return (
+    <View ref={cardRef} collapsable={false} style={{ width: FSHARE_W, backgroundColor: '#040e1e' }}>
+      <View style={{ height: 5, backgroundColor: '#0ea5e9' }} />
+
+      <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingHorizontal: 22, paddingTop: 20, paddingBottom: 16 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 10, fontWeight: '800', color: '#0ea5e9', letterSpacing: 2.5, marginBottom: 6 }}>SUP STATUS · CONDICIONES</Text>
+          <Text style={{ fontSize: 28, fontWeight: '900', color: '#f1f5f9', lineHeight: 32, letterSpacing: -0.5 }}>{spot.nombre}</Text>
+          <Text style={{ fontSize: 12, color: '#64748b', marginTop: 6, textTransform: 'capitalize' }}>{fecha} · {block.hora}</Text>
+        </View>
+        <Image source={require('../../assets/icon.png')} style={{ width: 54, height: 54, borderRadius: 13, marginLeft: 14 }} />
+      </View>
+
+      <View style={{ height: 1, backgroundColor: '#0f172a', marginHorizontal: 22, marginBottom: 16 }} />
+
+      {/* Condiciones */}
+      <View style={{ marginHorizontal: 20, backgroundColor: '#060f1e', borderRadius: 14, padding: 18, borderLeftWidth: 4, borderLeftColor: '#0ea5e9', marginBottom: 14 }}>
+        <Text style={{ color: '#e2e8f0', fontSize: 15, lineHeight: 23, fontWeight: '500' }}>{block.condiciones}</Text>
+        <View style={{ marginTop: 12, alignSelf: 'flex-start', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: diff.bg, borderWidth: 1, borderColor: diff.color + '50' }}>
+          <Text style={{ color: diff.color, fontWeight: '800', fontSize: 12 }}>Nivel: {block.nivel}</Text>
+        </View>
+      </View>
+
+      {/* Stats 2x2 */}
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: 20, gap: 10, marginBottom: 14 }}>
+        {[
+          { emoji: '💨', val: block.viento, sub: block.direccionViento, lbl: 'VIENTO', color: '#0ea5e9' },
+          { emoji: '🌊', val: block.oleaje, sub: block.direccionOleaje, lbl: 'OLEAJE', color: '#22c55e' },
+          { emoji: '🌡️', val: block.temperatura, sub: `${minTemp}°–${maxTemp}°C hoy`, lbl: 'TEMPERATURA', color: '#f59e0b' },
+          { emoji: '🕐', val: bestBlock?.hora ?? block.hora, sub: 'mejor momento', lbl: 'MEJOR HORA', color: '#a855f7' },
+        ].map(s => (
+          <View key={s.lbl} style={{ width: (FSHARE_W - 50) / 2, backgroundColor: '#060f1e', borderRadius: 14, padding: 14, borderTopWidth: 3, borderTopColor: s.color, borderWidth: 1, borderColor: '#1e293b' }}>
+            <Text style={{ fontSize: 22, marginBottom: 6 }}>{s.emoji}</Text>
+            <Text style={{ fontSize: 18, fontWeight: '900', color: '#f1f5f9', letterSpacing: -0.3 }}>{s.val}</Text>
+            <Text style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{s.sub}</Text>
+            <Text style={{ fontSize: 9, color: '#334155', marginTop: 6, fontWeight: '700', letterSpacing: 0.8 }}>{s.lbl}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Rango viento */}
+      <View style={{ marginHorizontal: 20, marginBottom: 14, backgroundColor: '#060f1e', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#1e293b', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text style={{ color: '#475569', fontSize: 12, fontWeight: '700' }}>Viento durante el día</Text>
+        <Text style={{ color: '#f1f5f9', fontSize: 16, fontWeight: '900' }}>{minViento} – {maxViento} km/h</Text>
+      </View>
+
+      <View style={{ height: 1, backgroundColor: '#0f172a', marginHorizontal: 20 }} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 14 }}>
+        <View>
+          <Text style={{ color: '#0ea5e9', fontWeight: '900', fontSize: 15 }}>@__supstatus</Text>
+          <Text style={{ color: '#334155', fontSize: 10, marginTop: 2 }}>#SUP #SUPChile #StandUpPaddle</Text>
+        </View>
+        <View style={{ backgroundColor: '#0f172a', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, borderWidth: 1, borderColor: '#1e293b' }}>
+          <Text style={{ color: '#64748b', fontSize: 12, fontWeight: '700' }}>🌊 Forecast</Text>
+        </View>
+      </View>
+      <View style={{ height: 5, backgroundColor: '#0ea5e9', opacity: 0.4 }} />
     </View>
   );
 }
@@ -442,4 +629,19 @@ const styles = StyleSheet.create({
   mareaTipoText: { fontSize: 10, fontWeight: '700' },
   mareasEmpty: { marginHorizontal: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.surface1, borderRadius: radius.md, padding: spacing.md, borderWidth: 1, borderColor: colors.border },
   mareasEmptyText: { fontSize: 13, color: colors.textMuted },
+
+  // Header extras
+  userAvatar: { width: 32, height: 32, borderRadius: 16, borderWidth: 1, borderColor: colors.border },
+  userAvatarPlaceholder: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  mapIconBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: colors.surface2, borderWidth: 1, borderColor: colors.primary + '40', alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+
+  // SpotMapModal
+  mapOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.75)', justifyContent: 'flex-end' },
+  mapSheet: { backgroundColor: '#1e293b', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+  mapSheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
+  mapSheetTitle: { fontSize: 18, fontWeight: '700', color: colors.textPrimary },
+  mapCloseBtn: { padding: 6, backgroundColor: colors.surface2, borderRadius: radius.md },
+  navButtons: { flexDirection: 'row', gap: 10, flexWrap: 'wrap' },
+  navBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, backgroundColor: colors.primary, paddingVertical: 12, paddingHorizontal: 10, borderRadius: radius.md },
+  navBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
 });

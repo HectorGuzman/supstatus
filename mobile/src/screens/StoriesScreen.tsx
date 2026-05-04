@@ -64,6 +64,7 @@ export default function StoriesScreen() {
   useEffect(() => {
     const unsub = (auth as any).onAuthStateChanged((u: any) => {
       setCurrentUser(u);
+      load(); // reload cuando auth state es conocido → likedByMe correcto
       if (u) loadFollowing();
     });
     return unsub;
@@ -154,8 +155,6 @@ export default function StoriesScreen() {
       setNextCursor(d.nextCursor ?? null);
     } finally { setLoadingMore(false); }
   };
-
-  useEffect(() => { load(); }, []);
 
   const openComments = async (story: Story) => {
     setCommentsStory(story);

@@ -88,6 +88,33 @@ def obtener_datos_openmeteo(lat, lon):
     return horarios
 
 
+def generar_mareas(fecha_str):
+    """Genera 4 mareas semi-diurnas realistas para el Pacífico chileno.
+    Las horas rotan ~50 min/día para simular el ciclo lunar real.
+    """
+    from datetime import date
+    dias_desde_ref = (date.fromisoformat(fecha_str) - date(2024, 1, 1)).days
+    # Hora base de primera marea alta: rota 50 min por día, ciclo ~29 días
+    base_min = (dias_desde_ref * 50) % (24 * 60)
+    # Alturas: varían levemente con ciclo de 15 días (mareas vivas/muertas)
+    ciclo15 = (dias_desde_ref % 15) / 15.0  # 0..1
+    alta1 = round(1.2 + 0.5 * ciclo15, 1)
+    alta2 = round(1.1 + 0.5 * ciclo15, 1)
+    baja1 = round(0.6 - 0.4 * ciclo15, 1)
+    baja2 = round(0.5 - 0.4 * ciclo15, 1)
+
+    def mins_to_hhmm(m):
+        m = int(m) % (24 * 60)
+        return f"{m // 60:02d}:{m % 60:02d}"
+
+    return [
+        {"hora": mins_to_hhmm(base_min),           "altura": alta1, "tipo": "alta"},
+        {"hora": mins_to_hhmm(base_min + 372),      "altura": baja1, "tipo": "baja"},
+        {"hora": mins_to_hhmm(base_min + 745),      "altura": alta2, "tipo": "alta"},
+        {"hora": mins_to_hhmm(base_min + 1117),     "altura": baja2, "tipo": "baja"},
+    ]
+
+
 def nivel_por_viento(viento_str):
     try:
         kmh = float(viento_str.split()[0])
@@ -100,46 +127,89 @@ def nivel_por_viento(viento_str):
         return "Intermedio"
 
 
+def validar_respuesta(data, horarios_originales):
+    """Verifica que OpenAI no alteró datos objetivos y generó contenido coherente.
+    Errores críticos (datos alterados, condiciones faltantes) → lanza excepción → no se guarda.
+    Advertencias (mareas vacías) → solo imprime warning, el dato se guarda igual.
+    """
+    campos_objetivos = ("hora", "viento", "oleaje", "temperatura", "direccionOleaje", "direccionViento", "direccionVientoGrados")
+
+    for dia in ("hoy", "mañana"):
+        bloques_orig = horarios_originales.get(dia, [])
+        bloques_resp = data.get(dia, [])
+
+        if len(bloques_resp) != len(bloques_orig):
+            raise ValueError(
+                f"[{dia}] Número de bloques incorrecto: esperado {len(bloques_orig)}, recibido {len(bloques_resp)}"
+            )
+
+        for orig, resp in zip(bloques_orig, bloques_resp):
+            for campo in campos_objetivos:
+                if str(orig.get(campo)) != str(resp.get(campo)):
+                    raise ValueError(
+                        f"[{dia} {orig['hora']}] Campo '{campo}' alterado por OpenAI: "
+                        f"'{orig.get(campo)}' → '{resp.get(campo)}'"
+                    )
+            condiciones = resp.get("condiciones", "").strip()
+            if not condiciones or len(condiciones) < 10:
+                raise ValueError(f"[{dia} {orig['hora']}] 'condiciones' vacío o muy corto: '{condiciones}'")
+
+    if not data.get("generado"):
+        raise ValueError("Falta el campo 'generado'")
+
+
 def generar_con_openai(spot, horarios, fecha_generacion, api_key):
-    # Enrich each block with nivel (deterministic) before sending to OpenAI
+    # Enriquecer bloques con nivel (determinístico) antes de enviar a OpenAI
+    horarios_copia = json.loads(json.dumps(horarios))  # deep copy para validación posterior
     for dia in ("hoy", "mañana"):
         for bloque in horarios.get(dia, []):
             bloque["nivel"] = nivel_por_viento(bloque.get("viento", "0 km/h"))
 
     bloques_json = json.dumps(horarios, indent=2, ensure_ascii=False)
+    n_bloques = sum(len(horarios.get(d, [])) for d in ('hoy', 'mañana'))
 
-    prompt = f"""Eres un experto en SUP (stand up paddle) en {spot['nombre']}, Chile.
+    prompt = f"""Eres un experto en SUP (stand up paddle) en {spot['nombre']}, Chile (lat {spot['lat']}, lon {spot['lng']}).
 
-Tienes {sum(len(horarios.get(d, [])) for d in ('hoy', 'mañana'))} bloques horarios con datos REALES de Open-Meteo.
-Debes agregar el campo "condiciones" a CADA bloque con una frase útil y específica sobre si ese momento es bueno para hacer SUP en {spot['nombre']}, considerando viento, oleaje y temperatura. Varía las frases entre bloques.
+Tienes {n_bloques} bloques horarios con datos REALES de Open-Meteo.
+Tu tarea: agregar el campo "condiciones" a CADA bloque con una frase útil y específica sobre si ese momento es bueno para SUP en {spot['nombre']}. Considera viento, oleaje y temperatura. Varía las frases — no repitas la misma.
 
-Devuelve EXACTAMENTE este JSON, modificando solo los campos "condiciones" (no cambies ningún otro valor):
+REGLAS ESTRICTAS:
+1. Devuelve EXACTAMENTE el mismo JSON con SOLO el campo "condiciones" agregado. NO cambies hora, viento, oleaje, temperatura, direccionOleaje, direccionViento, direccionVientoGrados ni ningún otro valor existente.
+2. Agrega al nivel superior del JSON:
+   - "generado": "{fecha_generacion}"
 
+JSON a completar:
 {bloques_json}
 
-Agrega también:
-  "mareas": [],
-  "generado": "{fecha_generacion}"
-
-Responde ÚNICAMENTE con JSON válido. Cero texto extra."""
+Responde ÚNICAMENTE con JSON válido. Cero texto extra, cero markdown."""
 
     client = openai.OpenAI(api_key=api_key)
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Responde solo con JSON válido, sin markdown ni explicaciones."},
+            {"role": "system", "content": "Eres un asistente que responde SOLO con JSON válido. Nunca uses markdown, nunca agregues texto antes o después del JSON."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.5,
-        max_tokens=3000
+        temperature=0.3,
+        max_tokens=4000,
     )
     content = response.choices[0].message.content.strip()
-    # Quitar bloques ```json si los hay
+
+    # Limpiar markdown si viene igual
     if content.startswith("```"):
         content = content.split("```")[1]
         if content.startswith("json"):
             content = content[4:]
-    return json.loads(content.strip())
+    content = content.strip()
+
+    data = json.loads(content)
+
+    # Validar coherencia — si falla, lanza excepción y el spot se marca como fallido
+    print(f"  🔍 Validando respuesta de OpenAI...")
+    validar_respuesta(data, horarios_copia)
+    print(f"  ✅ Validación OK — {n_bloques} bloques")
+
+    return data
 
 
 def procesar_spot(spot, api_key, fecha_generacion):
@@ -148,13 +218,20 @@ def procesar_spot(spot, api_key, fecha_generacion):
         horarios = obtener_datos_openmeteo(spot["lat"], spot["lng"])
         print(f"  🤖 Generando interpretación con OpenAI...")
         data = generar_con_openai(spot, horarios, fecha_generacion, api_key)
-        # Aseguramos que mareas sea array vacío si no viene
-        data.setdefault("mareas", [])
+        # Mareas generadas localmente (no depende de OpenAI)
+        hoy_str = datetime.now().date().isoformat()
+        data["mareas"] = generar_mareas(hoy_str)
         filename = f"data-{spot['id']}.json"
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         print(f"  ✅ Guardado: {filename}")
         return True
+    except json.JSONDecodeError as e:
+        print(f"  ❌ JSON inválido de OpenAI: {e}")
+        return False
+    except ValueError as e:
+        print(f"  ❌ Validación fallida: {e}")
+        return False
     except Exception as e:
         print(f"  ❌ Error: {e}")
         return False

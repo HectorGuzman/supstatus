@@ -55,7 +55,7 @@ export default function ProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [spots, setSpots] = useState<{ id: string; nombre: string }[]>([]);
-  const { signIn: googleSignIn, ready: googleReady } = useGoogleSignIn();
+  const { signIn: googleSignIn, ready: googleReady, loading: googleLoading } = useGoogleSignIn();
 
   useEffect(() => {
     fetchSpotsConfig().then(setSpots);
@@ -186,12 +186,23 @@ export default function ProfileScreen() {
 
   if (loading) return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}><ActivityIndicator color={colors.primary} size="large" /></View>;
 
-  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} />;
+  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} />;
 
   const km = profile?.sessionsSummary?.totalKm ?? 0;
   const rank = getRank(km);
   const nextRank = getNextRank(km);
   const rankProgress = nextRank ? Math.min((km - (getRank(km).min)) / (nextRank.min - getRank(km).min), 1) : 1;
+
+  const handleShare = async () => {
+    try {
+      const uri = await captureRef(profileCardRef, { format: 'png', quality: 1 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir perfil' });
+        return;
+      }
+    } catch {}
+    Share.share({ message: `🏄 ${profile?.displayName ?? user.email?.split('@')[0]} — SUP Status\n${profile?.nivel ? `Nivel: ${profile.nivel}` : ''}${km > 0 ? `\n📍 ${km.toFixed(1)} km remados` : ''}\n@__supstatus` });
+  };
 
   return (
     <View style={styles.container}>
@@ -215,21 +226,7 @@ export default function ProfileScreen() {
           <View style={styles.headerRow}>
             <Text style={styles.screenTitle}>Perfil</Text>
             <View style={{ flexDirection: 'row', gap: 10 }}>
-              <TouchableOpacity
-                onPress={async () => {
-                  try {
-                    if (profileCardRef.current) {
-                      const uri = await captureRef(profileCardRef, { format: 'png', quality: 0.95 });
-                      if (await Sharing.isAvailableAsync()) {
-                        await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir perfil' });
-                        return;
-                      }
-                    }
-                  } catch {}
-                  Share.share({ message: `🏄 ${profile?.displayName ?? user.email?.split('@')[0]} — SUP Status\n${profile?.nivel ? `Nivel: ${profile.nivel}` : ''}${profile?.equipo ? ` · ${profile.equipo}` : ''}${km > 0 ? `\n📍 ${km.toFixed(1)} km remados` : ''}` });
-                }}
-                style={styles.shareBtn}
-              >
+              <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
                 <Ionicons name="share-outline" size={20} color={colors.textMuted} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => signOut(auth as any)} style={styles.signOutBtn}>
@@ -304,6 +301,106 @@ export default function ProfileScreen() {
         </TouchableOpacity>
         <View style={{ height: 80 + insets.bottom }} />
       </ScrollView>
+
+      {/* Tarjeta invisible para compartir */}
+      <View style={{ position: 'absolute', left: 0, top: 0, opacity: 0 }} pointerEvents="none">
+        <ProfileShareCard
+          profile={profile}
+          user={user}
+          km={km}
+          rank={rank}
+          nextRank={nextRank}
+          rankProgress={rankProgress}
+          cardRef={profileCardRef}
+        />
+      </View>
+    </View>
+  );
+}
+
+const PSHARE_W = 390;
+
+function ProfileShareCard({ profile, user, km, rank, nextRank, rankProgress, cardRef }: any) {
+  const disciplines = profile?.disciplinas?.join(' · ') ?? profile?.disciplina ?? null;
+  return (
+    <View ref={cardRef} collapsable={false} style={{ width: PSHARE_W, backgroundColor: '#040e1e' }}>
+      <View style={{ height: 5, backgroundColor: rank.color }} />
+
+      {/* Header branding */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 22, paddingTop: 18, paddingBottom: 14 }}>
+        <Text style={{ fontSize: 10, fontWeight: '800', color: '#0ea5e9', letterSpacing: 2.5 }}>SUP STATUS · PERFIL</Text>
+        <Image source={require('../../assets/icon.png')} style={{ width: 38, height: 38, borderRadius: 10 }} />
+      </View>
+
+      {/* Avatar + nombre */}
+      <View style={{ alignItems: 'center', paddingBottom: 20 }}>
+        <View style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 4, borderColor: rank.color, marginBottom: 14, overflow: 'hidden', backgroundColor: '#1e293b', alignItems: 'center', justifyContent: 'center' }}>
+          {profile?.avatarUrl
+            ? <Image source={{ uri: profile.avatarUrl }} style={{ width: 100, height: 100 }} />
+            : <Ionicons name="person" size={44} color="#475569" />}
+        </View>
+        <Text style={{ fontSize: 28, fontWeight: '900', color: '#f1f5f9', letterSpacing: -0.5 }}>
+          {profile?.displayName ?? user?.email?.split('@')[0]}
+        </Text>
+        {/* Rank badge */}
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, backgroundColor: rank.color + '20', borderWidth: 1, borderColor: rank.color + '60' }}>
+          <Text style={{ fontSize: 16 }}>{rank.icon}</Text>
+          <Text style={{ color: rank.color, fontWeight: '800', fontSize: 15 }}>{rank.label}</Text>
+        </View>
+      </View>
+
+      <View style={{ height: 1, backgroundColor: '#0f172a', marginHorizontal: 22, marginBottom: 16 }} />
+
+      {/* Stats */}
+      <View style={{ flexDirection: 'row', marginHorizontal: 20, gap: 10, marginBottom: 16 }}>
+        {[
+          { val: km.toFixed(1), unit: 'KM', lbl: 'REMADOS', color: '#0ea5e9', emoji: '📏' },
+          { val: String(profile?.sessionsSummary?.totalSessions ?? 0), unit: 'SES.', lbl: 'REMADAS', color: '#22c55e', emoji: '🏄' },
+          { val: `${Math.floor((profile?.sessionsSummary?.totalDurationMin ?? 0) / 60)}`, unit: 'HRS', lbl: 'EN EL AGUA', color: '#f59e0b', emoji: '⏱️' },
+        ].map(s => (
+          <View key={s.lbl} style={{ flex: 1, backgroundColor: '#060f1e', borderRadius: 14, padding: 14, alignItems: 'center', borderTopWidth: 3, borderTopColor: s.color, borderWidth: 1, borderColor: '#1e293b' }}>
+            <Text style={{ fontSize: 20, marginBottom: 4 }}>{s.emoji}</Text>
+            <Text style={{ fontSize: 22, fontWeight: '900', color: '#f1f5f9', letterSpacing: -0.5 }}>{s.val}</Text>
+            <Text style={{ fontSize: 9, color: s.color, fontWeight: '800', letterSpacing: 1 }}>{s.unit}</Text>
+            <Text style={{ fontSize: 8, color: '#334155', marginTop: 4, fontWeight: '700', letterSpacing: 0.8 }}>{s.lbl}</Text>
+          </View>
+        ))}
+      </View>
+
+      {/* Progreso */}
+      {nextRank && (
+        <View style={{ marginHorizontal: 20, marginBottom: 14, backgroundColor: '#060f1e', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#1e293b' }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
+            <Text style={{ color: '#64748b', fontSize: 11, fontWeight: '700' }}>Progreso hacia {nextRank.label}</Text>
+            <Text style={{ color: rank.color, fontSize: 11, fontWeight: '800' }}>{km.toFixed(1)} / {nextRank.min} km</Text>
+          </View>
+          <View style={{ height: 6, backgroundColor: '#1e293b', borderRadius: 3 }}>
+            <View style={{ height: 6, width: `${rankProgress * 100}%` as any, backgroundColor: rank.color, borderRadius: 3 }} />
+          </View>
+        </View>
+      )}
+
+      {/* Info extra */}
+      {(profile?.nivel || disciplines || profile?.equipo || profile?.bio) && (
+        <View style={{ marginHorizontal: 20, marginBottom: 14, backgroundColor: '#060f1e', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#1e293b', gap: 8 }}>
+          {profile?.nivel && <Text style={{ color: '#94a3b8', fontSize: 13 }}>🎯 Nivel: <Text style={{ color: '#f1f5f9', fontWeight: '700' }}>{profile.nivel}</Text></Text>}
+          {disciplines && <Text style={{ color: '#94a3b8', fontSize: 13 }}>🏄 {disciplines}</Text>}
+          {profile?.equipo && <Text style={{ color: '#94a3b8', fontSize: 13 }}>👥 {profile.equipo}</Text>}
+          {profile?.bio && <Text style={{ color: '#94a3b8', fontSize: 13, fontStyle: 'italic' }}>"{profile.bio}"</Text>}
+        </View>
+      )}
+
+      <View style={{ height: 1, backgroundColor: '#0f172a', marginHorizontal: 20 }} />
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 22, paddingVertical: 14 }}>
+        <View>
+          <Text style={{ color: '#0ea5e9', fontWeight: '900', fontSize: 15 }}>@__supstatus</Text>
+          <Text style={{ color: '#334155', fontSize: 10, marginTop: 2 }}>#SUP #SUPChile #StandUpPaddle</Text>
+        </View>
+        <View style={{ backgroundColor: '#0f172a', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, borderWidth: 1, borderColor: '#1e293b' }}>
+          <Text style={{ color: '#64748b', fontSize: 12, fontWeight: '700' }}>🏅 Atleta</Text>
+        </View>
+      </View>
+      <View style={{ height: 5, backgroundColor: rank.color, opacity: 0.4 }} />
     </View>
   );
 }
@@ -331,9 +428,13 @@ function InfoSection({ profile, onEdit, spots }: { profile: UserProfile | null; 
   }
   return (
     <View style={styles.infoCard}>
-      <TouchableOpacity style={styles.editIconBtn} onPress={onEdit}>
-        <Ionicons name="settings-outline" size={18} color={colors.textMuted} />
-      </TouchableOpacity>
+      <View style={styles.infoCardHeader}>
+        <Text style={styles.infoCardTitle}>Mi perfil</Text>
+        <TouchableOpacity style={styles.editIconBtn} onPress={onEdit} activeOpacity={0.7}>
+          <Ionicons name="pencil-outline" size={15} color={colors.primary} />
+          <Text style={styles.editIconBtnText}>Editar</Text>
+        </TouchableOpacity>
+      </View>
       {profile?.nivel && <InfoRow icon="ribbon-outline" label="Nivel" value={profile.nivel} />}
       {(profile?.disciplinas?.length || profile?.disciplina) && (
         <InfoRow
@@ -435,7 +536,7 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
   );
 }
 
-function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady }: any) {
+function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading }: any) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#071828', '#040e1e']} style={StyleSheet.absoluteFill} />
@@ -445,9 +546,18 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
           <Text style={styles.loginSub}>{authMode === 'login' ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}</Text>
         </View>
 
-        <TouchableOpacity style={[styles.googleBtn, !googleReady && { opacity: 0.4 }]} onPress={onGoogle} disabled={!googleReady}>
-          <Ionicons name="logo-google" size={20} color="#fff" />
-          <Text style={styles.googleBtnText}>Continuar con Google</Text>
+        <TouchableOpacity
+          style={[styles.googleBtn, (!googleReady || googleLoading) && { opacity: 0.6 }]}
+          onPress={onGoogle}
+          disabled={!googleReady || googleLoading}
+        >
+          {googleLoading
+            ? <ActivityIndicator size="small" color="#fff" />
+            : <Ionicons name="logo-google" size={20} color="#fff" />
+          }
+          <Text style={styles.googleBtnText}>
+            {googleLoading ? 'Iniciando sesión...' : 'Continuar con Google'}
+          </Text>
         </TouchableOpacity>
 
         <View style={styles.divider}>
@@ -495,9 +605,9 @@ const styles = StyleSheet.create({
   signOutBtn: { padding: 8, backgroundColor: colors.dangerGlow, borderRadius: radius.md },
   shareBtn: { padding: 8, backgroundColor: colors.surface2, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
   avatarSection: { alignItems: 'center', marginBottom: spacing.md },
-  avatarRing: { width: 96, height: 96, borderRadius: 48, padding: 3, marginBottom: spacing.sm, position: 'relative' },
-  avatarRingGradient: { position: 'absolute', inset: 0, borderRadius: 48 },
-  avatar: { width: 90, height: 90, borderRadius: 45, margin: 3 },
+  avatarRing: { width: 100, height: 100, borderRadius: 50, padding: 3, marginBottom: spacing.sm, alignItems: 'center', justifyContent: 'center' },
+  avatarRingGradient: { position: 'absolute', inset: 0, borderRadius: 50 },
+  avatar: { width: 92, height: 92, borderRadius: 46 },
   avatarEditBadge: { position: 'absolute', bottom: 4, right: 4, width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   displayName: { fontSize: 22, fontWeight: '700', color: colors.textPrimary, marginBottom: 8 },
   rankBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 5, borderRadius: radius.full, borderWidth: 1 },
@@ -518,7 +628,10 @@ const styles = StyleSheet.create({
   infoValue: { fontSize: 15, color: colors.textPrimary, fontWeight: '500' },
   editBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: spacing.md, justifyContent: 'center' },
   editBtnText: { color: colors.primary, fontWeight: '600' },
-  editIconBtn: { position: 'absolute', top: spacing.sm, right: spacing.sm, padding: 6 },
+  infoCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.sm },
+  infoCardTitle: { fontSize: 13, fontWeight: '700', color: colors.textMuted, letterSpacing: 0.5, textTransform: 'uppercase' },
+  editIconBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 8, paddingHorizontal: 14, backgroundColor: colors.surface2, borderRadius: radius.full, borderWidth: 1, borderColor: colors.primary + '50' },
+  editIconBtnText: { color: colors.primary, fontSize: 13, fontWeight: '700' },
   emptyProfile: { alignItems: 'center', padding: spacing.xl, backgroundColor: colors.surface1, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', gap: 8 },
   emptyProfileText: { color: colors.textPrimary, fontSize: 16, fontWeight: '600' },
   emptyProfileSub: { color: colors.textMuted, fontSize: 13 },

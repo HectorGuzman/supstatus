@@ -5,19 +5,14 @@ const API_BASE_URL = __DEV__
   : 'https://sup-experience-backend-858880938649.us-east1.run.app';
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  // Wait for Firebase to restore auth state before reading currentUser
-  const user = await new Promise<any>(resolve => {
-    const unsub = (auth as any).onAuthStateChanged((u: any) => {
-      unsub();
-      resolve(u);
-    });
-  });
+  const user = (auth as any).currentUser;
   if (!user) return { 'Content-Type': 'application/json' };
-  const token = await user.getIdToken();
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
+  try {
+    const token = await user.getIdToken();
+    return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+  } catch {
+    return { 'Content-Type': 'application/json' };
+  }
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
