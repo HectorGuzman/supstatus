@@ -593,12 +593,12 @@ export default function StoriesScreen() {
         transparent
         onRequestClose={() => setCommentsStory(null)}
       >
-        <View style={styles.commentsOverlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.commentsOverlay}
+        >
           <TouchableOpacity style={styles.commentsDismiss} activeOpacity={1} onPress={() => setCommentsStory(null)} />
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.commentsSheet}
-          >
+          <View style={styles.commentsSheet}>
             <LinearGradient colors={['#0d1f33', '#040e1e']} style={StyleSheet.absoluteFill} />
             <View style={styles.sheetHandle} />
             <View style={styles.commentsHeader}>
@@ -675,8 +675,8 @@ export default function StoriesScreen() {
                 <Text style={styles.loginPromptText}>Inicia sesión para comentar</Text>
               </View>
             )}
-          </KeyboardAvoidingView>
-        </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

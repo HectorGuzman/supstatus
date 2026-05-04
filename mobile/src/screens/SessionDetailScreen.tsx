@@ -1,15 +1,17 @@
 import React, { useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, Image,
-  StyleSheet, Alert, Dimensions, ActivityIndicator,
+  StyleSheet, Alert, Dimensions, ActivityIndicator, Platform,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { api } from '../services/api';
 import { Session } from '../types';
+import { colors, radius, spacing } from '../theme';
 
 const { width } = Dimensions.get('window');
 const MAP_H = 300;
@@ -298,6 +300,17 @@ export default function SessionDetailScreen({ route, navigation }: Props) {
   const shareCardRef = useRef<View>(null);
   const { speeds, maxSpeed, hasSpeedData } = computeTrackStats(track);
 
+  const fmtDuration = (min: number) =>
+    min < 60 ? `${min} min` : `${Math.floor(min / 60)}h ${min % 60}m`;
+
+  const avgSpeed = session.distanceKm && session.durationMin && session.durationMin > 0
+    ? ((session.distanceKm / session.durationMin) * 60).toFixed(1)
+    : null;
+
+  const fecha = new Date(session.date).toLocaleDateString('es-CL', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
   const handleDelete = () => {
     Alert.alert('Eliminar remada', '¿Estás seguro?', [
       { text: 'Cancelar', style: 'cancel' },
@@ -321,115 +334,140 @@ export default function SessionDetailScreen({ route, navigation }: Props) {
     }
   };
 
-  const fmtDuration = (min: number) =>
-    min < 60 ? `${min} min` : `${Math.floor(min / 60)}h ${min % 60}m`;
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation?.goBack()}>
-          <Text style={styles.backText}>← Volver</Text>
-        </TouchableOpacity>
-        <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
-          <TouchableOpacity onPress={handleShare} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="share-outline" size={22} color="#94a3b8" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete}>
-            <Text style={styles.deleteText}>Eliminar</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
 
-      <ScrollView>
-        {track.length > 1 ? (
-          <View style={styles.mapContainer}>
+        {/* ── HERO: mapa full-width con header flotante ── */}
+        <View style={styles.heroContainer}>
+          {track.length > 1 ? (
             <WebView
               source={{ html: buildMapHtml(track) }}
-              style={styles.map}
+              style={styles.heroMap}
               scrollEnabled={false}
               javaScriptEnabled
               originWhitelist={['*']}
               mixedContentMode="always"
               startInLoadingState
               renderLoading={() => (
-                <View style={{ position: 'absolute', inset: 0, alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a' }}>
-                  <ActivityIndicator color="#0ea5e9" size="large" />
+                <View style={[styles.heroMap, { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.bg }]}>
+                  <ActivityIndicator color={colors.primary} size="large" />
                 </View>
               )}
             />
-            <View style={styles.legend}>
-              <Text style={styles.legendItem}>🟢 Inicio</Text>
-              <Text style={styles.legendItem}>🔴 Fin</Text>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.noMap}>
-            <Text style={styles.noMapText}>Sin datos GPS</Text>
-          </View>
-        )}
-
-        {hasSpeedData && speeds.length > 1 && (
-          <View style={styles.speedChartCard}>
-            <Text style={styles.speedChartTitle}>Velocidad durante la remada</Text>
-            <SpeedChart speeds={speeds} maxSpeed={maxSpeed} />
-            <View style={styles.speedLegend}>
-              {[
-                { color: '#38bdf8', label: 'Lento' },
-                { color: '#10b981', label: 'Medio' },
-                { color: '#f59e0b', label: 'Rápido' },
-                { color: '#ef4444', label: 'Sprint' },
-              ].map(l => (
-                <View key={l.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                  <View style={{ width: 10, height: 10, borderRadius: 2, backgroundColor: l.color }} />
-                  <Text style={styles.speedLegendText}>{l.label}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        <View style={styles.body}>
-          <Text style={styles.spot}>{session.spot}</Text>
-          <Text style={styles.date}>
-            {new Date(session.date).toLocaleDateString('es-CL', {
-              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-            })}
-          </Text>
-
-          <View style={styles.statsGrid}>
-            {session.distanceKm != null && (
-              <StatCard label="Distancia" value={`${session.distanceKm} km`} icon="📏" />
-            )}
-            {session.durationMin != null && (
-              <StatCard label="Duración" value={fmtDuration(session.durationMin)} icon="⏱️" />
-            )}
-            {session.distanceKm && session.durationMin && session.durationMin > 0 && (
-              <StatCard
-                label="Velocidad media"
-                value={`${((session.distanceKm / session.durationMin) * 60).toFixed(1)} km/h`}
-                icon="🚀"
-              />
-            )}
-            {track.length > 0 && (
-              <StatCard label="Puntos GPS" value={String(track.length)} icon="📍" />
-            )}
-            {hasSpeedData && maxSpeed > 0 && (
-              <StatCard label="Vel. máxima" value={`${maxSpeed.toFixed(1)} km/h`} icon="⚡" />
-            )}
-          </View>
-
-          {session.notes && (
-            <View style={styles.notes}>
-              <Text style={styles.notesLabel}>Notas</Text>
-              <Text style={styles.notesText}>{session.notes}</Text>
+          ) : (
+            <View style={[styles.heroMap, styles.noMapHero]}>
+              <Ionicons name="map-outline" size={48} color={colors.textDim} />
+              <Text style={styles.noMapText}>Sin datos GPS</Text>
             </View>
           )}
+
+          {/* Gradiente superior — header flotante */}
+          <LinearGradient
+            colors={['rgba(4,14,30,0.92)', 'rgba(4,14,30,0.3)', 'transparent']}
+            style={[styles.heroTopGrad, { paddingTop: insets.top + 8 }]}
+          >
+            <TouchableOpacity onPress={() => navigation?.goBack()} style={styles.backBtn}>
+              <Ionicons name="chevron-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity onPress={handleShare} style={styles.actionBtn}>
+                <Ionicons name="share-outline" size={18} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleDelete} style={[styles.actionBtn, { backgroundColor: 'rgba(239,68,68,0.25)' }]}>
+                <Ionicons name="trash-outline" size={18} color="#ef4444" />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+
+          {/* Gradiente inferior — spot + fecha */}
+          <LinearGradient
+            colors={['transparent', 'rgba(4,14,30,0.75)', 'rgba(4,14,30,0.97)']}
+            style={styles.heroBottomGrad}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <Ionicons name="location" size={13} color={colors.primary} />
+              <Text style={styles.heroSpot}>{session.spot}</Text>
+            </View>
+            <Text style={styles.heroDate}>{fecha}</Text>
+          </LinearGradient>
         </View>
+
+        {/* ── STATS PRINCIPALES ── */}
+        <View style={styles.statsRow}>
+          {session.distanceKm != null && (
+            <StatPill icon="📏" value={`${session.distanceKm}`} unit="km" label="Distancia" accent={colors.primary} />
+          )}
+          {session.durationMin != null && (
+            <StatPill icon="⏱️" value={fmtDuration(session.durationMin)} unit="" label="Duración" accent={colors.success} />
+          )}
+          {avgSpeed && (
+            <StatPill icon="🚀" value={avgSpeed} unit="km/h" label="Vel. media" accent={colors.warning} />
+          )}
+        </View>
+
+        {/* ── FILA SECUNDARIA ── */}
+        {(hasSpeedData || track.length > 0) && (
+          <View style={styles.secondaryRow}>
+            {hasSpeedData && maxSpeed > 0 && (
+              <View style={styles.secondaryChip}>
+                <Text style={styles.secondaryChipEmoji}>⚡</Text>
+                <View>
+                  <Text style={styles.secondaryChipValue}>{maxSpeed.toFixed(1)} km/h</Text>
+                  <Text style={styles.secondaryChipLabel}>Vel. máxima</Text>
+                </View>
+              </View>
+            )}
+            {track.length > 0 && (
+              <View style={styles.secondaryChip}>
+                <Text style={styles.secondaryChipEmoji}>📍</Text>
+                <View>
+                  <Text style={styles.secondaryChipValue}>{track.length}</Text>
+                  <Text style={styles.secondaryChipLabel}>Puntos GPS</Text>
+                </View>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* ── VELOCIDAD ── */}
+        {hasSpeedData && speeds.length > 1 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Velocidad</Text>
+            <View style={styles.sectionCard}>
+              <SpeedChart speeds={speeds} maxSpeed={maxSpeed} />
+              <View style={styles.speedLegend}>
+                {[
+                  { color: '#38bdf8', label: 'Lento' },
+                  { color: '#10b981', label: 'Medio' },
+                  { color: '#f59e0b', label: 'Rápido' },
+                  { color: '#ef4444', label: 'Sprint' },
+                ].map(l => (
+                  <View key={l.label} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: l.color }} />
+                    <Text style={styles.speedLegendText}>{l.label}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* ── NOTAS ── */}
+        {session.notes && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Notas</Text>
+            <View style={[styles.sectionCard, { flexDirection: 'row', gap: 12, alignItems: 'flex-start' }]}>
+              <Ionicons name="chatbubble-outline" size={18} color={colors.primary} style={{ marginTop: 2 }} />
+              <Text style={styles.notesText}>{session.notes}</Text>
+            </View>
+          </View>
+        )}
 
         <View style={{ height: 40 + insets.bottom }} />
       </ScrollView>
 
-      {/* Tarjeta de compartir — invisible, capturada con captureRef */}
+      {/* Tarjeta invisible para compartir */}
       <View style={{ position: 'absolute', left: 0, top: 0, opacity: 0 }} pointerEvents="none">
         <ShareCard session={session} track={track} cardRef={shareCardRef} />
       </View>
@@ -437,42 +475,58 @@ export default function SessionDetailScreen({ route, navigation }: Props) {
   );
 }
 
-function StatCard({ label, value, icon }: { label: string; value: string; icon: string }) {
+function StatPill({ icon, value, unit, label, accent }: { icon: string; value: string; unit: string; label: string; accent: string }) {
   return (
-    <View style={styles.statCard}>
-      <Text style={styles.statIcon}>{icon}</Text>
-      <Text style={styles.statValue}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
+    <View style={[styles.statPill, { borderTopColor: accent }]}>
+      <Text style={styles.statPillEmoji}>{icon}</Text>
+      <Text style={styles.statPillValue}>{value}</Text>
+      {unit ? <Text style={[styles.statPillUnit, { color: accent }]}>{unit}</Text> : null}
+      <Text style={styles.statPillLabel}>{label}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
-  header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 16, backgroundColor: '#1e293b', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', zIndex: 10 },
-  backText: { color: '#0ea5e9', fontWeight: '600', fontSize: 16 },
-  deleteText: { color: '#ef4444', fontWeight: '600' },
-  mapContainer: { marginHorizontal: PAD, marginTop: 16, borderRadius: 12, overflow: 'hidden', backgroundColor: '#0f172a' },
-  map: { width: width - PAD * 2, height: MAP_H, backgroundColor: '#0f172a' },
-  legend: { flexDirection: 'row', justifyContent: 'center', gap: 24, paddingVertical: 8, backgroundColor: '#1e293b' },
-  legendItem: { color: '#94a3b8', fontSize: 13 },
-  noMap: { height: 120, backgroundColor: '#1e293b', alignItems: 'center', justifyContent: 'center', margin: PAD, borderRadius: 12 },
-  noMapText: { color: '#475569' },
-  body: { padding: 20 },
-  spot: { fontSize: 22, fontWeight: '700', color: '#f1f5f9' },
-  date: { color: '#64748b', marginTop: 4, marginBottom: 20, textTransform: 'capitalize' },
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  statCard: { flex: 1, minWidth: '44%', backgroundColor: '#1e293b', padding: 16, borderRadius: 12, alignItems: 'center' },
-  statIcon: { fontSize: 24, marginBottom: 6 },
-  statValue: { fontSize: 18, fontWeight: '700', color: '#f1f5f9' },
-  statLabel: { fontSize: 12, color: '#64748b', marginTop: 2 },
-  notes: { marginTop: 20, backgroundColor: '#1e293b', padding: 16, borderRadius: 12 },
-  notesLabel: { color: '#64748b', fontSize: 12, marginBottom: 6 },
-  notesText: { color: '#e2e8f0', lineHeight: 22 },
-  speedChartCard: { marginHorizontal: PAD, marginTop: 12, backgroundColor: '#1e293b', borderRadius: 12, padding: 16 },
-  speedChartTitle: { fontSize: 11, fontWeight: '700', color: '#64748b', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 10 },
-  speedLegend: { flexDirection: 'row', gap: 14, marginTop: 10, flexWrap: 'wrap' },
-  speedLegendText: { fontSize: 10, color: '#64748b' },
+  container: { flex: 1, backgroundColor: colors.bg },
+
+  // Hero
+  heroContainer: { width, height: MAP_H + 60, position: 'relative' },
+  heroMap: { width, height: MAP_H + 60, backgroundColor: colors.bg },
+  noMapHero: { alignItems: 'center', justifyContent: 'center', gap: 12 },
+  noMapText: { color: colors.textDim, fontSize: 14 },
+  heroTopGrad: {
+    position: 'absolute', top: 0, left: 0, right: 0, height: 110,
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
+    paddingHorizontal: 16,
+  },
+  backBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  actionBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  heroBottomGrad: { position: 'absolute', bottom: 0, left: 0, right: 0, paddingHorizontal: 20, paddingBottom: 20, paddingTop: 50 },
+  heroSpot: { fontSize: 22, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
+  heroDate: { fontSize: 13, color: 'rgba(255,255,255,0.6)', textTransform: 'capitalize', marginTop: 2 },
+
+  // Stats principales
+  statsRow: { flexDirection: 'row', gap: 10, marginHorizontal: 16, marginTop: 16 },
+  statPill: { flex: 1, backgroundColor: colors.surface2, borderRadius: radius.md, padding: 14, alignItems: 'center', borderTopWidth: 3, borderWidth: 1, borderColor: colors.border },
+  statPillEmoji: { fontSize: 18, marginBottom: 6 },
+  statPillValue: { fontSize: 19, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.5 },
+  statPillUnit: { fontSize: 10, fontWeight: '700', letterSpacing: 1, marginTop: 1 },
+  statPillLabel: { fontSize: 10, color: colors.textDim, marginTop: 4, fontWeight: '600' },
+
+  // Fila secundaria
+  secondaryRow: { flexDirection: 'row', gap: 10, marginHorizontal: 16, marginTop: 10 },
+  secondaryChip: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface1, borderRadius: radius.md, paddingVertical: 12, paddingHorizontal: 14, borderWidth: 1, borderColor: colors.border },
+  secondaryChipEmoji: { fontSize: 20 },
+  secondaryChipValue: { fontSize: 15, fontWeight: '700', color: colors.textPrimary },
+  secondaryChipLabel: { fontSize: 11, color: colors.textDim, marginTop: 1 },
+
+  // Secciones
+  section: { marginHorizontal: 16, marginTop: 20 },
+  sectionTitle: { fontSize: 11, fontWeight: '800', color: colors.textDim, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 10 },
+  sectionCard: { backgroundColor: colors.surface2, borderRadius: radius.md, padding: 16, borderWidth: 1, borderColor: colors.border },
+  notesText: { flex: 1, color: colors.textSecondary, lineHeight: 22, fontSize: 14 },
+  speedLegend: { flexDirection: 'row', gap: 14, marginTop: 12, flexWrap: 'wrap' },
+  speedLegendText: { fontSize: 10, color: colors.textDim },
 });
 
 // Estilos tarjeta Instagram
