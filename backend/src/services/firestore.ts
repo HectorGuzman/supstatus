@@ -1,4 +1,5 @@
 import { ensureFirebase } from '../config/firebase.js';
+import { computeRank } from './rank.js';
 
 const admin = ensureFirebase();
 const firestore = admin.firestore();
@@ -99,6 +100,25 @@ export async function deleteSession(uid: string, sessionId: string) {
   }
   await docRef.delete();
   return true;
+}
+
+export async function updateUserStats(uid: string) {
+  const sessionsRef = firestore.collection('users').doc(uid).collection('sessions');
+  const snap = await sessionsRef.get();
+  const totalSessions = snap.size;
+  let totalKm = 0;
+  let totalDurationMin = 0;
+  snap.docs.forEach(d => {
+    totalKm += Number(d.data().distanceKm) || 0;
+    totalDurationMin += Number(d.data().durationMin) || 0;
+  });
+  totalKm = Number(totalKm.toFixed(1));
+  const rank = computeRank(totalKm, totalSessions);
+  await firestore.collection('users').doc(uid).set({
+    rankKey: rank.key,
+    rankIcon: rank.icon,
+    sessionsSummary: { totalKm, totalSessions, totalDurationMin: Number(totalDurationMin.toFixed(1)) },
+  }, { merge: true });
 }
 
 export async function listAllProfiles() {

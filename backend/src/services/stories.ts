@@ -1,5 +1,6 @@
 import type { DocumentData, DocumentSnapshot, Query } from 'firebase-admin/firestore';
 import { ensureFirebase } from '../config/firebase.js';
+import { computeRank } from './rank.js';
 
 const admin = ensureFirebase();
 const firestore = admin.firestore();
@@ -75,6 +76,8 @@ function serializeStoryDoc(doc: DocumentSnapshot, currentUid?: string | null): S
     authorUid: data.authorUid,
     authorName: data.authorName,
     authorEmail: data.authorEmail,
+    authorRankKey: data.authorRankKey ?? 'polloDelSup',
+    authorRankIcon: data.authorRankIcon ?? '🐔',
     title: data.title,
     body: data.body,
     spot: data.spot,
@@ -127,10 +130,25 @@ export async function createUserStory(uid: string, payload: StoryPayload, author
           ? `Historia de ${author.email.split('@')[0]}`
           : 'Historia SUP');
 
+  // Read author rank from user doc (fire-and-forget safe — defaults to polloDelSup)
+  let authorRankKey = 'polloDelSup';
+  let authorRankIcon = '🐔';
+  try {
+    const userDoc = await admin.firestore().collection('users').doc(uid).get();
+    const userData = userDoc.data();
+    if (userData?.rankKey) { authorRankKey = userData.rankKey; authorRankIcon = userData.rankIcon ?? '🐔'; }
+    else {
+      const ss = userData?.sessionsSummary;
+      if (ss) { const r = computeRank(ss.totalKm ?? 0, ss.totalSessions ?? 0); authorRankKey = r.key; authorRankIcon = r.icon; }
+    }
+  } catch { /* use defaults */ }
+
   const data: Record<string, unknown> = {
     authorUid: uid,
     authorName: displayName || sanitized.title || author.email || null,
     authorEmail: author.email ?? null,
+    authorRankKey,
+    authorRankIcon,
     likes: 0,
     featured: false,
     status: 'published',

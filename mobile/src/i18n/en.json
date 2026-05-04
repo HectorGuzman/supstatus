@@ -225,5 +225,16 @@
     "sessions": "Sessions",
     "stories": "Stories",
     "profile": "Profile"
+  },
+  "ranks": {
+    "polloDelSup": "SUP Chicken",
+    "aprendizMojado": "Soggy Apprentice",
+    "remadorDeDomingo": "Weekend Warrior",
+    "buscaolas": "Wave Chaser",
+    "loboDeMar": "Sea Wolf",
+    "tiburonDeBahia": "Bay Shark",
+    "maestroDelRemo": "Paddle Master",
+    "leyendaDeLosMaress": "Legend of the Seas",
+    "progressText": "{{score}} pts → {{next}} pts to {{icon}} {{label}}"
   }
 }

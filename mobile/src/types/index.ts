@@ -48,6 +48,8 @@ export interface Story {
   authorUid?: string;
   authorName: string;
   authorAvatar?: string;
+  authorRankKey?: string;
+  authorRankIcon?: string;
   spot?: string;
   mediaUrl?: string;
   likeCount: number;

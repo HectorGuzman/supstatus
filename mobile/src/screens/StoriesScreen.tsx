@@ -15,6 +15,7 @@ import { api } from '../services/api';
 import { requestMediaLibraryPermission, requestCameraPermission } from '../services/permissions';
 import { Story, Comment } from '../types';
 import { colors, radius, spacing } from '../theme';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +33,7 @@ function formatRelativeTime(dateStr: string | null) {
 }
 
 export default function StoriesScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [stories, setStories] = useState<Story[]>([]);
@@ -402,7 +404,7 @@ export default function StoriesScreen() {
                 </View>
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Text style={styles.userDisplayName}>{item.displayName}</Text>
-                  {item.nivel && <Text style={styles.userNivel}>{item.nivel}</Text>}
+                  {item.rankKey && <Text style={styles.userNivel}>{item.rankIcon} {t(`ranks.${item.rankKey}`)}</Text>}
                 </View>
                 <TouchableOpacity
                   onPress={() => {
@@ -698,6 +700,7 @@ function StoryCard({ story, onLike, onComment, isFollowing, onFollowToggle, onVi
   story: Story; onLike: () => void; onComment: () => void;
   isFollowing?: boolean; onFollowToggle?: () => void; onViewProfile?: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <View style={styles.card}>
       {/* Header */}
@@ -708,12 +711,17 @@ function StoryCard({ story, onLike, onComment, isFollowing, onFollowToggle, onVi
           </View>
           <View style={{ flex: 1, marginLeft: 10 }}>
             <Text style={styles.cardAuthorName}>{story.authorName}</Text>
-            {story.spot && (
-              <View style={styles.spotRow}>
-                <Ionicons name="location-outline" size={11} color={colors.primary} />
-                <Text style={styles.spotLabel}>{story.spot}</Text>
-              </View>
-            )}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              {story.authorRankKey && (
+                <Text style={styles.cardAuthorRank}>{story.authorRankIcon} {t(`ranks.${story.authorRankKey}`)}</Text>
+              )}
+              {story.spot && (
+                <View style={styles.spotRow}>
+                  <Ionicons name="location-outline" size={11} color={colors.primary} />
+                  <Text style={styles.spotLabel}>{story.spot}</Text>
+                </View>
+              )}
+            </View>
           </View>
         </TouchableOpacity>
         {onFollowToggle && (
@@ -830,6 +838,7 @@ const styles = StyleSheet.create({
   userAvatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   userDisplayName: { color: colors.textPrimary, fontWeight: '700', fontSize: 15 },
   userNivel: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
+  cardAuthorRank: { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
 
   // Public profile modal
   profileOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },

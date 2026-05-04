@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { Timestamp } from 'firebase-admin/firestore';
 import { authenticateAny as authenticate } from '../middleware/authenticate.js';
-import { createSession, deleteSession, listSessions, type SessionPayload } from '../services/firestore.js';
+import { createSession, deleteSession, listSessions, updateUserStats, type SessionPayload } from '../services/firestore.js';
 
 const router = Router();
 
@@ -118,6 +118,7 @@ router.post('/me', authenticate, async (req: Request, res: Response) => {
 
   try {
     const session = await createSession(decoded.uid, payload);
+    updateUserStats(decoded.uid).catch(e => console.error('[sessions] updateUserStats error', e));
     res.json({ session: serializeSession(session) });
   } catch (error) {
     console.error('[sessions] error creating session', error);
@@ -136,6 +137,7 @@ router.delete('/me/:sessionId', authenticate, async (req: Request, res: Response
     if (!removed) {
       return res.status(404).json({ error: 'Remada no encontrada.' });
     }
+    updateUserStats(decoded.uid).catch(e => console.error('[sessions] updateUserStats error', e));
     res.json({ success: true });
   } catch (error) {
     console.error('[sessions] error deleting session', error);

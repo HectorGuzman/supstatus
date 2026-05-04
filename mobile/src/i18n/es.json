@@ -225,5 +225,16 @@
     "sessions": "Remadas",
     "stories": "Historias",
     "profile": "Perfil"
+  },
+  "ranks": {
+    "polloDelSup": "Pollo del SUP",
+    "aprendizMojado": "Aprendiz Mojado",
+    "remadorDeDomingo": "Remador de Domingo",
+    "buscaolas": "Buscaolas",
+    "loboDeMar": "Lobo de Mar",
+    "tiburonDeBahia": "Tiburón de Bahía",
+    "maestroDelRemo": "Maestro del Remo",
+    "leyendaDeLosMaress": "Leyenda de los Mares",
+    "progressText": "{{score}} pts → {{next}} pts para {{icon}} {{label}}"
   }
 }

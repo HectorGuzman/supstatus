@@ -72,6 +72,8 @@ router.get('/', authenticateAny, async (req: Request, res: Response) => {
           displayName: data.displayName ?? '',
           avatarUrl: data.avatarUrl ?? null,
           nivel: data.nivel ?? null,
+          rankKey: data.rankKey ?? 'polloDelSup',
+          rankIcon: data.rankIcon ?? '🐔',
           isFollowing: followingSet.has(doc.id),
         };
       });

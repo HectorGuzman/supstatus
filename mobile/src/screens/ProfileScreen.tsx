@@ -19,29 +19,36 @@ import { fetchSpotsConfig } from '../services/spots';
 import { registerPushToken } from '../services/notifications';
 import { UserProfile } from '../types';
 import { colors, radius, spacing } from '../theme';
+import { useTranslation } from 'react-i18next';
 
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
 const DISCIPLINAS = ['Travesía', 'Surf', 'Racing', 'Yoga SUP', 'Pesca', 'Recreativo'];
 
 const RANKS = [
-  { min: 0,   label: 'Sin remadas',     color: colors.textMuted,  icon: '🌊' },
-  { min: 1,   label: 'Explorador SUP',  color: colors.success,    icon: '🟢' },
-  { min: 20,  label: 'Remero Regular',  color: colors.primary,    icon: '🔵' },
-  { min: 50,  label: 'Aventurero SUP',  color: colors.purple,     icon: '🟣' },
-  { min: 100, label: 'Maestro del Remo',color: colors.warning,    icon: '🟡' },
-  { min: 200, label: 'Leyenda SUP',     color: colors.danger,     icon: '🔴' },
+  { min: 0,    key: 'polloDelSup',        color: '#94a3b8',      icon: '🐔' },
+  { min: 10,   key: 'aprendizMojado',     color: colors.success, icon: '💦' },
+  { min: 30,   key: 'remadorDeDomingo',   color: colors.primary, icon: '😎' },
+  { min: 70,   key: 'buscaolas',          color: '#06b6d4',      icon: '🌊' },
+  { min: 140,  key: 'loboDeMar',          color: colors.purple,  icon: '🐺' },
+  { min: 280,  key: 'tiburonDeBahia',     color: colors.warning, icon: '🦈' },
+  { min: 550,  key: 'maestroDelRemo',     color: '#f97316',      icon: '🧙' },
+  { min: 1000, key: 'leyendaDeLosMaress', color: colors.danger,  icon: '🏆' },
 ];
 
-const NEXT_RANK_KM = [1, 20, 50, 100, 200, Infinity];
-
-function getRank(km: number) {
-  return [...RANKS].reverse().find(r => km >= r.min) ?? RANKS[0];
+function rankScore(km: number, sessions: number) {
+  return km + sessions * 5;
 }
-function getNextRank(km: number) {
-  return RANKS.find(r => r.min > km) ?? null;
+function getRank(km: number, sessions: number) {
+  const score = rankScore(km, sessions);
+  return [...RANKS].reverse().find(r => score >= r.min) ?? RANKS[0];
+}
+function getNextRank(km: number, sessions: number) {
+  const score = rankScore(km, sessions);
+  return RANKS.find(r => r.min > score) ?? null;
 }
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const profileCardRef = useRef<View>(null);
   const [user, setUser] = useState<any>(null);
@@ -189,9 +196,11 @@ export default function ProfileScreen() {
   if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} />;
 
   const km = profile?.sessionsSummary?.totalKm ?? 0;
-  const rank = getRank(km);
-  const nextRank = getNextRank(km);
-  const rankProgress = nextRank ? Math.min((km - (getRank(km).min)) / (nextRank.min - getRank(km).min), 1) : 1;
+  const sessions = profile?.sessionsSummary?.totalSessions ?? 0;
+  const score = rankScore(km, sessions);
+  const rank = getRank(km, sessions);
+  const nextRank = getNextRank(km, sessions);
+  const rankProgress = nextRank ? Math.min((score - rank.min) / (nextRank.min - rank.min), 1) : 1;
 
   const handleShare = async () => {
     try {
@@ -261,7 +270,7 @@ export default function ProfileScreen() {
             <Text style={styles.displayName}>{profile?.displayName ?? user.email?.split('@')[0]}</Text>
             <View style={[styles.rankBadge, { backgroundColor: rank.color + '20', borderColor: rank.color + '60' }]}>
               <Text style={styles.rankIcon}>{rank.icon}</Text>
-              <Text style={[styles.rankLabel, { color: rank.color }]}>{rank.label}</Text>
+              <Text style={[styles.rankLabel, { color: rank.color }]}>{t(`ranks.${rank.key}`)}</Text>
             </View>
           </View>
 
@@ -270,7 +279,7 @@ export default function ProfileScreen() {
               <View style={styles.progressBar}>
                 <View style={[styles.progressFill, { width: `${rankProgress * 100}%` as any, backgroundColor: rank.color }]} />
               </View>
-              <Text style={styles.progressText}>{km.toFixed(1)} km → {nextRank.min} km para {nextRank.label}</Text>
+              <Text style={styles.progressText}>{t('ranks.progressText', { score: score.toFixed(0), next: nextRank.min, icon: nextRank.icon, label: t(`ranks.${nextRank.key}`) })}</Text>
             </View>
           )}
 
@@ -308,6 +317,7 @@ export default function ProfileScreen() {
           profile={profile}
           user={user}
           km={km}
+          score={score}
           rank={rank}
           nextRank={nextRank}
           rankProgress={rankProgress}
@@ -320,7 +330,8 @@ export default function ProfileScreen() {
 
 const PSHARE_W = 390;
 
-function ProfileShareCard({ profile, user, km, rank, nextRank, rankProgress, cardRef }: any) {
+function ProfileShareCard({ profile, user, km, score, rank, nextRank, rankProgress, cardRef }: any) {
+  const { t } = useTranslation();
   const disciplines = profile?.disciplinas?.join(' · ') ?? profile?.disciplina ?? null;
   return (
     <View ref={cardRef} collapsable={false} style={{ width: PSHARE_W, backgroundColor: '#040e1e' }}>
@@ -345,7 +356,7 @@ function ProfileShareCard({ profile, user, km, rank, nextRank, rankProgress, car
         {/* Rank badge */}
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10, paddingHorizontal: 18, paddingVertical: 8, borderRadius: 20, backgroundColor: rank.color + '20', borderWidth: 1, borderColor: rank.color + '60' }}>
           <Text style={{ fontSize: 16 }}>{rank.icon}</Text>
-          <Text style={{ color: rank.color, fontWeight: '800', fontSize: 15 }}>{rank.label}</Text>
+          <Text style={{ color: rank.color, fontWeight: '800', fontSize: 15 }}>{t(`ranks.${rank.key}`)}</Text>
         </View>
       </View>
 
@@ -371,8 +382,8 @@ function ProfileShareCard({ profile, user, km, rank, nextRank, rankProgress, car
       {nextRank && (
         <View style={{ marginHorizontal: 20, marginBottom: 14, backgroundColor: '#060f1e', borderRadius: 12, padding: 14, borderWidth: 1, borderColor: '#1e293b' }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-            <Text style={{ color: '#64748b', fontSize: 11, fontWeight: '700' }}>Progreso hacia {nextRank.label}</Text>
-            <Text style={{ color: rank.color, fontSize: 11, fontWeight: '800' }}>{km.toFixed(1)} / {nextRank.min} km</Text>
+            <Text style={{ color: '#64748b', fontSize: 11, fontWeight: '700' }}>Progreso hacia {t(`ranks.${nextRank.key}`)}</Text>
+            <Text style={{ color: rank.color, fontSize: 11, fontWeight: '800' }}>{score.toFixed(0)} / {nextRank?.min ?? '—'} pts</Text>
           </View>
           <View style={{ height: 6, backgroundColor: '#1e293b', borderRadius: 3 }}>
             <View style={{ height: 6, width: `${rankProgress * 100}%` as any, backgroundColor: rank.color, borderRadius: 3 }} />
