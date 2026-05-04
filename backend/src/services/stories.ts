@@ -26,6 +26,8 @@ export interface StoryRecord {
   authorUid: string;
   authorName?: string;
   authorEmail?: string;
+  authorRankKey?: string;
+  authorRankIcon?: string;
   title?: string;
   body?: string;
   spot?: string;
