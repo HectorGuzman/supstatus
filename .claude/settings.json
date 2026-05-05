@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://raw.githubusercontent.com/HectorGuzman/sup-vision/main/data.json\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)\\); print\\(d.get\\('generado_en','NO FIELD'\\)\\); print\\(list\\(d['hoy'][0].keys\\(\\)\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('generado:', d['generado']\\); print\\('mareas:', d['mareas']\\)\")",
+      "Bash(sed -i '' 's/style={StyleSheet\\\\.absoluteFill} borderRadius={radius\\\\.full}/style={[StyleSheet.absoluteFill, { borderRadius: radius.full }]}/g' src/screens/ForecastScreen.tsx src/screens/ProfileScreen.tsx src/screens/SessionsScreen.tsx src/screens/StoriesScreen.tsx src/navigation/index.tsx)",
+      "Bash(sed -i '' 's/style={StyleSheet\\\\.absoluteFill} borderRadius={radius\\\\.md}/style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]}/g' src/screens/ForecastScreen.tsx src/screens/ProfileScreen.tsx src/screens/SessionsScreen.tsx src/screens/StoriesScreen.tsx src/navigation/index.tsx)",
+      "Bash(sed -i '' 's/style={StyleSheet\\\\.absoluteFill} borderRadius={radius\\\\.lg}/style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}/g' src/screens/ForecastScreen.tsx src/screens/ProfileScreen.tsx src/screens/SessionsScreen.tsx src/screens/StoriesScreen.tsx src/navigation/index.tsx)",
+      "Bash(python3 -c \"import cairosvg\")",
+      "Bash(npm --version)",
+      "Bash(npx svgexport *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(list\\(d.get\\('exports',{}\\).keys\\(\\)\\)[:10]\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('react-native', d.get\\('exports', {}\\)\\), indent=2\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); rn=d.get\\('react-native'\\); print\\('react-native:', rn\\)\")",
+      "Bash(python3 -c \" import sys, json d = json.load\\(sys.stdin\\) exports = d.get\\('exports', {}\\) auth_export = exports.get\\('./auth', {}\\) print\\(json.dumps\\(auth_export, indent=2\\)\\) \")",
+      "Bash(curl -s https://raw.githubusercontent.com/HectorGuzman/sup-vision/main/data.json)",
+      "Bash(python3 -c ' *)",
+      "Read(//Users/hector/Downloads/**)"
+    ]
+  }
+}
