@@ -50,7 +50,7 @@ function getNextRank(km: number, sessions: number) {
 export default function ProfileScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const profileCardRef = useRef<View>(null);
+  const shareCardRef = useRef<View>(null);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -204,7 +204,7 @@ export default function ProfileScreen() {
 
   const handleShare = async () => {
     try {
-      const uri = await captureRef(profileCardRef, { format: 'png', quality: 1 });
+      const uri = await captureRef(shareCardRef, { format: 'png', quality: 1 });
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: 'image/png', dialogTitle: 'Compartir perfil' });
         return;
@@ -230,7 +230,6 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       )}
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View ref={profileCardRef} collapsable={false}>
         <LinearGradient colors={['#071828', '#040e1e']} style={styles.headerGradient}>
           <View style={styles.headerRow}>
             <Text style={styles.screenTitle}>Perfil</Text>
@@ -291,7 +290,6 @@ export default function ProfileScreen() {
             </View>
           )}
         </LinearGradient>
-        </View>{/* end profileCardRef */}
 
         <View style={styles.content}>
           {editing ? (
@@ -321,7 +319,7 @@ export default function ProfileScreen() {
           rank={rank}
           nextRank={nextRank}
           rankProgress={rankProgress}
-          cardRef={profileCardRef}
+          cardRef={shareCardRef}
         />
       </View>
     </View>
