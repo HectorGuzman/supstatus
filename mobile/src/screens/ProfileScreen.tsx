@@ -64,6 +64,7 @@ export default function ProfileScreen() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [spots, setSpots] = useState<{ id: string; nombre: string }[]>([]);
   const { signIn: googleSignIn, ready: googleReady, loading: googleLoading } = useGoogleSignIn();
+  const { signIn: appleSignIn } = useAppleSignIn();
 
   useEffect(() => {
     fetchSpotsConfig().then(setSpots);
@@ -194,7 +195,7 @@ export default function ProfileScreen() {
 
   if (loading) return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}><ActivityIndicator color={colors.primary} size="large" /></View>;
 
-  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} />;
+  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} onApple={appleSignIn} />;
 
   const km = profile?.sessionsSummary?.totalKm ?? 0;
   const sessions = profile?.sessionsSummary?.totalSessions ?? 0;
@@ -546,8 +547,7 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
   );
 }
 
-function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading }: any) {
-  const { signIn: appleSignIn, loading: appleLoading } = useAppleSignIn();
+function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading, onApple }: any) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#071828', '#040e1e']} style={StyleSheet.absoluteFill} />
@@ -571,19 +571,10 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-            style={[styles.appleBtn, appleLoading && { opacity: 0.6 }]}
-            onPress={appleSignIn}
-            disabled={appleLoading}
-          >
-            {appleLoading
-              ? <ActivityIndicator size="small" color="#000" />
-              : <Ionicons name="logo-apple" size={20} color="#000" />
-            }
-            <Text style={styles.appleBtnText}>
-              {appleLoading ? 'Iniciando sesión...' : 'Continuar con Apple'}
-            </Text>
-          </TouchableOpacity>
+        <TouchableOpacity style={styles.appleBtn} onPress={onApple}>
+          <Ionicons name="logo-apple" size={20} color="#000" />
+          <Text style={styles.appleBtnText}>Continuar con Apple</Text>
+        </TouchableOpacity>
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} /><Text style={styles.dividerText}>o</Text><View style={styles.dividerLine} />
