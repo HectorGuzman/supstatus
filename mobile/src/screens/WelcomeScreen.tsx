@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import { useGoogleSignIn } from '../services/googleAuth';
+import { useAppleSignIn } from '../services/appleAuth';
 import { colors, radius, spacing } from '../theme';
 
 type Mode = 'welcome' | 'login' | 'register';
@@ -37,6 +38,7 @@ const FEATURES = [
 export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const { signIn: googleSignIn, loading: googleLoading } = useGoogleSignIn();
+  const { signIn: appleSignIn, loading: appleLoading } = useAppleSignIn();
 
   const [mode, setMode] = useState<Mode>('welcome');
   const [email, setEmail] = useState('');
@@ -141,6 +143,23 @@ export default function WelcomeScreen() {
             )}
             <Text style={styles.googleBtnText}>
               {googleLoading ? 'Iniciando sesión...' : 'Continuar con Google'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* ── APPLE BUTTON ── */}
+          <TouchableOpacity
+            style={[styles.appleBtn, appleLoading && { opacity: 0.7 }]}
+            onPress={appleSignIn}
+            disabled={appleLoading}
+            activeOpacity={0.85}
+          >
+            {appleLoading ? (
+              <ActivityIndicator color="#000" size="small" />
+            ) : (
+              <Ionicons name="logo-apple" size={20} color="#000" />
+            )}
+            <Text style={styles.appleBtnText}>
+              {appleLoading ? 'Iniciando sesión...' : 'Continuar con Apple'}
             </Text>
           </TouchableOpacity>
 
@@ -294,6 +313,12 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(56,189,248,0.3)', marginBottom: 4,
   },
   googleBtnText: { color: '#f1f5f9', fontWeight: '700', fontSize: 15 },
+
+  appleBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    backgroundColor: '#ffffff', padding: 16, borderRadius: radius.lg, marginTop: 10,
+  },
+  appleBtnText: { color: '#000000', fontWeight: '700', fontSize: 15 },
 
   divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: spacing.lg },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
