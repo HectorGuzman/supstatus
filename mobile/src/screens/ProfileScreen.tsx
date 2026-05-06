@@ -14,6 +14,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, storage } from '../services/firebase';
 import { requestMediaLibraryPermission, requestCameraPermission } from '../services/permissions';
 import { useGoogleSignIn } from '../services/googleAuth';
+import { useAppleSignIn } from '../services/appleAuth';
 import { api } from '../services/api';
 import { fetchSpotsConfig } from '../services/spots';
 import { registerPushToken } from '../services/notifications';
@@ -63,6 +64,7 @@ export default function ProfileScreen() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [spots, setSpots] = useState<{ id: string; nombre: string }[]>([]);
   const { signIn: googleSignIn, ready: googleReady, loading: googleLoading } = useGoogleSignIn();
+  const { signIn: appleSignIn, loading: appleLoading, isAvailable: appleAvailable } = useAppleSignIn();
 
   useEffect(() => {
     fetchSpotsConfig().then(setSpots);
@@ -193,7 +195,7 @@ export default function ProfileScreen() {
 
   if (loading) return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}><ActivityIndicator color={colors.primary} size="large" /></View>;
 
-  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} />;
+  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} onApple={appleSignIn} appleLoading={appleLoading} appleAvailable={appleAvailable} />;
 
   const km = profile?.sessionsSummary?.totalKm ?? 0;
   const sessions = profile?.sessionsSummary?.totalSessions ?? 0;
@@ -545,7 +547,7 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
   );
 }
 
-function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading }: any) {
+function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading, onApple, appleLoading, appleAvailable }: any) {
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#071828', '#040e1e']} style={StyleSheet.absoluteFill} />
@@ -568,6 +570,22 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
             {googleLoading ? 'Iniciando sesión...' : 'Continuar con Google'}
           </Text>
         </TouchableOpacity>
+
+        {appleAvailable && (
+          <TouchableOpacity
+            style={[styles.appleBtn, appleLoading && { opacity: 0.6 }]}
+            onPress={onApple}
+            disabled={appleLoading}
+          >
+            {appleLoading
+              ? <ActivityIndicator size="small" color="#000" />
+              : <Ionicons name="logo-apple" size={20} color="#000" />
+            }
+            <Text style={styles.appleBtnText}>
+              {appleLoading ? 'Iniciando sesión...' : 'Continuar con Apple'}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} /><Text style={styles.dividerText}>o</Text><View style={styles.dividerLine} />
@@ -668,6 +686,8 @@ const styles = StyleSheet.create({
   loginSub: { fontSize: 15, color: colors.textMuted, marginTop: 4 },
   googleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#1a3a5c', padding: 16, borderRadius: radius.md, borderWidth: 1, borderColor: colors.borderLight },
   googleBtnText: { color: colors.textPrimary, fontWeight: '700', fontSize: 15 },
+  appleBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, backgroundColor: '#ffffff', padding: 16, borderRadius: radius.md, marginTop: 10 },
+  appleBtnText: { color: '#000000', fontWeight: '700', fontSize: 15 },
   divider: { flexDirection: 'row', alignItems: 'center', gap: 12, marginVertical: spacing.md },
   dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
   dividerText: { color: colors.textMuted, fontSize: 13 },

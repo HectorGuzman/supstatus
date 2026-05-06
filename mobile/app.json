@@ -65,6 +65,7 @@
           "locationAlwaysAndWhenInUsePermission": "Necesitamos tu ubicación para el seguimiento GPS de tus sesiones."
         }
       ],
+      "expo-apple-authentication",
       "expo-web-browser",
       "@react-native-google-signin/google-signin",
       [
