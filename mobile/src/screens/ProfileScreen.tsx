@@ -64,7 +64,6 @@ export default function ProfileScreen() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [spots, setSpots] = useState<{ id: string; nombre: string }[]>([]);
   const { signIn: googleSignIn, ready: googleReady, loading: googleLoading } = useGoogleSignIn();
-  const { signIn: appleSignIn, loading: appleLoading, isAvailable: appleAvailable } = useAppleSignIn();
 
   useEffect(() => {
     fetchSpotsConfig().then(setSpots);
@@ -195,7 +194,7 @@ export default function ProfileScreen() {
 
   if (loading) return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}><ActivityIndicator color={colors.primary} size="large" /></View>;
 
-  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} onApple={appleSignIn} appleLoading={appleLoading} appleAvailable={appleAvailable} />;
+  if (!user) return <LoginScreen email={email} setEmail={setEmail} password={password} setPassword={setPassword} authMode={authMode} setAuthMode={setAuthMode} onEmailAuth={handleEmailAuth} onForgotPassword={handleForgotPassword} onGoogle={googleSignIn} googleReady={googleReady} googleLoading={googleLoading} />;
 
   const km = profile?.sessionsSummary?.totalKm ?? 0;
   const sessions = profile?.sessionsSummary?.totalSessions ?? 0;
@@ -547,7 +546,8 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
   );
 }
 
-function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading, onApple, appleLoading, appleAvailable }: any) {
+function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading }: any) {
+  const { signIn: appleSignIn, loading: appleLoading } = useAppleSignIn();
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#071828', '#040e1e']} style={StyleSheet.absoluteFill} />
@@ -571,10 +571,9 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
           </Text>
         </TouchableOpacity>
 
-        {appleAvailable && (
-          <TouchableOpacity
+        <TouchableOpacity
             style={[styles.appleBtn, appleLoading && { opacity: 0.6 }]}
-            onPress={onApple}
+            onPress={appleSignIn}
             disabled={appleLoading}
           >
             {appleLoading
@@ -585,7 +584,6 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
               {appleLoading ? 'Iniciando sesión...' : 'Continuar con Apple'}
             </Text>
           </TouchableOpacity>
-        )}
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} /><Text style={styles.dividerText}>o</Text><View style={styles.dividerLine} />
