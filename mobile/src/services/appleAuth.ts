@@ -13,6 +13,10 @@ export function useAppleSignIn() {
   const isAvailable = Platform.OS === 'ios';
 
   const signIn = async () => {
+    if (!_AppleAuthentication) {
+      Alert.alert('Error', 'Sign in with Apple no está disponible en este dispositivo.');
+      return;
+    }
     setLoading(true);
     try {
       const credential = await _AppleAuthentication.signInAsync({
