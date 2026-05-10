@@ -121,6 +121,36 @@ export async function updateUserStats(uid: string) {
   }, { merge: true });
 }
 
+export async function deleteUserAccount(uid: string) {
+  const batch = firestore.batch();
+
+  // Borrar sesiones
+  const sessionsSnap = await firestore.collection('users').doc(uid).collection('sessions').get();
+  sessionsSnap.docs.forEach(d => batch.delete(d.ref));
+
+  // Borrar historias del usuario
+  const storiesSnap = await firestore.collection('stories').where('authorUid', '==', uid).get();
+  for (const storyDoc of storiesSnap.docs) {
+    const commentsSnap = await storyDoc.ref.collection('comments').get();
+    commentsSnap.docs.forEach(c => batch.delete(c.ref));
+    batch.delete(storyDoc.ref);
+  }
+
+  // Borrar follows
+  const followingSnap = await firestore.collection('follows').where('followerUid', '==', uid).get();
+  followingSnap.docs.forEach(d => batch.delete(d.ref));
+  const followersSnap = await firestore.collection('follows').where('targetUid', '==', uid).get();
+  followersSnap.docs.forEach(d => batch.delete(d.ref));
+
+  // Borrar perfil
+  batch.delete(firestore.collection('users').doc(uid));
+
+  await batch.commit();
+
+  // Borrar cuenta de Firebase Auth
+  await admin.auth().deleteUser(uid);
+}
+
 export async function listAllProfiles() {
   const snapshot = await firestore.collection('users').orderBy('displayName', 'asc').get();
   return snapshot.docs.map((doc) => ({

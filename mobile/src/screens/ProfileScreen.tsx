@@ -308,6 +308,35 @@ export default function ProfileScreen() {
           <Ionicons name="logo-instagram" size={18} color="#e1306c" />
           <Text style={styles.igText}>Síguenos en Instagram <Text style={styles.igHandle}>@__supstatus</Text></Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.deleteAccountBtn}
+          onPress={() => {
+            Alert.alert(
+              'Eliminar cuenta',
+              'Esta acción eliminará permanentemente tu cuenta, sesiones, historias y todos tus datos. No se puede deshacer.\n\n¿Estás seguro?',
+              [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                  text: 'Eliminar mi cuenta',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await api.deleteAccount();
+                      await signOut(auth as any);
+                    } catch {
+                      Alert.alert('Error', 'No se pudo eliminar la cuenta. Intenta de nuevo.');
+                    }
+                  },
+                },
+              ]
+            );
+          }}
+        >
+          <Ionicons name="trash-outline" size={16} color={colors.danger} />
+          <Text style={styles.deleteAccountText}>Eliminar cuenta</Text>
+        </TouchableOpacity>
+
         <View style={{ height: 80 + insets.bottom }} />
       </ScrollView>
 
@@ -682,4 +711,6 @@ const styles = StyleSheet.create({
   dividerText: { color: colors.textMuted, fontSize: 13 },
   switchText: { color: colors.textMuted, textAlign: 'center', fontSize: 14 },
   forgotText: { color: colors.primary, fontSize: 13, fontWeight: '600' },
+  deleteAccountBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginHorizontal: spacing.md, marginTop: spacing.sm, padding: 14, borderRadius: radius.md, borderWidth: 1, borderColor: colors.danger + '40' },
+  deleteAccountText: { color: colors.danger, fontSize: 14, fontWeight: '600' },
 });

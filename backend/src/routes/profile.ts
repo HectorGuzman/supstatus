@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { authenticate, authenticateAny } from '../middleware/authenticate.js';
 import { env } from '../config/env.js';
-import { getUserProfile, upsertUserProfile, listAllProfiles, listSessions } from '../services/firestore.js';
+import { getUserProfile, upsertUserProfile, listAllProfiles, listSessions, deleteUserAccount } from '../services/firestore.js';
 
 interface SessionRecord {
   id?: string;
@@ -60,6 +60,18 @@ router.post('/me', authenticateAny, async (req: Request, res: Response) => {
   } catch (error) {
     console.error('[profile] error updating profile', error);
     res.status(500).json({ error: 'No se pudo actualizar el perfil.' });
+  }
+});
+
+router.delete('/me', authenticateAny, async (req: Request, res: Response) => {
+  const decoded = (req as Request & { user?: DecodedIdToken }).user;
+  if (!decoded?.uid) return res.status(400).json({ error: 'UID no disponible.' });
+  try {
+    await deleteUserAccount(decoded.uid);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[profile] error deleting account', error);
+    res.status(500).json({ error: 'No se pudo eliminar la cuenta.' });
   }
 });
 
