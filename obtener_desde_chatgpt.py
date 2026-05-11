@@ -115,14 +115,15 @@ def generar_mareas(fecha_str):
     ]
 
 
-def nivel_por_viento(viento_str):
+def nivel_condiciones(viento_str, oleaje_str):
     try:
         kmh = float(viento_str.split()[0])
-        if kmh <= 8:
-            return "Principiante"
-        elif kmh <= 15:
+        metros = float(oleaje_str.split()[0])
+        if kmh > 15 or metros > 1.5:
+            return "Avanzado"
+        elif kmh > 8 or metros > 0.8:
             return "Intermedio"
-        return "Avanzado"
+        return "Principiante"
     except Exception:
         return "Intermedio"
 
@@ -163,18 +164,22 @@ def generar_con_openai(spot, horarios, fecha_generacion, api_key):
     horarios_copia = json.loads(json.dumps(horarios))  # deep copy para validación posterior
     for dia in ("hoy", "mañana"):
         for bloque in horarios.get(dia, []):
-            bloque["nivel"] = nivel_por_viento(bloque.get("viento", "0 km/h"))
+            bloque["nivel"] = nivel_condiciones(bloque.get("viento", "0 km/h"), bloque.get("oleaje", "0 m"))
 
     bloques_json = json.dumps(horarios, indent=2, ensure_ascii=False)
     n_bloques = sum(len(horarios.get(d, [])) for d in ('hoy', 'mañana'))
 
     prompt = f"""Eres un experto en SUP (stand up paddle) en {spot['nombre']}, Chile (lat {spot['lat']}, lon {spot['lng']}).
 
-Tienes {n_bloques} bloques horarios con datos REALES de Open-Meteo.
-Tu tarea: agregar el campo "condiciones" a CADA bloque con una frase útil y específica sobre si ese momento es bueno para SUP en {spot['nombre']}. Considera viento, oleaje y temperatura. Varía las frases — no repitas la misma.
+Tienes {n_bloques} bloques horarios con datos REALES de Open-Meteo. Cada bloque ya tiene un campo "nivel" calculado con esta lógica:
+- "Principiante": viento ≤ 8 km/h Y oleaje ≤ 0.8 m
+- "Intermedio": viento ≤ 15 km/h Y oleaje ≤ 1.5 m (pero superando el umbral de principiante)
+- "Avanzado": viento > 15 km/h O oleaje > 1.5 m
+
+Tu tarea: agregar el campo "condiciones" a CADA bloque con una frase útil y específica para remadores de ese nivel en {spot['nombre']}. La frase DEBE ser coherente con el nivel — si es "Principiante" las condiciones son buenas para principiantes, si es "Intermedio" o "Avanzado" explica por qué requiere más experiencia. Varía las frases — no repitas la misma.
 
 REGLAS ESTRICTAS:
-1. Devuelve EXACTAMENTE el mismo JSON con SOLO el campo "condiciones" agregado. NO cambies hora, viento, oleaje, temperatura, direccionOleaje, direccionViento, direccionVientoGrados ni ningún otro valor existente.
+1. Devuelve EXACTAMENTE el mismo JSON con SOLO el campo "condiciones" agregado. NO cambies hora, viento, oleaje, temperatura, nivel, direccionOleaje, direccionViento, direccionVientoGrados ni ningún otro valor existente.
 2. Agrega al nivel superior del JSON:
    - "generado": "{fecha_generacion}"
 
