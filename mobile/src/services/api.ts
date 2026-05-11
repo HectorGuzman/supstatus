@@ -42,4 +42,8 @@ export const api = {
   unfollowUser: (targetUid: string) => request<any>(`/v1/users/${targetUid}/follow`, { method: 'DELETE' }),
   getUserProfile: (uid: string) => request<any>(`/v1/users/${uid}/profile`),
   deleteAccount: () => request<any>('/v1/profile/me', { method: 'DELETE' }),
+  reportStory: (id: string, reason: string) => request<any>(`/v1/stories/${id}/report`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  getBlockedUsers: () => request<any>('/v1/users/blocked'),
+  blockUser: (targetUid: string) => request<any>(`/v1/users/${targetUid}/block`, { method: 'POST' }),
+  unblockUser: (targetUid: string) => request<any>(`/v1/users/${targetUid}/block`, { method: 'DELETE' }),
 };

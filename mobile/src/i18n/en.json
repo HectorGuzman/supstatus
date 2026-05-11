@@ -198,6 +198,32 @@
     "noAccountText": "Don't have an account?",
     "hasAccountText": "Already have an account?",
     "loginAction": "Log in",
+    "myProfile": "My profile",
+    "edit": "Edit",
+    "deleteAccount": "Delete account",
+    "deleteAccountMsg": "This action will permanently delete your account, sessions, stories and all your data. This cannot be undone.\n\nAre you sure?",
+    "deleteAccountConfirm": "Delete my account",
+    "deleteAccountError": "Could not delete the account. Please try again.",
+    "verifyBannerLong": "Verify your email — tap here to resend",
+    "forgotPasswordTitle": "Recover password",
+    "couldNotSend": "Could not send",
+    "signingIn": "Signing in...",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithApple": "Continue with Apple",
+    "levels": {
+      "Principiante": "Beginner",
+      "Intermedio": "Intermediate",
+      "Avanzado": "Advanced",
+      "Experto": "Expert"
+    },
+    "disciplines": {
+      "Travesía": "Touring",
+      "Surf": "Surf",
+      "Racing": "Racing",
+      "Yoga SUP": "SUP Yoga",
+      "Pesca": "Fishing",
+      "Recreativo": "Recreational"
+    },
     "errors": {
       "auth/invalid-credential": "Wrong email or password.",
       "auth/user-not-found": "No account found with that email.",

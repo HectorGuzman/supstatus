@@ -4,6 +4,7 @@ import {
   StyleSheet, Linking,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Spot } from '../types';
 import { subscribeSpots } from '../services/spots';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function SpotSelector({ selected, onSelect }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [spots, setSpots] = useState<Spot[]>([]);
   const insets = useSafeAreaInsets();
@@ -22,14 +24,14 @@ export default function SpotSelector({ selected, onSelect }: Props) {
   return (
     <>
       <TouchableOpacity style={styles.trigger} onPress={() => setOpen(true)}>
-        <Text style={styles.triggerText}>📍 {selected?.nombre ?? 'Seleccionar spot'}</Text>
+        <Text style={styles.triggerText}>📍 {selected?.nombre ?? t('spotSelector.selectSpot')}</Text>
         <Text style={styles.arrow}>▾</Text>
       </TouchableOpacity>
 
       <Modal visible={open} animationType="slide" transparent>
         <View style={styles.overlay}>
           <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 16) }]}>
-            <Text style={styles.sheetTitle}>Spots</Text>
+            <Text style={styles.sheetTitle}>{t('spotSelector.spots')}</Text>
             <ScrollView style={{ maxHeight: 320 }}>
               {spots.map(spot => (
                 <TouchableOpacity
@@ -49,12 +51,12 @@ export default function SpotSelector({ selected, onSelect }: Props) {
               style={styles.suggestBtn}
               onPress={() => Linking.openURL('https://instagram.com/__supstatus')}
             >
-              <Text style={styles.suggestText}>¿Tu spot no está? Escríbenos en Instagram</Text>
+              <Text style={styles.suggestText}>{t('spotSelector.noSpot')}</Text>
               <Text style={styles.suggestHandle}>@__supstatus</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.btnSecondary, { marginTop: 8 }]} onPress={() => setOpen(false)}>
-              <Text style={styles.btnText}>Cerrar</Text>
+              <Text style={styles.btnText}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </View>

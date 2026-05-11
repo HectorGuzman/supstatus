@@ -20,6 +20,7 @@ import {
   type StoryPayload,
   type StoryStatus,
 } from '../services/stories.js';
+import { reportStory } from '../services/firestore.js';
 
 const router = Router();
 
@@ -255,6 +256,24 @@ router.delete('/:storyId/comments/:commentId', authenticate, async (req: Request
   } catch (error) {
     console.error('[stories] error deleting comment', error);
     res.status(500).json({ error: 'No se pudo eliminar el comentario.' });
+  }
+});
+
+router.post('/:storyId/report', authenticateAny, async (req: Request, res: Response) => {
+  const decoded = decodedFromReq(req);
+  if (!decoded?.uid) return res.status(400).json({ error: 'UID no disponible.' });
+  const { storyId } = req.params;
+  const reason = typeof req.body?.reason === 'string' ? req.body.reason.trim() : '';
+  if (!reason) return res.status(400).json({ error: 'Debes indicar un motivo.' });
+  try {
+    const result = await reportStory(storyId, decoded.uid, reason);
+    if (result.alreadyReported) {
+      return res.status(409).json({ error: 'Ya reportaste esta historia.' });
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('[stories] error reporting story', error);
+    res.status(500).json({ error: 'No se pudo enviar el reporte.' });
   }
 });
 

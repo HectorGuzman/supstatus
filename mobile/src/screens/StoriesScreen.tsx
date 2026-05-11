@@ -54,6 +54,7 @@ export default function StoriesScreen() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [followingUsers, setFollowingUsers] = useState<Set<string>>(new Set());
+  const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
   const [viewingProfile, setViewingProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -67,7 +68,7 @@ export default function StoriesScreen() {
     const unsub = (auth as any).onAuthStateChanged((u: any) => {
       setCurrentUser(u);
       load(); // reload cuando auth state es conocido → likedByMe correcto
-      if (u) loadFollowing();
+      if (u) { loadFollowing(); loadBlocked(); }
     });
     return unsub;
   }, []);
@@ -77,6 +78,13 @@ export default function StoriesScreen() {
       const d = await api.getFollowing();
       setFollowing(new Set(d.following ?? []));
       setFollowingUsers(new Set(d.following ?? []));
+    } catch {}
+  };
+
+  const loadBlocked = async () => {
+    try {
+      const d = await api.getBlockedUsers();
+      setBlockedUsers(new Set(d.blocked ?? []));
     } catch {}
   };
 
@@ -200,6 +208,46 @@ export default function StoriesScreen() {
     }
   };
 
+  const handleReport = (storyId: string, authorUid: string) => {
+    const reasons = ['Contenido inapropiado', 'Spam', 'Acoso o bullying', 'Otro'];
+    Alert.alert('Reportar o bloquear', '¿Qué quieres hacer?', [
+      ...reasons.map(reason => ({
+        text: `Reportar: ${reason}`,
+        onPress: async () => {
+          try {
+            await api.reportStory(storyId, reason);
+            Alert.alert('Reporte enviado', 'Gracias por ayudarnos a mantener la comunidad segura.');
+          } catch (e: any) {
+            const msg = e?.message?.includes('409') ? 'Ya reportaste esta historia.' : 'No se pudo enviar el reporte.';
+            Alert.alert('Error', msg);
+          }
+        },
+      })),
+      {
+        text: 'Bloquear usuario',
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert('Bloquear usuario', 'Su contenido dejará de aparecer en tu feed.', [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Bloquear',
+              style: 'destructive',
+              onPress: async () => {
+                try {
+                  await api.blockUser(authorUid);
+                  setBlockedUsers(prev => new Set([...prev, authorUid]));
+                } catch {
+                  Alert.alert('Error', 'No se pudo bloquear al usuario.');
+                }
+              },
+            },
+          ]);
+        },
+      },
+      { text: 'Cancelar', style: 'cancel' },
+    ]);
+  };
+
   const pickImage = () => {
     Alert.alert('Agregar foto', '¿De dónde quieres subir la foto?', [
       {
@@ -308,9 +356,9 @@ export default function StoriesScreen() {
           </View>
 
           {(() => {
-            let visible = stories;
-            if (filter === 'destacadas') visible = stories.filter(s => s.featured);
-            else if (filter === 'siguiendo') visible = stories.filter(s => followingUsers.has(s.authorUid ?? ''));
+            let visible = stories.filter(s => !blockedUsers.has(s.authorUid ?? ''));
+            if (filter === 'destacadas') visible = visible.filter(s => s.featured);
+            else if (filter === 'siguiendo') visible = visible.filter(s => followingUsers.has(s.authorUid ?? ''));
 
             const emptyMessages: Record<string, string> = {
               destacadas: 'Sin historias destacadas',
@@ -333,6 +381,7 @@ export default function StoriesScreen() {
                 story={s}
                 onLike={() => toggleLike(s.id)}
                 onComment={() => openComments(s)}
+                onReport={currentUser && s.authorUid !== currentUser.uid ? () => handleReport(s.id, s.authorUid ?? '') : undefined}
                 isFollowing={followingUsers.has(s.authorUid ?? '')}
                 onFollowToggle={currentUser && s.authorUid !== currentUser.uid ? () => toggleFollow(s.authorUid ?? '') : undefined}
                 onViewProfile={s.authorUid ? () => openUserProfile(s.authorUid!) : undefined}
@@ -696,8 +745,8 @@ function Avatar({ uri, name, size = 40 }: { uri?: string; name?: string; size?: 
   );
 }
 
-function StoryCard({ story, onLike, onComment, isFollowing, onFollowToggle, onViewProfile }: {
-  story: Story; onLike: () => void; onComment: () => void;
+function StoryCard({ story, onLike, onComment, onReport, isFollowing, onFollowToggle, onViewProfile }: {
+  story: Story; onLike: () => void; onComment: () => void; onReport?: () => void;
   isFollowing?: boolean; onFollowToggle?: () => void; onViewProfile?: () => void;
 }) {
   const { t } = useTranslation();
@@ -757,6 +806,12 @@ function StoryCard({ story, onLike, onComment, isFollowing, onFollowToggle, onVi
         <TouchableOpacity style={styles.actionBtn} onPress={onComment} activeOpacity={0.7}>
           <Ionicons name="chatbubble-outline" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
+        <View style={{ flex: 1 }} />
+        {onReport && (
+          <TouchableOpacity style={styles.actionBtn} onPress={onReport} activeOpacity={0.7}>
+            <Ionicons name="flag-outline" size={22} color={colors.textMuted} />
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Counts */}

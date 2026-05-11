@@ -3,7 +3,7 @@ import type { Request, Response } from 'express';
 import type { DecodedIdToken } from 'firebase-admin/auth';
 import { authenticateAny } from '../middleware/authenticate.js';
 import { ensureFirebase } from '../config/firebase.js';
-import { getUserProfile, listSessions } from '../services/firestore.js';
+import { getUserProfile, listSessions, blockUser, unblockUser, getBlockedUsers } from '../services/firestore.js';
 import { sendPushNotification, getUserFcmToken } from '../services/notifications.js';
 
 const router = Router();
@@ -144,6 +144,48 @@ router.delete('/:targetUid/follow', authenticateAny, async (req: Request, res: R
   } catch (err) {
     console.error('[users] unfollow error', err);
     res.status(500).json({ error: 'No se pudo dejar de seguir al usuario.' });
+  }
+});
+
+// GET /v1/users/blocked — list UIDs blocked by current user
+router.get('/blocked', authenticateAny, async (req: Request, res: Response) => {
+  const me = uid(req);
+  if (!me) return res.status(400).json({ error: 'UID no disponible.' });
+  try {
+    const blocked = await getBlockedUsers(me);
+    res.json({ blocked });
+  } catch (err) {
+    console.error('[users] error listing blocked', err);
+    res.status(500).json({ error: 'No se pudo obtener la lista.' });
+  }
+});
+
+// POST /v1/users/:targetUid/block
+router.post('/:targetUid/block', authenticateAny, async (req: Request, res: Response) => {
+  const me = uid(req);
+  const { targetUid } = req.params;
+  if (!me) return res.status(400).json({ error: 'UID no disponible.' });
+  if (me === targetUid) return res.status(400).json({ error: 'No puedes bloquearte a ti mismo.' });
+  try {
+    await blockUser(me, targetUid);
+    res.json({ blocked: true });
+  } catch (err) {
+    console.error('[users] block error', err);
+    res.status(500).json({ error: 'No se pudo bloquear al usuario.' });
+  }
+});
+
+// DELETE /v1/users/:targetUid/block
+router.delete('/:targetUid/block', authenticateAny, async (req: Request, res: Response) => {
+  const me = uid(req);
+  const { targetUid } = req.params;
+  if (!me) return res.status(400).json({ error: 'UID no disponible.' });
+  try {
+    await unblockUser(me, targetUid);
+    res.json({ blocked: false });
+  } catch (err) {
+    console.error('[users] unblock error', err);
+    res.status(500).json({ error: 'No se pudo desbloquear al usuario.' });
   }
 });
 

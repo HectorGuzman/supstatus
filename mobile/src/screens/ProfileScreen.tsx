@@ -82,32 +82,25 @@ export default function ProfileScreen() {
 
   const handleForgotPassword = async () => {
     if (!email.trim()) {
-      Alert.alert('Recuperar contraseña', 'Ingresa tu email primero y luego toca "¿Olvidaste tu contraseña?".');
+      Alert.alert(t('profile.forgotPasswordTitle'), t('profile.forgotPasswordHint'));
       return;
     }
     try {
       await sendPasswordResetEmail(auth as any, email.trim());
       Alert.alert(
-        'Revisa tu correo',
-        `Si existe una cuenta con ${email.trim()}, recibirás un enlace para restablecer tu contraseña.\n\n⚠️ Revisa también la carpeta de spam o correo no deseado.\n\nNota: esto solo funciona si tu cuenta fue creada con email y contraseña (no con Google).`,
-        [{ text: 'Entendido' }]
+        t('profile.resetEmailSent'),
+        t('profile.resetEmailSentMsg', { email: email.trim() }),
+        [{ text: t('welcome.understood') }]
       );
     } catch (e: any) {
       console.log('[ForgotPassword] error:', e?.code, e?.message);
-      const msgs: Record<string, string> = {
-        'auth/user-not-found': 'No existe una cuenta con ese email.',
-        'auth/invalid-email': 'El email ingresado no es válido.',
-        'auth/network-request-failed': 'Sin conexión a internet.',
-        'auth/too-many-requests': 'Demasiados intentos. Espera unos minutos.',
-        'auth/missing-email': 'Ingresa un email para continuar.',
-      };
-      Alert.alert('No se pudo enviar', msgs[e.code] ?? `Error: ${e.code ?? e.message}`);
+      Alert.alert(t('profile.couldNotSend'), String(t(`profile.errors.${e.code}` as any) || `Error: ${e.code ?? e.message}`));
     }
   };
 
   const handleEmailAuth = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Ingresa tu email y contraseña.');
+      Alert.alert(t('common.error'), t('profile.loginError'));
       return;
     }
     try {
@@ -117,28 +110,18 @@ export default function ProfileScreen() {
         const cred = await createUserWithEmailAndPassword(auth as any, email.trim(), password);
         if (cred.user) {
           await (await import('firebase/auth')).sendEmailVerification(cred.user);
-          Alert.alert('¡Cuenta creada!', 'Te enviamos un correo de verificación. Revisa tu bandeja de entrada.');
+          Alert.alert(t('profile.accountCreated'), t('profile.verificationSent'));
         }
       }
     } catch (e: any) {
-      const msgs: Record<string, string> = {
-        'auth/invalid-credential': 'Email o contraseña incorrectos.',
-        'auth/user-not-found': 'No existe una cuenta con ese email.',
-        'auth/wrong-password': 'Contraseña incorrecta.',
-        'auth/email-already-in-use': 'Ya existe una cuenta con ese email.',
-        'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-        'auth/invalid-email': 'El email no es válido.',
-        'auth/network-request-failed': 'Sin conexión a internet.',
-        'auth/too-many-requests': 'Demasiados intentos. Espera un momento.',
-      };
-      Alert.alert('Error', msgs[e.code] ?? e.message);
+      Alert.alert(t('common.error'), String(t(`profile.errors.${e.code}` as any) || e.message));
     }
   };
 
   const pickAvatar = () => {
-    Alert.alert('Cambiar foto de perfil', '¿De dónde quieres subir la foto?', [
+    Alert.alert(t('profile.changePhoto'), '', [
       {
-        text: 'Cámara',
+        text: t('profile.photoFromCamera'),
         onPress: async () => {
           try {
             if (!(await requestCameraPermission())) return;
@@ -146,12 +129,12 @@ export default function ProfileScreen() {
             if (result.canceled) return;
             await uploadAvatar(result.assets[0].uri);
           } catch (e: any) {
-            Alert.alert('Error al tomar foto', e?.message ?? 'Error desconocido');
+            Alert.alert(t('profile.cameraError'), e?.message ?? t('common.error'));
           }
         },
       },
       {
-        text: 'Galería',
+        text: t('profile.photoFromGallery'),
         onPress: async () => {
           try {
             if (!(await requestMediaLibraryPermission())) return;
@@ -159,11 +142,11 @@ export default function ProfileScreen() {
             if (result.canceled) return;
             await uploadAvatar(result.assets[0].uri);
           } catch (e: any) {
-            Alert.alert('Error al seleccionar foto', e?.message ?? 'Error desconocido');
+            Alert.alert(t('profile.galleryError'), e?.message ?? t('common.error'));
           }
         },
       },
-      { text: 'Cancelar', style: 'cancel' },
+      { text: t('common.cancel'), style: 'cancel' },
     ]);
   };
 
@@ -180,7 +163,7 @@ export default function ProfileScreen() {
       const updated = await api.updateProfile({ ...form, avatarUrl: url });
       setProfile(updated.profile);
     } catch (e: any) {
-      Alert.alert('Error al subir foto', e?.message ?? 'No se pudo subir la imagen. Verifica tu conexión.');
+      Alert.alert(t('profile.photoError'), e?.message ?? t('profile.photoErrorMsg'));
     } finally {
       setUploadingAvatar(false);
     }
@@ -189,7 +172,7 @@ export default function ProfileScreen() {
   const saveProfile = async () => {
     setSaving(true);
     try { const d = await api.updateProfile(form); setProfile(d.profile); setEditing(false); }
-    catch { Alert.alert('Error', 'No se pudo guardar el perfil.'); }
+    catch { Alert.alert(t('common.error'), t('profile.saveError')); }
     finally { setSaving(false); }
   };
 
@@ -223,18 +206,18 @@ export default function ProfileScreen() {
           onPress={async () => {
             try {
               await (await import('firebase/auth')).sendEmailVerification(user);
-              Alert.alert('Correo enviado', 'Revisa tu bandeja de entrada y verifica tu cuenta.');
-            } catch { Alert.alert('Error', 'No se pudo enviar el correo.'); }
+              Alert.alert(t('profile.emailSent'), t('profile.emailSentMsg'));
+            } catch { Alert.alert(t('common.error'), t('profile.emailSentError')); }
           }}
         >
           <Ionicons name="mail-outline" size={16} color="#fff" />
-          <Text style={styles.verifyBannerText}>Verifica tu correo electrónico — toca aquí para reenviar</Text>
+          <Text style={styles.verifyBannerText}>{t('profile.verifyBannerLong')}</Text>
         </TouchableOpacity>
       )}
       <ScrollView showsVerticalScrollIndicator={false}>
         <LinearGradient colors={['#071828', '#040e1e']} style={styles.headerGradient}>
           <View style={styles.headerRow}>
-            <Text style={styles.screenTitle}>Perfil</Text>
+            <Text style={styles.screenTitle}>{t('profile.title')}</Text>
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <TouchableOpacity onPress={handleShare} style={styles.shareBtn}>
                 <Ionicons name="share-outline" size={20} color={colors.textMuted} />
@@ -286,9 +269,9 @@ export default function ProfileScreen() {
 
           {profile?.sessionsSummary && (
             <View style={styles.statsRow}>
-              <StatBox value={km.toFixed(1)} label="km totales" color={colors.primary} />
-              <StatBox value={String(profile.sessionsSummary.totalSessions)} label="remadas" color={colors.success} />
-              <StatBox value={`${Math.floor(profile.sessionsSummary.totalDurationMin / 60)}h`} label="en el agua" color={colors.warning} />
+              <StatBox value={km.toFixed(1)} label={t('profile.kmLabel')} color={colors.primary} />
+              <StatBox value={String(profile.sessionsSummary.totalSessions)} label={t('profile.sessionsLabel')} color={colors.success} />
+              <StatBox value={`${Math.floor(profile.sessionsSummary.totalDurationMin / 60)}h`} label={t('profile.hoursLabel')} color={colors.warning} />
             </View>
           )}
         </LinearGradient>
@@ -306,26 +289,26 @@ export default function ProfileScreen() {
           activeOpacity={0.75}
         >
           <Ionicons name="logo-instagram" size={18} color="#e1306c" />
-          <Text style={styles.igText}>Síguenos en Instagram <Text style={styles.igHandle}>@__supstatus</Text></Text>
+          <Text style={styles.igText}>{t('profile.followUs')} <Text style={styles.igHandle}>@__supstatus</Text></Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.deleteAccountBtn}
           onPress={() => {
             Alert.alert(
-              'Eliminar cuenta',
-              'Esta acción eliminará permanentemente tu cuenta, sesiones, historias y todos tus datos. No se puede deshacer.\n\n¿Estás seguro?',
+              t('profile.deleteAccount'),
+              t('profile.deleteAccountMsg'),
               [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                  text: 'Eliminar mi cuenta',
+                  text: t('profile.deleteAccountConfirm'),
                   style: 'destructive',
                   onPress: async () => {
                     try {
                       await api.deleteAccount();
                       await signOut(auth as any);
                     } catch {
-                      Alert.alert('Error', 'No se pudo eliminar la cuenta. Intenta de nuevo.');
+                      Alert.alert(t('common.error'), t('profile.deleteAccountError'));
                     }
                   },
                 },
@@ -334,7 +317,7 @@ export default function ProfileScreen() {
           }}
         >
           <Ionicons name="trash-outline" size={16} color={colors.danger} />
-          <Text style={styles.deleteAccountText}>Eliminar cuenta</Text>
+          <Text style={styles.deleteAccountText}>{t('profile.deleteAccount')}</Text>
         </TouchableOpacity>
 
         <View style={{ height: 80 + insets.bottom }} />
@@ -456,37 +439,38 @@ function StatBox({ value, label, color }: { value: string; label: string; color:
 }
 
 function InfoSection({ profile, onEdit, spots }: { profile: UserProfile | null; onEdit: () => void; spots: { id: string; nombre: string }[] }) {
+  const { t } = useTranslation();
   const hasData = !!(profile?.nivel || profile?.disciplina || profile?.disciplinas?.length || profile?.bio || profile?.boardSetup || profile?.equipo);
   if (!hasData) {
     return (
       <TouchableOpacity style={styles.emptyProfile} onPress={onEdit}>
         <Ionicons name="create-outline" size={32} color={colors.primary} />
-        <Text style={styles.emptyProfileText}>Completa tu perfil</Text>
-        <Text style={styles.emptyProfileSub}>Agrega tu nivel, disciplina y bio</Text>
+        <Text style={styles.emptyProfileText}>{t('profile.completeProfile')}</Text>
+        <Text style={styles.emptyProfileSub}>{t('profile.completeProfileSub')}</Text>
       </TouchableOpacity>
     );
   }
   return (
     <View style={styles.infoCard}>
       <View style={styles.infoCardHeader}>
-        <Text style={styles.infoCardTitle}>Mi perfil</Text>
+        <Text style={styles.infoCardTitle}>{t('profile.myProfile')}</Text>
         <TouchableOpacity style={styles.editIconBtn} onPress={onEdit} activeOpacity={0.7}>
           <Ionicons name="pencil-outline" size={15} color={colors.primary} />
-          <Text style={styles.editIconBtnText}>Editar</Text>
+          <Text style={styles.editIconBtnText}>{t('profile.edit')}</Text>
         </TouchableOpacity>
       </View>
-      {profile?.nivel && <InfoRow icon="ribbon-outline" label="Nivel" value={profile.nivel} />}
+      {profile?.nivel && <InfoRow icon="ribbon-outline" label={t('profile.infoLevel')} value={t(`profile.levels.${profile.nivel}` as any, profile.nivel)} />}
       {(profile?.disciplinas?.length || profile?.disciplina) && (
         <InfoRow
           icon="water-outline"
-          label={(profile.disciplinas?.length ?? 0) > 1 ? 'Disciplinas' : 'Disciplina'}
-          value={profile.disciplinas?.join(' · ') ?? profile.disciplina!}
+          label={(profile.disciplinas?.length ?? 0) > 1 ? t('profile.infoDisciplines') : t('profile.infoDiscipline')}
+          value={(profile.disciplinas ?? [profile.disciplina!]).map((d: string) => t(`profile.disciplines.${d}` as any, d)).join(' · ')}
         />
       )}
-      {profile?.boardSetup && <InfoRow icon="tablet-landscape-outline" label="Tabla" value={profile.boardSetup} />}
-      {profile?.equipo && <InfoRow icon="people-outline" label="Equipo" value={profile.equipo} />}
-      {profile?.bio && <InfoRow icon="person-circle-outline" label="Bio" value={profile.bio} />}
-      {(profile as any)?.favSpot && <InfoRow icon="notifications-outline" label="Spot favorito" value={spots.find(s => s.id === (profile as any).favSpot)?.nombre ?? (profile as any).favSpot} />}
+      {profile?.boardSetup && <InfoRow icon="tablet-landscape-outline" label={t('profile.infoBoard')} value={profile.boardSetup} />}
+      {profile?.equipo && <InfoRow icon="people-outline" label={t('profile.infoTeam')} value={profile.equipo} />}
+      {profile?.bio && <InfoRow icon="person-circle-outline" label={t('profile.infoBio')} value={profile.bio} />}
+      {(profile as any)?.favSpot && <InfoRow icon="notifications-outline" label={t('profile.favoriteSpot')} value={spots.find(s => s.id === (profile as any).favSpot)?.nombre ?? (profile as any).favSpot} />}
     </View>
   );
 }
@@ -504,25 +488,26 @@ function InfoRow({ icon, label, value }: { icon: any; label: string; value: stri
 }
 
 function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots }: any) {
+  const { t } = useTranslation();
   return (
     <View style={styles.editForm}>
-      <Text style={styles.editSectionTitle}>Información básica</Text>
+      <Text style={styles.editSectionTitle}>{t('profile.editBasicInfo')}</Text>
       <View style={styles.inputGroup}>
         <Ionicons name="person-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
-        <TextInput style={styles.input} placeholder="Nombre" placeholderTextColor={colors.textMuted} value={form.displayName ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, displayName: v }))} />
+        <TextInput style={styles.input} placeholder={t('profile.displayNamePlaceholder')} placeholderTextColor={colors.textMuted} value={form.displayName ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, displayName: v }))} />
       </View>
 
-      <Text style={styles.editSectionTitle}>Nivel</Text>
+      <Text style={styles.editSectionTitle}>{t('profile.editLevel')}</Text>
       <View style={styles.pills}>
         {NIVELES.map(n => (
           <TouchableOpacity key={n} onPress={() => setForm((f: any) => ({ ...f, nivel: n }))} style={[styles.pill, form.nivel === n && styles.pillActive]}>
             {form.nivel === n && <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.full }]} />}
-            <Text style={[styles.pillText, form.nivel === n && { color: '#fff' }]}>{n}</Text>
+            <Text style={[styles.pillText, form.nivel === n && { color: '#fff' }]}>{t(`profile.levels.${n}` as any, n)}</Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <Text style={styles.editSectionTitle}>Disciplinas (puedes elegir varias)</Text>
+      <Text style={styles.editSectionTitle}>{t('profile.editDisciplines')}</Text>
       <View style={styles.pills}>
         {DISCIPLINAS.map(d => {
           const selected = (form.disciplinas ?? (form.disciplina ? [form.disciplina] : [])).includes(d);
@@ -533,27 +518,27 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
               return { ...f, disciplinas: updated, disciplina: updated[0] ?? '' };
             })} style={[styles.pill, selected && styles.pillActive]}>
               {selected && <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.full }]} />}
-              <Text style={[styles.pillText, selected && { color: '#fff' }]}>{d}</Text>
+              <Text style={[styles.pillText, selected && { color: '#fff' }]}>{t(`profile.disciplines.${d}` as any, d)}</Text>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      <Text style={styles.editSectionTitle}>Tabla y equipo</Text>
+      <Text style={styles.editSectionTitle}>{t('profile.editBoardTeam')}</Text>
       <View style={styles.inputGroup}>
         <Ionicons name="tablet-landscape-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
-        <TextInput style={styles.input} placeholder="Ej: 12'6 racing, remo carbono..." placeholderTextColor={colors.textMuted} value={form.boardSetup ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, boardSetup: v }))} />
+        <TextInput style={styles.input} placeholder={t('profile.editBoardPlaceholder')} placeholderTextColor={colors.textMuted} value={form.boardSetup ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, boardSetup: v }))} />
       </View>
 
       <View style={styles.inputGroup}>
         <Ionicons name="people-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
-        <TextInput style={styles.input} placeholder="¿A qué equipo perteneces?" placeholderTextColor={colors.textMuted} value={form.equipo ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, equipo: v }))} />
+        <TextInput style={styles.input} placeholder={t('profile.editTeamPlaceholder')} placeholderTextColor={colors.textMuted} value={form.equipo ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, equipo: v }))} />
       </View>
 
-      <Text style={styles.editSectionTitle}>Bio</Text>
-      <TextInput style={[styles.input, { height: 80, textAlignVertical: 'top' }]} placeholder="Cuéntanos sobre ti..." placeholderTextColor={colors.textMuted} multiline value={form.bio ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, bio: v }))} />
+      <Text style={styles.editSectionTitle}>{t('profile.infoBio')}</Text>
+      <TextInput style={[styles.input, { height: 80, textAlignVertical: 'top' }]} placeholder={t('profile.bioPlaceholder')} placeholderTextColor={colors.textMuted} multiline value={form.bio ?? ''} onChangeText={(v: string) => setForm((f: any) => ({ ...f, bio: v }))} />
 
-      <Text style={styles.editSectionTitle}>Spot favorito (notificaciones de condiciones)</Text>
+      <Text style={styles.editSectionTitle}>{t('profile.editFavSpot')}</Text>
       <View style={styles.pills}>
         {spots.map((s: { id: string; nombre: string }) => (
           <TouchableOpacity key={s.id} onPress={() => setForm((f: any) => ({ ...f, favSpot: f.favSpot === s.id ? null : s.id }))} style={[styles.pill, form.favSpot === s.id && styles.pillActive]}>
@@ -565,11 +550,11 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
 
       <View style={[styles.editActions, { marginBottom: bottomInset ?? 0 }]}>
         <TouchableOpacity style={styles.cancelBtn} onPress={onCancel}>
-          <Text style={styles.cancelBtnText}>Cancelar</Text>
+          <Text style={styles.cancelBtnText}>{t('common.cancel')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.saveBtn} onPress={onSave} disabled={saving}>
           <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]} />
-          {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveBtnText}>Guardar</Text>}
+          {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveBtnText}>{t('profile.saveProfile')}</Text>}
         </TouchableOpacity>
       </View>
     </View>
@@ -577,13 +562,14 @@ function EditForm({ form, setForm, onSave, onCancel, saving, bottomInset, spots 
 }
 
 function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuthMode, onEmailAuth, onForgotPassword, onGoogle, googleReady, googleLoading, onApple }: any) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#071828', '#040e1e']} style={StyleSheet.absoluteFill} />
       <ScrollView contentContainerStyle={styles.loginContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.loginHeader}>
           <Image source={require('../../assets/icon.png')} style={styles.loginLogo} />
-          <Text style={styles.loginSub}>{authMode === 'login' ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}</Text>
+          <Text style={styles.loginSub}>{authMode === 'login' ? t('profile.loginWelcomeBack') : t('profile.loginCreateTitle')}</Text>
         </View>
 
         <TouchableOpacity
@@ -596,13 +582,13 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
             : <Ionicons name="logo-google" size={20} color="#fff" />
           }
           <Text style={styles.googleBtnText}>
-            {googleLoading ? 'Iniciando sesión...' : 'Continuar con Google'}
+            {googleLoading ? t('profile.signingIn') : t('profile.continueWithGoogle')}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.appleBtn} onPress={onApple}>
           <Ionicons name="logo-apple" size={20} color="#000" />
-          <Text style={styles.appleBtnText}>Continuar con Apple</Text>
+          <Text style={styles.appleBtnText}>{t('profile.continueWithApple')}</Text>
         </TouchableOpacity>
 
         <View style={styles.divider}>
@@ -611,28 +597,28 @@ function LoginScreen({ email, setEmail, password, setPassword, authMode, setAuth
 
         <View style={styles.inputGroup}>
           <Ionicons name="mail-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
-          <TextInput style={styles.input} placeholder="Email" placeholderTextColor={colors.textMuted} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
+          <TextInput style={styles.input} placeholder={t('welcome.emailPlaceholder')} placeholderTextColor={colors.textMuted} keyboardType="email-address" autoCapitalize="none" value={email} onChangeText={setEmail} />
         </View>
         <View style={styles.inputGroup}>
           <Ionicons name="lock-closed-outline" size={16} color={colors.textMuted} style={styles.inputIcon} />
-          <TextInput style={styles.input} placeholder="Contraseña" placeholderTextColor={colors.textMuted} secureTextEntry value={password} onChangeText={setPassword} />
+          <TextInput style={styles.input} placeholder={t('welcome.passwordPlaceholder')} placeholderTextColor={colors.textMuted} secureTextEntry value={password} onChangeText={setPassword} />
         </View>
 
         <TouchableOpacity style={styles.loginBtn} onPress={onEmailAuth}>
           <LinearGradient colors={['#0ea5e9', '#0284c7']} style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]} />
-          <Text style={styles.saveBtnText}>{authMode === 'login' ? 'Iniciar sesión' : 'Registrarse'}</Text>
+          <Text style={styles.saveBtnText}>{authMode === 'login' ? t('profile.loginAction') : t('profile.loginRegisterAction')}</Text>
         </TouchableOpacity>
 
         {authMode === 'login' && (
           <TouchableOpacity onPress={onForgotPassword} style={{ marginTop: spacing.sm, alignItems: 'center' }}>
-            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+            <Text style={styles.forgotText}>{t('profile.forgotPassword')}</Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity onPress={() => setAuthMode((a: string) => a === 'login' ? 'register' : 'login')} style={{ marginTop: spacing.md }}>
           <Text style={styles.switchText}>
-            {authMode === 'login' ? '¿No tienes cuenta? ' : '¿Ya tienes cuenta? '}
-            <Text style={{ color: colors.primary, fontWeight: '700' }}>{authMode === 'login' ? 'Regístrate' : 'Inicia sesión'}</Text>
+            {authMode === 'login' ? t('profile.noAccountText') + ' ' : t('profile.hasAccountText') + ' '}
+            <Text style={{ color: colors.primary, fontWeight: '700' }}>{authMode === 'login' ? t('profile.loginRegisterAction') : t('profile.loginAction')}</Text>
           </Text>
         </TouchableOpacity>
       </ScrollView>

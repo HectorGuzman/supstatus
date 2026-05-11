@@ -198,6 +198,32 @@
     "noAccountText": "¿No tienes cuenta?",
     "hasAccountText": "¿Ya tienes cuenta?",
     "loginAction": "Inicia sesión",
+    "myProfile": "Mi perfil",
+    "edit": "Editar",
+    "deleteAccount": "Eliminar cuenta",
+    "deleteAccountMsg": "Esta acción eliminará permanentemente tu cuenta, sesiones, historias y todos tus datos. No se puede deshacer.\n\n¿Estás seguro?",
+    "deleteAccountConfirm": "Eliminar mi cuenta",
+    "deleteAccountError": "No se pudo eliminar la cuenta. Intenta de nuevo.",
+    "verifyBannerLong": "Verifica tu correo electrónico — toca aquí para reenviar",
+    "forgotPasswordTitle": "Recuperar contraseña",
+    "couldNotSend": "No se pudo enviar",
+    "signingIn": "Iniciando sesión...",
+    "continueWithGoogle": "Continuar con Google",
+    "continueWithApple": "Continuar con Apple",
+    "levels": {
+      "Principiante": "Principiante",
+      "Intermedio": "Intermedio",
+      "Avanzado": "Avanzado",
+      "Experto": "Experto"
+    },
+    "disciplines": {
+      "Travesía": "Travesía",
+      "Surf": "Surf",
+      "Racing": "Racing",
+      "Yoga SUP": "Yoga SUP",
+      "Pesca": "Pesca",
+      "Recreativo": "Recreativo"
+    },
     "errors": {
       "auth/invalid-credential": "Email o contraseña incorrectos.",
       "auth/user-not-found": "No existe una cuenta con ese email.",

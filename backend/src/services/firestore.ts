@@ -151,6 +151,46 @@ export async function deleteUserAccount(uid: string) {
   await admin.auth().deleteUser(uid);
 }
 
+export async function blockUser(blockerUid: string, blockedUid: string) {
+  const ref = firestore.collection('blocks').doc(`${blockerUid}_${blockedUid}`);
+  await ref.set({
+    blockerUid,
+    blockedUid,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+export async function unblockUser(blockerUid: string, blockedUid: string) {
+  await firestore.collection('blocks').doc(`${blockerUid}_${blockedUid}`).delete();
+}
+
+export async function getBlockedUsers(blockerUid: string): Promise<string[]> {
+  const snap = await firestore.collection('blocks').where('blockerUid', '==', blockerUid).limit(200).get();
+  return snap.docs.map(d => d.data().blockedUid as string);
+}
+
+export async function reportStory(storyId: string, reporterUid: string, reason: string) {
+  const storyDoc = await firestore.collection('stories').doc(storyId).get();
+  const authorUid = storyDoc.data()?.authorUid ?? null;
+
+  const existing = await firestore.collection('reports')
+    .where('storyId', '==', storyId)
+    .where('reporterUid', '==', reporterUid)
+    .limit(1)
+    .get();
+  if (!existing.empty) return { alreadyReported: true };
+
+  await firestore.collection('reports').add({
+    storyId,
+    reporterUid,
+    authorUid,
+    reason,
+    status: 'pending',
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  return { alreadyReported: false };
+}
+
 export async function listAllProfiles() {
   const snapshot = await firestore.collection('users').orderBy('displayName', 'asc').get();
   return snapshot.docs.map((doc) => ({

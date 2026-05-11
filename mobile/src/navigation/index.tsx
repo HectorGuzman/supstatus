@@ -5,14 +5,18 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { Gradient as LinearGradient } from '../components/Gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ForecastScreen from '../screens/ForecastScreen';
 import SessionsScreen from '../screens/SessionsScreen';
 import StoriesScreen from '../screens/StoriesScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import WelcomeScreen from '../screens/WelcomeScreen';
+import EulaScreen from '../screens/EulaScreen';
 import { colors } from '../theme';
 import { auth } from '../services/firebase';
+
+const EULA_KEY = 'eula_accepted_v1';
 
 const Tab = createBottomTabNavigator();
 
@@ -51,6 +55,7 @@ export default function Navigation() {
   const insets = useSafeAreaInsets();
   const [user, setUser] = useState<any>((auth as any).currentUser);
   const [authLoaded, setAuthLoaded] = useState(false);
+  const [eulaAccepted, setEulaAccepted] = useState<boolean | null>(null);
 
   useEffect(() => {
     const unsub = (auth as any).onAuthStateChanged((u: any) => {
@@ -60,7 +65,21 @@ export default function Navigation() {
     return unsub;
   }, []);
 
-  if (!authLoaded) return <LoadingSplash />;
+  useEffect(() => {
+    AsyncStorage.getItem(EULA_KEY).then(val => setEulaAccepted(val === 'true'));
+  }, []);
+
+  const handleEulaAccept = async () => {
+    await AsyncStorage.setItem(EULA_KEY, 'true');
+    setEulaAccepted(true);
+  };
+
+  if (!authLoaded || eulaAccepted === null) return <LoadingSplash />;
+
+  if (!eulaAccepted) {
+    return <EulaScreen onAccept={handleEulaAccept} />;
+  }
+
   if (!user) {
     return (
       <NavigationContainer>
