@@ -115,13 +115,21 @@ def generar_mareas(fecha_str):
     ]
 
 
-def nivel_condiciones(viento_str, oleaje_str):
+def nivel_condiciones(viento_str, oleaje_str, spot_id=None):
+    # Umbrales de viento: 10 nudos = 18.5 km/h, 15 nudos = 27.8 km/h
     try:
         kmh = float(viento_str.split()[0])
         metros = float(oleaje_str.split()[0])
-        if kmh > 15 or metros > 1.5:
+        if spot_id == "herradura":
+            # La Herradura es zona protegida sin oleaje real — solo viento
+            if kmh > 27.8:
+                return "Avanzado"
+            elif kmh > 18.5:
+                return "Intermedio"
+            return "Principiante"
+        if kmh > 27.8 or metros > 1.5:
             return "Avanzado"
-        elif kmh > 8 or metros > 0.8:
+        elif kmh > 18.5 or metros > 0.8:
             return "Intermedio"
         return "Principiante"
     except Exception:
@@ -164,7 +172,7 @@ def generar_con_openai(spot, horarios, fecha_generacion, api_key):
     horarios_copia = json.loads(json.dumps(horarios))  # deep copy para validación posterior
     for dia in ("hoy", "mañana"):
         for bloque in horarios.get(dia, []):
-            bloque["nivel"] = nivel_condiciones(bloque.get("viento", "0 km/h"), bloque.get("oleaje", "0 m"))
+            bloque["nivel"] = nivel_condiciones(bloque.get("viento", "0 km/h"), bloque.get("oleaje", "0 m"), spot_id=spot.get("id"))
 
     bloques_json = json.dumps(horarios, indent=2, ensure_ascii=False)
     n_bloques = sum(len(horarios.get(d, [])) for d in ('hoy', 'mañana'))
