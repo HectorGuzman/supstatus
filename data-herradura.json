@@ -2,159 +2,159 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "0.6 km/h",
-      "oleaje": "1.2 m",
+      "viento": "2.5 km/h",
+      "oleaje": "0.94 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "7.3°C",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 56,
+      "temperatura": "9.1°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 249,
       "nivel": "Principiante",
       "condiciones": "Las condiciones son ideales para principiantes, disfruta de un paseo tranquilo."
     },
     {
       "hora": "09:00",
-      "viento": "3.1 km/h",
-      "oleaje": "1.14 m",
+      "viento": "1.9 km/h",
+      "oleaje": "0.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.4°C",
+      "temperatura": "9.2°C",
       "direccionViento": "Noroeste",
-      "direccionVientoGrados": 306,
+      "direccionVientoGrados": 319,
       "nivel": "Principiante",
-      "condiciones": "Perfecto para principiantes, el viento es suave y el oleaje manejable."
+      "condiciones": "Perfecto para principiantes, aprovecha para practicar tu técnica."
     },
     {
       "hora": "12:00",
-      "viento": "6.0 km/h",
-      "oleaje": "1.1 m",
+      "viento": "2.6 km/h",
+      "oleaje": "0.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
+      "temperatura": "12.8°C",
       "direccionViento": "Noroeste",
       "direccionVientoGrados": 321,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones son favorables para principiantes, ideal para practicar."
+      "condiciones": "Un gran momento para principiantes, el clima es muy favorable."
     },
     {
       "hora": "15:00",
-      "viento": "10.2 km/h",
-      "oleaje": "1.06 m",
+      "viento": "9.5 km/h",
+      "oleaje": "0.9 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.2°C",
+      "temperatura": "13.2°C",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 287,
+      "direccionVientoGrados": 284,
       "nivel": "Principiante",
-      "condiciones": "Aún apto para principiantes, pero mantén atención al oleaje."
+      "condiciones": "Condiciones adecuadas para principiantes, mantén el equilibrio y disfruta."
     },
     {
       "hora": "18:00",
-      "viento": "4.3 km/h",
-      "oleaje": "1.04 m",
+      "viento": "4.0 km/h",
+      "oleaje": "0.88 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.6°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 312,
+      "temperatura": "11.9°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 280,
       "nivel": "Principiante",
-      "condiciones": "Condiciones tranquilas, perfectas para disfrutar del SUP sin complicaciones."
+      "condiciones": "Las condiciones son favorables para principiantes, ideal para relajarse en el agua."
     },
     {
       "hora": "21:00",
-      "viento": "5.7 km/h",
-      "oleaje": "1.0 m",
+      "viento": "2.9 km/h",
+      "oleaje": "0.86 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "10.2°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 18,
+      "temperatura": "10.3°C",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 30,
       "nivel": "Principiante",
-      "condiciones": "Ideal para principiantes, el viento es ligero y el oleaje es cómodo."
+      "condiciones": "Excelente para principiantes, disfruta de una tranquila salida nocturna."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "0.8 km/h",
-      "oleaje": "0.92 m",
+      "viento": "3.6 km/h",
+      "oleaje": "0.84 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.0°C",
+      "temperatura": "8.1°C",
       "direccionViento": "Sureste",
-      "direccionVientoGrados": 153,
+      "direccionVientoGrados": 117,
       "nivel": "Principiante",
-      "condiciones": "Excelente para principiantes, el viento es casi imperceptible."
+      "condiciones": "Ideal para principiantes, el clima es perfecto para comenzar el día."
     },
     {
       "hora": "09:00",
-      "viento": "1.6 km/h",
-      "oleaje": "0.9 m",
+      "viento": "2.3 km/h",
+      "oleaje": "0.84 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.4°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 264,
+      "temperatura": "8.8°C",
+      "direccionViento": "Sureste",
+      "direccionVientoGrados": 141,
       "nivel": "Principiante",
-      "condiciones": "Condiciones suaves, ideales para quienes están comenzando."
+      "condiciones": "Condiciones óptimas para principiantes, disfruta de la tranquilidad del agua."
     },
     {
       "hora": "12:00",
-      "viento": "5.6 km/h",
-      "oleaje": "0.88 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.1°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 312,
-      "nivel": "Principiante",
-      "condiciones": "Perfecto para principiantes, el oleaje es ligero y manejable."
-    },
-    {
-      "hora": "15:00",
-      "viento": "10.2 km/h",
+      "viento": "3.8 km/h",
       "oleaje": "0.86 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.6°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 293,
-      "nivel": "Principiante",
-      "condiciones": "Aún adecuado para principiantes, pero mantén la atención al oleaje."
-    },
-    {
-      "hora": "18:00",
-      "viento": "6.0 km/h",
-      "oleaje": "0.86 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "11.9°C",
+      "temperatura": "13.0°C",
       "direccionViento": "Oeste",
       "direccionVientoGrados": 287,
       "nivel": "Principiante",
-      "condiciones": "Condiciones agradables, ideales para disfrutar del SUP sin preocupaciones."
+      "condiciones": "Perfecto para principiantes, el clima es ideal para navegar."
+    },
+    {
+      "hora": "15:00",
+      "viento": "7.4 km/h",
+      "oleaje": "0.86 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "13.1°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 277,
+      "nivel": "Principiante",
+      "condiciones": "Condiciones favorables para principiantes, excelente para practicar."
+    },
+    {
+      "hora": "18:00",
+      "viento": "5.5 km/h",
+      "oleaje": "0.88 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "12.0°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 281,
+      "nivel": "Principiante",
+      "condiciones": "Las condiciones son buenas para principiantes, ideal para disfrutar del atardecer."
     },
     {
       "hora": "21:00",
-      "viento": "4.2 km/h",
-      "oleaje": "0.84 m",
+      "viento": "2.1 km/h",
+      "oleaje": "0.88 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "10.2°C",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 36,
+      "temperatura": "10.6°C",
+      "direccionViento": "Este",
+      "direccionVientoGrados": 70,
       "nivel": "Principiante",
-      "condiciones": "Excelente para principiantes, el viento es suave y el oleaje es cómodo."
+      "condiciones": "Excelente para principiantes, una buena oportunidad para relajarse en el agua."
     }
   ],
-  "generado": "2026-05-18 07:04:29",
+  "generado": "2026-05-19 06:35:14",
   "mareas": [
     {
-      "hora": "03:20",
+      "hora": "04:10",
+      "altura": 1.7,
+      "tipo": "alta"
+    },
+    {
+      "hora": "10:22",
+      "altura": 0.2,
+      "tipo": "baja"
+    },
+    {
+      "hora": "16:35",
       "altura": 1.6,
       "tipo": "alta"
     },
     {
-      "hora": "09:32",
-      "altura": 0.3,
-      "tipo": "baja"
-    },
-    {
-      "hora": "15:45",
-      "altura": 1.5,
-      "tipo": "alta"
-    },
-    {
-      "hora": "21:57",
-      "altura": 0.2,
+      "hora": "22:47",
+      "altura": 0.1,
       "tipo": "baja"
     }
   ]
