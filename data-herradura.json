@@ -2,158 +2,158 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "2.0 km/h",
-      "oleaje": "0.8 m",
+      "viento": "5.1 km/h",
+      "oleaje": "1.06 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "7.2°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 180,
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 51,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones son ideales para principiantes, perfectas para disfrutar de un paseo tranquilo."
+      "condiciones": "Las condiciones son ideales para principiantes, disfruta de un paseo tranquilo."
     },
     {
       "hora": "09:00",
-      "viento": "3.4 km/h",
-      "oleaje": "0.82 m",
+      "viento": "2.3 km/h",
+      "oleaje": "1.12 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.1°C",
-      "direccionViento": "Este",
-      "direccionVientoGrados": 74,
+      "temperatura": "8.4°C",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 32,
       "nivel": "Principiante",
-      "condiciones": "Excelente para principiantes, el viento suave y el oleaje ligero permiten una experiencia placentera."
+      "condiciones": "Perfecto para principiantes, el viento es suave y el oleaje manejable."
     },
     {
       "hora": "12:00",
-      "viento": "7.3 km/h",
-      "oleaje": "0.84 m",
+      "viento": "6.5 km/h",
+      "oleaje": "1.16 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.1°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 230,
+      "temperatura": "13.4°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 272,
       "nivel": "Principiante",
-      "condiciones": "Condiciones perfectas para principiantes, ideales para practicar y disfrutar del paisaje."
+      "condiciones": "Condiciones favorables para principiantes, ideal para practicar."
     },
     {
       "hora": "15:00",
-      "viento": "8.3 km/h",
-      "oleaje": "0.88 m",
+      "viento": "5.1 km/h",
+      "oleaje": "1.2 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.2°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 286,
+      "temperatura": "14.6°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 302,
       "nivel": "Principiante",
-      "condiciones": "Aprovecha estas condiciones favorables para principiantes y disfruta de un buen rato en el agua."
+      "condiciones": "Las condiciones son adecuadas para principiantes, disfruta de la tranquilidad del agua."
     },
     {
       "hora": "18:00",
-      "viento": "6.3 km/h",
-      "oleaje": "0.92 m",
+      "viento": "9.3 km/h",
+      "oleaje": "1.24 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.2°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 257,
+      "temperatura": "12.9°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 238,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones son adecuadas para principiantes, perfectas para relajarse y disfrutar del atardecer."
+      "condiciones": "Aún es seguro para principiantes, pero mantén la atención en el oleaje."
     },
     {
       "hora": "21:00",
-      "viento": "5.5 km/h",
-      "oleaje": "0.96 m",
+      "viento": "3.1 km/h",
+      "oleaje": "1.3 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "10.2°C",
+      "temperatura": "10.1°C",
       "direccionViento": "Noreste",
-      "direccionVientoGrados": 54,
+      "direccionVientoGrados": 40,
       "nivel": "Principiante",
-      "condiciones": "Ideal para principiantes, el viento suave y el oleaje manejable permiten una experiencia placentera."
+      "condiciones": "Condiciones tranquilas para principiantes, ideal para una sesión relajante."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "2.7 km/h",
-      "oleaje": "1.06 m",
+      "viento": "3.4 km/h",
+      "oleaje": "1.36 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "7.1°C",
-      "direccionViento": "Este",
-      "direccionVientoGrados": 70,
+      "temperatura": "7.7°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 18,
       "nivel": "Principiante",
-      "condiciones": "Condiciones favorables para principiantes, aunque el oleaje es un poco más alto, aún es manejable."
+      "condiciones": "Excelente para principiantes, el viento es ligero y el oleaje es manejable."
     },
     {
       "hora": "09:00",
-      "viento": "0.3 km/h",
-      "oleaje": "1.1 m",
+      "viento": "1.8 km/h",
+      "oleaje": "1.4 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.7°C",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 45,
+      "temperatura": "10.9°C",
+      "direccionViento": "Este",
+      "direccionVientoGrados": 90,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones son adecuadas para principiantes, con poco viento y un oleaje ligero."
+      "condiciones": "Ideal para principiantes, el viento es casi imperceptible y el oleaje es suave."
     },
     {
       "hora": "12:00",
-      "viento": "4.4 km/h",
-      "oleaje": "1.14 m",
+      "viento": "4.7 km/h",
+      "oleaje": "1.36 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.9°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 282,
+      "temperatura": "17.5°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 302,
       "nivel": "Principiante",
-      "condiciones": "Perfecto para principiantes, el viento suave y el oleaje ligero permiten disfrutar del día."
+      "condiciones": "Condiciones favorables para principiantes, perfecto para disfrutar del agua."
     },
     {
       "hora": "15:00",
-      "viento": "6.2 km/h",
-      "oleaje": "1.16 m",
+      "viento": "6.6 km/h",
+      "oleaje": "1.34 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.7°C",
+      "temperatura": "18.5°C",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 262,
+      "direccionVientoGrados": 287,
       "nivel": "Principiante",
-      "condiciones": "Las condiciones son buenas para principiantes, ideales para disfrutar de un rato en el agua."
+      "condiciones": "Aún es seguro para principiantes, pero mantén la atención en el oleaje."
     },
     {
       "hora": "18:00",
-      "viento": "1.5 km/h",
-      "oleaje": "1.2 m",
+      "viento": "2.0 km/h",
+      "oleaje": "1.32 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.4°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 249,
+      "temperatura": "14.1°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 315,
       "nivel": "Principiante",
-      "condiciones": "Condiciones adecuadas para principiantes, perfectas para relajarse y disfrutar del entorno."
+      "condiciones": "Las condiciones son tranquilas, ideales para principiantes que quieren disfrutar."
     },
     {
       "hora": "21:00",
-      "viento": "1.1 km/h",
-      "oleaje": "1.24 m",
+      "viento": "4.9 km/h",
+      "oleaje": "1.32 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "10.9°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 198,
+      "temperatura": "11.8°C",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 36,
       "nivel": "Principiante",
-      "condiciones": "Aprovecha estas condiciones suaves, ideales para principiantes que buscan disfrutar del paddle."
+      "condiciones": "Condiciones suaves para principiantes, perfecto para una sesión relajante."
     }
   ],
-  "generado": "2026-05-23 05:00:24",
+  "generado": "2026-05-24 05:19:48",
   "mareas": [
     {
-      "hora": "07:30",
+      "hora": "08:20",
       "altura": 1.3,
       "tipo": "alta"
     },
     {
-      "hora": "13:42",
+      "hora": "14:32",
       "altura": 0.5,
       "tipo": "baja"
     },
     {
-      "hora": "19:55",
+      "hora": "20:45",
       "altura": 1.2,
       "tipo": "alta"
     },
     {
-      "hora": "02:07",
+      "hora": "02:57",
       "altura": 0.4,
       "tipo": "baja"
     }
