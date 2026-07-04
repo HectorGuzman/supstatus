@@ -2,159 +2,159 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "5.8 km/h",
-      "oleaje": "1.82 m",
+      "viento": "6.8 km/h",
+      "oleaje": "1.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.0°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 290,
+      "temperatura": "15.8°C",
+      "direccionViento": "Este",
+      "direccionVientoGrados": 79,
       "nivel": "Avanzado",
-      "condiciones": "Las condiciones son desafiantes, se recomienda tener experiencia en oleaje alto."
+      "condiciones": "Las condiciones son desafiantes, se recomienda experiencia previa."
     },
     {
       "hora": "09:00",
-      "viento": "1.3 km/h",
-      "oleaje": "1.84 m",
+      "viento": "9.8 km/h",
+      "oleaje": "1.88 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17.0°C",
+      "temperatura": "15.8°C",
       "direccionViento": "Suroeste",
-      "direccionVientoGrados": 236,
+      "direccionVientoGrados": 240,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es considerable, ideal para remadores con habilidades avanzadas."
+      "condiciones": "El oleaje es alto, ideal para quienes buscan un reto."
     },
     {
       "hora": "12:00",
-      "viento": "7.8 km/h",
-      "oleaje": "1.88 m",
+      "viento": "9.9 km/h",
+      "oleaje": "1.82 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "19.1°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 263,
+      "temperatura": "19.9°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 238,
       "nivel": "Avanzado",
-      "condiciones": "Requiere experiencia, el oleaje puede ser complicado para principiantes."
+      "condiciones": "Condiciones exigentes, solo para paddlers experimentados."
     },
     {
       "hora": "15:00",
-      "viento": "11.2 km/h",
-      "oleaje": "1.94 m",
+      "viento": "8.5 km/h",
+      "oleaje": "1.78 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "19.5°C",
+      "temperatura": "21.1°C",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 259,
+      "direccionVientoGrados": 277,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones retadoras, se aconseja a los remadores con experiencia."
+      "condiciones": "El oleaje puede ser complicado, se recomienda precaución."
     },
     {
       "hora": "18:00",
-      "viento": "5.6 km/h",
-      "oleaje": "1.98 m",
+      "viento": "4.7 km/h",
+      "oleaje": "1.68 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "18.2°C",
+      "temperatura": "19.2°C",
       "direccionViento": "Oeste",
       "direccionVientoGrados": 274,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es alto, solo recomendado para quienes tienen buena técnica."
+      "condiciones": "Condiciones retadoras, solo para quienes tienen experiencia."
     },
     {
       "hora": "21:00",
-      "viento": "1.6 km/h",
-      "oleaje": "2.0 m",
+      "viento": "4.8 km/h",
+      "oleaje": "1.6 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17.3°C",
-      "direccionViento": "Este",
-      "direccionVientoGrados": 96,
+      "temperatura": "18.0°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 281,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es muy alto, solo para remadores experimentados y bien preparados."
+      "condiciones": "El oleaje sigue siendo alto, ideal para paddlers avanzados."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "4.8 km/h",
-      "oleaje": "1.88 m",
+      "viento": "0.4 km/h",
+      "oleaje": "1.5 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.3°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 297,
-      "nivel": "Avanzado",
-      "condiciones": "Condiciones difíciles, se recomienda tener experiencia en oleaje alto."
+      "temperatura": "15.0°C",
+      "direccionViento": "Sureste",
+      "direccionVientoGrados": 117,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones adecuadas, pero el oleaje requiere atención."
     },
     {
       "hora": "09:00",
-      "viento": "7.4 km/h",
-      "oleaje": "1.82 m",
+      "viento": "3.1 km/h",
+      "oleaje": "1.52 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.9°C",
-      "direccionViento": "Este",
-      "direccionVientoGrados": 84,
+      "temperatura": "17.4°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 301,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es considerable, ideal para remadores con habilidades avanzadas."
+      "condiciones": "El oleaje es alto, se recomienda experiencia para navegar."
     },
     {
       "hora": "12:00",
-      "viento": "5.3 km/h",
-      "oleaje": "1.74 m",
+      "viento": "6.4 km/h",
+      "oleaje": "1.54 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "18.5°C",
+      "temperatura": "19.3°C",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 260,
+      "direccionVientoGrados": 259,
       "nivel": "Avanzado",
-      "condiciones": "Requiere experiencia, el oleaje puede ser complicado para principiantes."
+      "condiciones": "Condiciones desafiantes, solo para paddlers con experiencia."
     },
     {
       "hora": "15:00",
-      "viento": "11.3 km/h",
-      "oleaje": "1.66 m",
+      "viento": "9.4 km/h",
+      "oleaje": "1.56 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "19.8°C",
+      "temperatura": "20.2°C",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 250,
+      "direccionVientoGrados": 268,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones retadoras, se aconseja a los remadores con experiencia."
+      "condiciones": "El oleaje puede ser complicado, se recomienda precaución."
     },
     {
       "hora": "18:00",
-      "viento": "7.4 km/h",
-      "oleaje": "1.62 m",
+      "viento": "6.6 km/h",
+      "oleaje": "1.58 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "18.5°C",
+      "temperatura": "18.0°C",
       "direccionViento": "Oeste",
-      "direccionVientoGrados": 248,
+      "direccionVientoGrados": 257,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es alto, solo recomendado para quienes tienen buena técnica."
+      "condiciones": "Condiciones exigentes, solo para paddlers experimentados."
     },
     {
       "hora": "21:00",
-      "viento": "4.0 km/h",
-      "oleaje": "1.56 m",
+      "viento": "3.4 km/h",
+      "oleaje": "1.62 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "17.8°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 306,
+      "temperatura": "17.6°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 223,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es considerable, solo para remadores experimentados y bien preparados."
+      "condiciones": "El oleaje sigue siendo alto, ideal para paddlers avanzados."
     }
   ],
-  "generado": "2026-07-03 05:54:41",
+  "generado": "2026-07-04 05:19:55",
   "mareas": [
     {
-      "hora": "17:40",
-      "altura": 1.7,
+      "hora": "18:30",
+      "altura": 1.2,
       "tipo": "alta"
     },
     {
-      "hora": "23:52",
-      "altura": 0.2,
+      "hora": "00:42",
+      "altura": 0.6,
       "tipo": "baja"
     },
     {
-      "hora": "06:05",
-      "altura": 1.6,
+      "hora": "06:55",
+      "altura": 1.1,
       "tipo": "alta"
     },
     {
-      "hora": "12:17",
-      "altura": 0.1,
+      "hora": "13:07",
+      "altura": 0.5,
       "tipo": "baja"
     }
   ]
