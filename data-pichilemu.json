@@ -2,159 +2,159 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "2.2 km/h",
-      "oleaje": "2.68 m",
+      "viento": "11.1 km/h",
+      "oleaje": "1.94 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "11.3°C",
-      "direccionViento": "Este",
-      "direccionVientoGrados": 85,
+      "temperatura": "12.5°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 8,
       "nivel": "Avanzado",
-      "condiciones": "Las condiciones son desafiantes, se recomienda experiencia avanzada para manejar el oleaje."
+      "condiciones": "Las condiciones son desafiantes, se recomienda tener experiencia en oleaje alto."
     },
     {
       "hora": "09:00",
-      "viento": "6.5 km/h",
-      "oleaje": "2.58 m",
+      "viento": "12.0 km/h",
+      "oleaje": "1.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.5°C",
-      "direccionViento": "Sureste",
-      "direccionVientoGrados": 124,
+      "temperatura": "13.2°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 17,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es alto, ideal para remadores con habilidades avanzadas."
+      "condiciones": "El oleaje es considerable, ideal para remadores con buena técnica."
     },
     {
       "hora": "12:00",
-      "viento": "14.5 km/h",
-      "oleaje": "2.44 m",
+      "viento": "12.0 km/h",
+      "oleaje": "1.92 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 185,
+      "temperatura": "15.4°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 9,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones exigentes, solo para remadores experimentados que puedan manejar el viento y el oleaje."
+      "condiciones": "Condiciones exigentes, solo para quienes se sientan cómodos en el agua."
     },
     {
       "hora": "15:00",
-      "viento": "9.7 km/h",
-      "oleaje": "2.32 m",
+      "viento": "10.8 km/h",
+      "oleaje": "1.9 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "16.3°C",
-      "direccionViento": "Sureste",
-      "direccionVientoGrados": 114,
+      "temperatura": "15.3°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 345,
       "nivel": "Avanzado",
-      "condiciones": "Requiere experiencia avanzada debido a la combinación de viento y oleaje."
+      "condiciones": "El viento y el oleaje requieren habilidad avanzada para navegar con seguridad."
     },
     {
       "hora": "18:00",
-      "viento": "4.1 km/h",
-      "oleaje": "2.26 m",
+      "viento": "1.4 km/h",
+      "oleaje": "1.86 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.3°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 358,
+      "temperatura": "14.1°C",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 50,
       "nivel": "Avanzado",
-      "condiciones": "Las condiciones son desafiantes, se aconseja a los remadores con experiencia."
+      "condiciones": "El oleaje sigue siendo alto, se aconseja solo para remadores experimentados."
     },
     {
       "hora": "21:00",
-      "viento": "7.2 km/h",
-      "oleaje": "2.18 m",
+      "viento": "5.4 km/h",
+      "oleaje": "1.8 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.0°C",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 25,
+      "temperatura": "13.1°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 214,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es considerable, solo para aquellos con habilidades avanzadas."
+      "condiciones": "Las condiciones son retadoras, se recomienda tener un buen control sobre la tabla."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "13.6 km/h",
-      "oleaje": "1.9 m",
+      "viento": "10.6 km/h",
+      "oleaje": "1.8 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "12.7°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 7,
+      "temperatura": "12.6°C",
+      "direccionViento": "Sureste",
+      "direccionVientoGrados": 152,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones retadoras, se recomienda experiencia avanzada para disfrutar del paddle."
+      "condiciones": "Condiciones difíciles, solo para quienes tienen experiencia en oleaje alto."
     },
     {
       "hora": "09:00",
-      "viento": "14.3 km/h",
+      "viento": "11.8 km/h",
       "oleaje": "1.82 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.2°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 15,
+      "temperatura": "12.0°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 159,
       "nivel": "Avanzado",
-      "condiciones": "El viento y el oleaje son significativos, solo para remadores experimentados."
+      "condiciones": "El oleaje es considerable, ideal para remadores con habilidades avanzadas."
     },
     {
       "hora": "12:00",
-      "viento": "15.3 km/h",
-      "oleaje": "1.78 m",
+      "viento": "14.6 km/h",
+      "oleaje": "1.82 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.2°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 3,
+      "temperatura": "13.9°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 176,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones exigentes, se recomienda solo para remadores con experiencia."
+      "condiciones": "Las condiciones son desafiantes, se recomienda tener buena técnica y control."
     },
     {
       "hora": "15:00",
-      "viento": "11.7 km/h",
-      "oleaje": "1.78 m",
+      "viento": "15.4 km/h",
+      "oleaje": "1.76 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "15.6°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 346,
+      "temperatura": "14.4°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 207,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje y el viento requieren habilidades avanzadas para navegar con seguridad."
+      "condiciones": "El viento y el oleaje son exigentes, solo para remadores experimentados."
     },
     {
       "hora": "18:00",
-      "viento": "7.6 km/h",
-      "oleaje": "1.82 m",
+      "viento": "13.4 km/h",
+      "oleaje": "1.68 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.6°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 357,
+      "temperatura": "11.9°C",
+      "direccionViento": "Sur",
+      "direccionVientoGrados": 184,
       "nivel": "Avanzado",
-      "condiciones": "Condiciones desafiantes, se recomienda experiencia avanzada para disfrutar del paddle."
+      "condiciones": "Condiciones retadoras, se aconseja tener experiencia en navegación."
     },
     {
       "hora": "21:00",
-      "viento": "5.1 km/h",
-      "oleaje": "1.88 m",
+      "viento": "14.0 km/h",
+      "oleaje": "1.6 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.7°C",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 63,
+      "temperatura": "12.1°C",
+      "direccionViento": "Sureste",
+      "direccionVientoGrados": 151,
       "nivel": "Avanzado",
-      "condiciones": "El oleaje es considerable, ideal para remadores con experiencia avanzada."
+      "condiciones": "El oleaje es moderado, pero se requiere habilidad para manejarlo con seguridad."
     }
   ],
-  "generado": "2026-07-09 06:21:52",
+  "generado": "2026-07-10 06:20:33",
   "mareas": [
     {
-      "hora": "22:40",
+      "hora": "23:30",
       "altura": 1.4,
       "tipo": "alta"
     },
     {
-      "hora": "04:52",
-      "altura": 0.5,
+      "hora": "05:42",
+      "altura": 0.4,
       "tipo": "baja"
     },
     {
-      "hora": "11:05",
+      "hora": "11:55",
       "altura": 1.3,
       "tipo": "alta"
     },
     {
-      "hora": "17:17",
-      "altura": 0.4,
+      "hora": "18:07",
+      "altura": 0.3,
       "tipo": "baja"
     }
   ]
