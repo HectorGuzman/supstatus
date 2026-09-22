@@ -2,158 +2,158 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "13.8 km/h",
-      "oleaje": "2.64 m",
+      "viento": "12.9 km/h",
+      "oleaje": "1.76 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "8.3°C",
+      "temperatura": "9.5°C",
       "direccionViento": "Sureste",
-      "direccionVientoGrados": 145,
+      "direccionVientoGrados": 155,
       "nivel": "Avanzado",
-      "condiciones": "Las condiciones son desafiantes, se recomienda tener experiencia en el manejo de olas grandes."
+      "condiciones": "Las condiciones son desafiantes, se recomienda tener experiencia previa en el manejo de olas grandes."
     },
     {
       "hora": "09:00",
-      "viento": "16.0 km/h",
-      "oleaje": "2.46 m",
+      "viento": "14.6 km/h",
+      "oleaje": "1.58 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "9.4°C",
+      "temperatura": "10.8°C",
       "direccionViento": "Sureste",
-      "direccionVientoGrados": 149,
+      "direccionVientoGrados": 151,
       "nivel": "Avanzado",
-      "condiciones": "El viento y el oleaje son intensos, solo para remadores con alta habilidad."
+      "condiciones": "El viento y el oleaje son intensos, ideal para quienes buscan un reto en el agua."
     },
     {
       "hora": "12:00",
-      "viento": "18.0 km/h",
-      "oleaje": "2.26 m",
+      "viento": "17.6 km/h",
+      "oleaje": "1.46 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.2°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 172,
-      "nivel": "Avanzado",
-      "condiciones": "Condiciones difíciles, se aconseja solo a quienes tengan experiencia en condiciones adversas."
+      "temperatura": "15.7°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 208,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones adecuadas para remadores intermedios, pero se debe tener cuidado con el oleaje."
     },
     {
       "hora": "15:00",
-      "viento": "24.8 km/h",
-      "oleaje": "2.2 m",
+      "viento": "16.2 km/h",
+      "oleaje": "1.44 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "14.3°C",
+      "temperatura": "15.9°C",
       "direccionViento": "Suroeste",
-      "direccionVientoGrados": 217,
-      "nivel": "Avanzado",
-      "condiciones": "El viento fuerte y el oleaje alto requieren habilidades avanzadas para navegar con seguridad."
+      "direccionVientoGrados": 216,
+      "nivel": "Intermedio",
+      "condiciones": "Las condiciones son retadoras, perfectas para mejorar habilidades en el agua."
     },
     {
       "hora": "18:00",
-      "viento": "23.8 km/h",
-      "oleaje": "2.34 m",
+      "viento": "15.6 km/h",
+      "oleaje": "1.48 m",
       "direccionOleaje": "Suroeste",
-      "temperatura": "13.1°C",
+      "temperatura": "13.9°C",
       "direccionViento": "Suroeste",
-      "direccionVientoGrados": 205,
-      "nivel": "Avanzado",
-      "condiciones": "Las condiciones son extremas, solo aptas para remadores experimentados."
+      "direccionVientoGrados": 203,
+      "nivel": "Intermedio",
+      "condiciones": "Recomendado para intermedios que buscan practicar en condiciones controladas."
     },
     {
       "hora": "21:00",
-      "viento": "12.8 km/h",
-      "oleaje": "2.3 m",
+      "viento": "11.7 km/h",
+      "oleaje": "1.52 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "11.4°C",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 186,
+      "direccionVientoGrados": 184,
       "nivel": "Avanzado",
-      "condiciones": "Las condiciones siguen siendo desafiantes, se recomienda prudencia y experiencia."
+      "condiciones": "Condiciones desafiantes, solo para remadores con experiencia en viento y oleaje."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "12.4 km/h",
-      "oleaje": "1.7 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "8.2°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 164,
-      "nivel": "Avanzado",
-      "condiciones": "Condiciones retadoras, solo para aquellos con experiencia en olas moderadas."
-    },
-    {
-      "hora": "09:00",
-      "viento": "15.2 km/h",
-      "oleaje": "1.52 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "10.0°C",
-      "direccionViento": "Sureste",
-      "direccionVientoGrados": 154,
-      "nivel": "Avanzado",
-      "condiciones": "El viento y el oleaje son significativos, se requiere habilidad para navegar con seguridad."
-    },
-    {
-      "hora": "12:00",
-      "viento": "13.5 km/h",
-      "oleaje": "1.4 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "15.8°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 205,
-      "nivel": "Intermedio",
-      "condiciones": "Las condiciones son favorables para remadores intermedios, ideales para practicar."
-    },
-    {
-      "hora": "15:00",
-      "viento": "18.2 km/h",
-      "oleaje": "1.36 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "14.9°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 222,
-      "nivel": "Intermedio",
-      "condiciones": "Condiciones adecuadas para intermedios, se recomienda estar atento a cambios en el clima."
-    },
-    {
-      "hora": "18:00",
-      "viento": "14.7 km/h",
-      "oleaje": "1.46 m",
-      "direccionOleaje": "Suroeste",
-      "temperatura": "13.3°C",
-      "direccionViento": "Sur",
-      "direccionVientoGrados": 200,
-      "nivel": "Intermedio",
-      "condiciones": "Las condiciones son buenas para intermedios, pero se debe tener cuidado con el oleaje."
-    },
-    {
-      "hora": "21:00",
-      "viento": "9.9 km/h",
-      "oleaje": "1.46 m",
+      "viento": "9.5 km/h",
+      "oleaje": "1.04 m",
       "direccionOleaje": "Suroeste",
       "temperatura": "11.2°C",
       "direccionViento": "Sur",
-      "direccionVientoGrados": 180,
+      "direccionVientoGrados": 169,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones tranquilas para intermedios, perfectas para disfrutar del paddle."
+      "condiciones": "Adecuado para intermedios que buscan mejorar su técnica en condiciones moderadas."
+    },
+    {
+      "hora": "09:00",
+      "viento": "4.2 km/h",
+      "oleaje": "0.96 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "11.3°C",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 36,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones suaves, ideales para practicar maniobras y aumentar confianza."
+    },
+    {
+      "hora": "12:00",
+      "viento": "5.4 km/h",
+      "oleaje": "0.94 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.1°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 250,
+      "nivel": "Intermedio",
+      "condiciones": "Perfecto para intermedios que desean disfrutar de un paseo tranquilo."
+    },
+    {
+      "hora": "15:00",
+      "viento": "6.0 km/h",
+      "oleaje": "1.04 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "15.4°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 253,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones agradables, ideales para practicar y disfrutar del paisaje."
+    },
+    {
+      "hora": "18:00",
+      "viento": "3.1 km/h",
+      "oleaje": "1.16 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "14.0°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 273,
+      "nivel": "Intermedio",
+      "condiciones": "Excelente para intermedios que buscan un ambiente tranquilo para remar."
+    },
+    {
+      "hora": "21:00",
+      "viento": "3.6 km/h",
+      "oleaje": "1.28 m",
+      "direccionOleaje": "Suroeste",
+      "temperatura": "12.3°C",
+      "direccionViento": "Sureste",
+      "direccionVientoGrados": 123,
+      "nivel": "Intermedio",
+      "condiciones": "Condiciones ideales para practicar técnicas de remado en calma."
     }
   ],
-  "generado": "2026-09-21 10:35:00",
+  "generado": "2026-09-22 09:19:35",
   "mareas": [
     {
-      "hora": "12:20",
-      "altura": 1.3,
+      "hora": "13:10",
+      "altura": 1.4,
       "tipo": "alta"
     },
     {
-      "hora": "18:32",
+      "hora": "19:22",
       "altura": 0.5,
       "tipo": "baja"
     },
     {
-      "hora": "00:45",
-      "altura": 1.2,
+      "hora": "01:35",
+      "altura": 1.3,
       "tipo": "alta"
     },
     {
-      "hora": "06:57",
+      "hora": "07:47",
       "altura": 0.4,
       "tipo": "baja"
     }
