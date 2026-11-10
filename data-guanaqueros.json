@@ -2,158 +2,158 @@
   "hoy": [
     {
       "hora": "06:00",
-      "viento": "14.5 km/h",
-      "oleaje": "1.12 m",
+      "viento": "3.1 km/h",
+      "oleaje": "1.0 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "15.6°C",
+      "temperatura": "16.2°C",
       "direccionViento": "Noreste",
-      "direccionVientoGrados": 38,
+      "direccionVientoGrados": 28,
       "nivel": "Intermedio",
-      "condiciones": "Las condiciones son adecuadas para remadores intermedios, pero se recomienda estar atentos al oleaje."
+      "condiciones": "Las condiciones son adecuadas para remadores intermedios, pero se recomienda estar atento al oleaje."
     },
     {
       "hora": "09:00",
-      "viento": "17.0 km/h",
-      "oleaje": "1.12 m",
+      "viento": "3.4 km/h",
+      "oleaje": "0.96 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "16.8°C",
-      "direccionViento": "Noreste",
-      "direccionVientoGrados": 51,
+      "temperatura": "18.4°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 238,
       "nivel": "Intermedio",
-      "condiciones": "El viento y el oleaje son desafiantes; asegúrate de tener experiencia antes de salir."
+      "condiciones": "Un buen momento para practicar, pero mantén el control ante el oleaje moderado."
     },
     {
       "hora": "12:00",
-      "viento": "17.2 km/h",
-      "oleaje": "1.1 m",
+      "viento": "13.0 km/h",
+      "oleaje": "0.92 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "19.2°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 7,
+      "temperatura": "21.2°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 296,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones intermedias; se recomienda tener control sobre la tabla para navegar con seguridad."
+      "condiciones": "Condiciones favorables para intermedios, asegúrate de tener experiencia con el viento."
     },
     {
       "hora": "15:00",
-      "viento": "10.3 km/h",
-      "oleaje": "1.06 m",
+      "viento": "16.6 km/h",
+      "oleaje": "0.92 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "20.3°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 356,
+      "temperatura": "23.1°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 276,
       "nivel": "Intermedio",
-      "condiciones": "Las condiciones son manejables, pero mantén la atención en el oleaje."
+      "condiciones": "El viento comienza a ser un factor, ideal para quienes buscan un desafío moderado."
     },
     {
       "hora": "18:00",
-      "viento": "10.3 km/h",
-      "oleaje": "1.04 m",
+      "viento": "16.8 km/h",
+      "oleaje": "0.98 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "19.3°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 357,
+      "temperatura": "23.0°C",
+      "direccionViento": "Oeste",
+      "direccionVientoGrados": 267,
       "nivel": "Intermedio",
-      "condiciones": "Ideal para remadores intermedios, pero sigue siendo importante estar alerta."
+      "condiciones": "Condiciones para intermedios, mantén la atención en el oleaje y el viento."
     },
     {
       "hora": "21:00",
-      "viento": "8.0 km/h",
-      "oleaje": "1.04 m",
+      "viento": "4.8 km/h",
+      "oleaje": "1.06 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "18.0°C",
-      "direccionViento": "Norte",
-      "direccionVientoGrados": 5,
+      "temperatura": "19.3°C",
+      "direccionViento": "Suroeste",
+      "direccionVientoGrados": 217,
       "nivel": "Intermedio",
-      "condiciones": "Las condiciones son adecuadas, pero se recomienda no subestimar el oleaje."
+      "condiciones": "Las condiciones son manejables, pero el oleaje puede ser un reto para los menos experimentados."
     }
   ],
   "mañana": [
     {
       "hora": "06:00",
-      "viento": "2.3 km/h",
-      "oleaje": "0.98 m",
+      "viento": "1.4 km/h",
+      "oleaje": "1.14 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "15.7°C",
+      "temperatura": "14.2°C",
       "direccionViento": "Este",
-      "direccionVientoGrados": 72,
+      "direccionVientoGrados": 90,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones suaves, pero el oleaje puede ser un reto; asegúrate de estar preparado."
+      "condiciones": "Condiciones suaves, perfectas para quienes tienen algo de experiencia en el agua."
     },
     {
       "hora": "09:00",
-      "viento": "0.4 km/h",
-      "oleaje": "0.96 m",
+      "viento": "4.9 km/h",
+      "oleaje": "1.12 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "17.6°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 270,
+      "temperatura": "18.3°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 356,
       "nivel": "Intermedio",
-      "condiciones": "El viento es muy ligero, pero el oleaje sigue siendo un factor a considerar."
+      "condiciones": "Un buen momento para salir, pero el oleaje puede requerir atención adicional."
     },
     {
       "hora": "12:00",
-      "viento": "10.4 km/h",
-      "oleaje": "0.94 m",
+      "viento": "13.2 km/h",
+      "oleaje": "1.06 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "20.2°C",
-      "direccionViento": "Noroeste",
-      "direccionVientoGrados": 302,
+      "temperatura": "20.4°C",
+      "direccionViento": "Norte",
+      "direccionVientoGrados": 349,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones intermedias; se recomienda tener experiencia para disfrutar plenamente."
+      "condiciones": "Las condiciones son adecuadas, pero asegúrate de estar preparado para el viento."
     },
     {
       "hora": "15:00",
-      "viento": "17.3 km/h",
-      "oleaje": "0.94 m",
+      "viento": "12.9 km/h",
+      "oleaje": "1.04 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "22.3°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 282,
+      "temperatura": "21.0°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 320,
       "nivel": "Intermedio",
-      "condiciones": "El viento puede ser fuerte; asegúrate de tener el control de tu tabla."
+      "condiciones": "Ideal para intermedios, pero el viento puede ser un reto para los menos experimentados."
     },
     {
       "hora": "18:00",
-      "viento": "14.4 km/h",
-      "oleaje": "0.98 m",
+      "viento": "8.9 km/h",
+      "oleaje": "1.04 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "22.2°C",
-      "direccionViento": "Oeste",
-      "direccionVientoGrados": 270,
+      "temperatura": "21.4°C",
+      "direccionViento": "Noroeste",
+      "direccionVientoGrados": 322,
       "nivel": "Intermedio",
-      "condiciones": "Condiciones adecuadas, pero mantente alerta ante cambios en el oleaje."
+      "condiciones": "Condiciones manejables, pero mantén la atención en el oleaje."
     },
     {
       "hora": "21:00",
-      "viento": "4.5 km/h",
+      "viento": "5.5 km/h",
       "oleaje": "1.04 m",
       "direccionOleaje": "Oeste",
-      "temperatura": "18.7°C",
-      "direccionViento": "Suroeste",
-      "direccionVientoGrados": 247,
+      "temperatura": "18.0°C",
+      "direccionViento": "Noreste",
+      "direccionVientoGrados": 27,
       "nivel": "Intermedio",
-      "condiciones": "El viento es ligero, pero el oleaje puede presentar desafíos; prepárate adecuadamente."
+      "condiciones": "Un buen momento para disfrutar, aunque el oleaje puede ser un desafío."
     }
   ],
-  "generado": "2026-11-09 14:06:47",
+  "generado": "2026-11-10 12:23:34",
   "mareas": [
     {
-      "hora": "05:10",
+      "hora": "06:00",
       "altura": 1.5,
       "tipo": "alta"
     },
     {
-      "hora": "11:22",
+      "hora": "12:12",
       "altura": 0.4,
       "tipo": "baja"
     },
     {
-      "hora": "17:35",
+      "hora": "18:25",
       "altura": 1.4,
       "tipo": "alta"
     },
     {
-      "hora": "23:47",
+      "hora": "00:37",
       "altura": 0.3,
       "tipo": "baja"
     }
